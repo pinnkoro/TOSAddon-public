@@ -2928,10 +2928,11 @@ function POPUP_LIMIT_PAYMENT(clientMsg, parentName, allPrice, ClickFuncName, Can
 	local spentPaymentValue = 0;
 	local myPc = GetMyPCObject();
 	if accountObj ~= nil then
-		spentPaymentValue = TryGetProp(accountObj, "SpentPaymentValue")
-		local nowUsePaymentValue = tonumber(VALVE_PURCHASESTATUS_ACTIVE_MONTHLY_PREMIUM_TP_SPENDLIMIT) - spentPaymentValue;
-		local paymentValue = tonumber(VALVE_PURCHASESTATUS_ACTIVE_MONTHLY_PREMIUM_TP_SPENDLIMIT) - (spentPaymentValue + allPrice);
-		
+		spentPaymentValue = TryGetProp(accountObj, "SpentPaymentValue") or 0;
+		local limitValue = tonumber(VALVE_PURCHASESTATUS_ACTIVE_MONTHLY_PREMIUM_TP_SPENDLIMIT) or 999999999;
+		local nowUsePaymentValue = limitValue - spentPaymentValue;
+		local paymentValue = limitValue - (spentPaymentValue + allPrice);
+				
 		if paymentValue >= 0 then
 			if ClickFuncName == nil then
 				ClickFuncName = "POPUP_POPUP_LIMIT_PAYMENT_CLICK"
@@ -4140,47 +4141,11 @@ function _TPSHOP_BANNER(parent, control, argStr, argNum)
 				end
 			end	
 		end
-	elseif config.GetServiceNation() == "GLOBAL_KOR" then
+	elseif config.GetServiceNation() == "GLOBAL" or config.GetServiceNation() == "GLOBAL_JP" or config.GetServiceNation() == "GLOBAL_KOR" then
 		local list, cnt = GetClassList('tpitem_banner')
 		for i = 0, cnt - 1 do
 			local banner_info = GetClassByIndexFromList(list, i)			
-			if banner_info ~= nil and TryGetProp(banner_info, 'Category', 'None') == 'GLOBAL_KOR' then
-				local s = TryGetProp(banner_info, 'start', 'None')
-				local e = TryGetProp(banner_info, 'end', 'None')
-				if s ~= 'None' and e ~= 'None'then
-					if date_time.is_between_time(s, e) == true then
-						banner:SetImage(TryGetProp(banner_info, 'ImagePath', 'None'))
-						banner:SetUserValue("URL_BANNER", TryGetProp(banner_info, 'url', 'None'));
-						banner:SetUserValue('first_open', 1)
-						banner:SetVisible(1)			
-						break
-					end
-				end
-			end	
-		end
-	elseif config.GetServiceNation() == "GLOBAL" then
-		local list, cnt = GetClassList('tpitem_banner')
-		for i = 0, cnt - 1 do
-			local banner_info = GetClassByIndexFromList(list, i)			
-			if banner_info ~= nil and TryGetProp(banner_info, 'Category', 'None') == 'GLOBAL' then
-				local s = TryGetProp(banner_info, 'start', 'None')
-				local e = TryGetProp(banner_info, 'end', 'None')
-				if s ~= 'None' and e ~= 'None'then
-					if date_time.is_between_time(s, e) == true then
-						banner:SetImage(TryGetProp(banner_info, 'ImagePath', 'None'))
-						banner:SetUserValue("URL_BANNER", TryGetProp(banner_info, 'url', 'None'));
-						banner:SetUserValue('first_open', 1)
-						banner:SetVisible(1)			
-						break
-					end
-				end
-			end	
-		end
-	elseif config.GetServiceNation() == "GLOBAL_JP" then
-		local list, cnt = GetClassList('tpitem_banner')
-		for i = 0, cnt - 1 do
-			local banner_info = GetClassByIndexFromList(list, i)			
-			if banner_info ~= nil and TryGetProp(banner_info, 'Category', 'None') == 'GLOBAL_JP' then
+			if banner_info ~= nil and TryGetProp(banner_info, 'Category', 'None') == config.GetServiceNation() then
 				local s = TryGetProp(banner_info, 'start', 'None')
 				local e = TryGetProp(banner_info, 'end', 'None')
 				if s ~= 'None' and e ~= 'None'then

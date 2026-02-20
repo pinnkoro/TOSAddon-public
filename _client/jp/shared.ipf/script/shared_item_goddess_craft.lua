@@ -53,6 +53,9 @@ function make_parameter_list()
 	parameter_list[520]['Weapon'] = 540
 	parameter_list[520]['Armor'] = 540
 
+	parameter_list[530] = {} 
+	parameter_list[530]['Acc'] = 550 -- 칼렌티스 -> 암지나스
+
 end
 make_parameter_list()
 
@@ -390,6 +393,22 @@ function setting_lv530_acc_inherit_target_list(list_by_lv)
 	}
 end
 
+function setting_lv550_acc_inherit_target_list(list_by_lv)
+	list_by_lv[550]['Neck'] = {
+		'EP18_NECK_01',
+		'EP18_NECK_02',
+		'EP18_NECK_03',
+		'EP18_NECK_04',
+	}
+
+	list_by_lv[550]['Ring'] = {
+		'EP18_BRC_01',
+		'EP18_BRC_02',	
+		'EP18_BRC_03',	
+		'EP18_BRC_04',	
+	}
+end
+
 
 function make_goddess_inherit_target_list()
 	item_goddess_inherit_target_list = {}
@@ -407,6 +426,7 @@ function make_goddess_inherit_target_list()
 	item_goddess_inherit_target_list[520] = {}
 	item_goddess_inherit_target_list[530] = {}
 	item_goddess_inherit_target_list[540] = {}
+	item_goddess_inherit_target_list[550] = {}
 
 	local list_by_lv = {}
 
@@ -421,6 +441,7 @@ function make_goddess_inherit_target_list()
 	list_by_lv[520] = {}
 	list_by_lv[530] = {}
 	list_by_lv[540] = {}
+	list_by_lv[550] = {}
 
 	list_by_lv[120]['Weapon'] = {}
 	list_by_lv[120]['Armor'] = {}
@@ -465,6 +486,10 @@ function make_goddess_inherit_target_list()
 	list_by_lv[540]['Weapon'] = {}
 	list_by_lv[540]['Armor'] = {}	
 	setting_lv540_inherit_target_list(list_by_lv)
+
+	list_by_lv[550]['Neck'] = {}
+	list_by_lv[550]['Ring'] = {}
+	setting_lv550_acc_inherit_target_list(list_by_lv)
 
 	for lv, _ in pairs(item_goddess_inherit_target_list) do
 		if list_by_lv[lv]['Weapon'] ~= nil then

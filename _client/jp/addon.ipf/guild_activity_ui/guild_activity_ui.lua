@@ -9,6 +9,7 @@ function GUILD_ACTIVITY_UI_ON_INIT(addon, frame)
 	addon:RegisterOpenOnlyMsg("GUILD_PROPERTY_UPDATE", "UPDATE_GUILD_ACTIVITY_GUILD_GROWTH")
 	addon:RegisterOpenOnlyMsg("GUILD_MEMBER_PROP_UPDATE", "UPDATE_GUILD_ACTIVITY_GUILD_GROWTH")
 	addon:RegisterMsg("GUILD_ACTIVITY_AGIT_EXTENSION", "ON_GUILD_ACTIVITY_AGIT_EXTENSION")
+	addon:RegisterMsg("BORUTA_RANKING_UI_UPDATE", "ON_GUILD_ACTIVITY_BLOCKADE_RANK")
 end
 
 local function GetGuildActivity_MenuCount(frame, category_type)
@@ -55,15 +56,6 @@ local function GetGuildActivity_MenuIndex(category_type, menu_class_name)
 		end
 	end
 	return nil
-end
-
-local function GetMyGuildObject()
-	local guild_obj = nil
-	local guild = session.party.GetPartyInfo(PARTY_GUILD)
-	if guild ~= nil then
-		guild_obj = GetIES(guild:GetObject())
-	end
-	return guild_obj
 end
 
 local function RemoveChildByPattern(parent, pattern)
@@ -115,20 +107,38 @@ end
 ---- init
 -- init - category
 function INIT_GUILD_ACTIVITY_CATEGORY(frame)
-	local guild_growth_btn = GET_CHILD_RECURSIVELY(frame, "category_guild_growth_btn")
+	local category_guild_growth_btn_ctrl_name = "category_guild_growth_btn"
+	local guild_growth_btn = GET_CHILD_RECURSIVELY(frame, category_guild_growth_btn_ctrl_name)
 	if guild_growth_btn ~= nil then
 		guild_growth_btn:SetUserValue("MENU_COUNT", 3)
 		guild_growth_btn:SetUserValue("CATEGORY_TYPE", 1)
+		local guild_growth_btn_icon = GET_CHILD_RECURSIVELY(frame, category_guild_growth_btn_ctrl_name.."_icon")
+		if guild_growth_btn_icon ~= nil then
+			guild_growth_btn_icon:SetUserValue("MENU_COUNT", 3)
+			guild_growth_btn_icon:SetUserValue("CATEGORY_TYPE", 1)
+		end
 	end
-	local guild_quest_btn = GET_CHILD_RECURSIVELY(frame, "category_guild_quest_btn")
+	local category_guild_quest_btn_ctrl_name = "category_guild_quest_btn"
+	local guild_quest_btn = GET_CHILD_RECURSIVELY(frame, category_guild_quest_btn_ctrl_name)
 	if guild_quest_btn ~= nil then
 		guild_quest_btn:SetUserValue("MENU_COUNT", 3)
 		guild_quest_btn:SetUserValue("CATEGORY_TYPE", 2)
+		local guild_quest_btn_icon = GET_CHILD_RECURSIVELY(frame, category_guild_quest_btn_ctrl_name.."_icon")
+		if guild_quest_btn_icon ~= nil then
+			guild_quest_btn_icon:SetUserValue("MENU_COUNT", 3)
+			guild_quest_btn_icon:SetUserValue("CATEGORY_TYPE", 2)
+		end
 	end
-	local guild_tower_btn = GET_CHILD_RECURSIVELY(frame, "category_guild_tower_btn")
+	local category_guild_tower_btn_ctrl_name = "category_guild_tower_btn"
+	local guild_tower_btn = GET_CHILD_RECURSIVELY(frame, category_guild_tower_btn_ctrl_name)
 	if guild_tower_btn ~= nil then
 		guild_tower_btn:SetUserValue("MENU_COUNT", 3)
 		guild_tower_btn:SetUserValue("CATEGORY_TYPE", 3)
+		local guild_tower_btn_icon = GET_CHILD_RECURSIVELY(frame, category_guild_tower_btn_ctrl_name.."_icon")
+		if guild_tower_btn_icon ~= nil then
+			guild_tower_btn_icon:SetUserValue("MENU_COUNT", 3)
+			guild_tower_btn_icon:SetUserValue("CATEGORY_TYPE", 3)
+		end
 	end
 
 	local select_category_type = tonumber(frame:GetUserValue("SELECT_CATEGORY_TYPE"))
@@ -187,9 +197,9 @@ end
 function HOLD_GUILD_ACTIVITY_BLOCKADE_RANK_UNFREEZE()
 	local frame = ui.GetFrame("guild_activity_ui")
 	if frame ~= nil then
-		local rank_list_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_list_gbox")
-		if rank_list_gbox ~= nil then
-			rank_list_gbox:EnableHitTest(1)
+		local rank_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_gbox")
+		if rank_gbox ~= nil then
+			rank_gbox:EnableHitTest(1)
 		end
 	end
 end
@@ -197,34 +207,60 @@ end
 -- init - blockade rank : rank data
 function INIT_GUILD_ACTIVITY_BLOCKADE_RANK()
 	local frame = ui.GetFrame("guild_activity_ui")
-	if frame ~= nil then
-		local rank_list_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_list_gbox")
-		if rank_list_gbox ~= nil then
-			rank_list_gbox:EnableHitTest(0)
-			rank_list_gbox:RemoveAllChild()
-			ReserveScript("HOLD_GUILD_ACTIVITY_BLOCKADE_RANK_UNFREEZE()", 1)
-		end
+    if frame == nil then
+        return
+    end
+
+    local rank_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_gbox")
+    if rank_gbox ~= nil then
+        rank_gbox:EnableHitTest(0)
+        ReserveScript("HOLD_GUILD_ACTIVITY_BLOCKADE_RANK_UNFREEZE()", 1)
+    end
+    REMOVE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
+
+    local week_num = GET_WEEK_NUM_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
+    if week_num < 1 then
+        boruta.RequestBorutaNowWeekNum()
+        return
+    end
+
+    local now_time = geTime.GetServerSystemTime()
+    local end_time = session.boruta_ranking.GetBorutaEndTime()
+    if imcTime.IsLaterThan(now_time, end_time) ~= 0 then
+        boruta.RequestBorutaEndTime(week_num)
+        boruta.RequestBorutaNowWeekNum()
+    end
+
+    local event_type = GET_EVENT_TYPE_AND_BOSS_NAME_GUILD_ACTIVITY_DETAIL_BLOCAKDE_RANK()
+    boruta.RequestBorutaStartTime(week_num)
+    boruta.RequestBorutaEndTime(week_num)
+    boruta.RequestBorutaRankList(week_num, event_type)
+    boruta.RequestBorutaAcceptedRewardInfo(week_num)
+end
+
+-- callback - blockade rank : rank data
+function ON_GUILD_ACTIVITY_BLOCKADE_RANK(frame, msg, arg_str, arg_num)
+	if frame == nil then
+        frame = ui.GetFrame("guild_activity_ui")
+    end
 	
-		local now_time = geTime.GetServerSystemTime()
-		local end_time = session.boruta_ranking.GetBorutaEndTime()
-		local week_num = GET_WEEK_NUM_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
-		if week_num < 1 then
-			boruta.RequestBorutaNowWeekNum()
-		elseif imcTime.IsLaterThan(now_time, end_time) ~= 0 then
-			boruta.RequestBorutaEndTime(week_num)
-        	boruta.RequestBorutaNowWeekNum()  
-		end
+    if frame == nil then
+        return
+    end
 
-		local event_type = GET_EVENT_TYPE_AND_BOSS_NAME_GUILD_ACTIVITY_DETAIL_BLOCAKDE_RANK()
-		boruta.RequestBorutaStartTime(week_num) 
-    	boruta.RequestBorutaEndTime(week_num)
-		boruta.RequestBorutaRankList(week_num, event_type)
-    	boruta.RequestBorutaAcceptedRewardInfo(week_num)
+    if frame:IsVisible() == 0 then
+        return
+    end
 
-		REMOVE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
-		CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
-		CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_LIST(frame)
-	end
+    local rank_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_gbox")
+    if rank_gbox == nil or rank_gbox:IsVisible() == 0 then
+        return
+    end
+
+    REMOVE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
+    CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_INFO(frame)
+    CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
+    CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_LIST(frame)
 end
 
 -- init - guild quest reward info
@@ -300,6 +336,8 @@ function GUILD_ACTIVITY_CATEGORY_SELECT_LBTN(parent, btn)
 		REMOVE_GUILD_ACTIVITY_MENU(frame)
 		CREATE_GUILD_ACTIVITY_MENU(frame, select_category_type)
 		GUILD_ACTIVITY_SET_DETAIL_GUILD_QUEST_TICKET(frame, select_category_type)
+		-- init menu
+		INIT_GUILD_ACTIVITY_MENU(frame)
 	end
 end
 
@@ -317,22 +355,21 @@ function CREATE_GUILD_ACTIVITY_MENU(frame, category_type)
 	local gbox = GET_CHILD_RECURSIVELY(frame, "menu_gbox")
 	if gbox ~= nil then
 		local y = 0
-		local offset_y = frame:GetUserConfig("MENU_START_Y")
 		local add_y = frame:GetUserConfig("MENU_ADD_Y")
 		local count = GetGuildActivity_MenuCount(frame, category_type)
 		local ctrlset_height = ui.GetControlSetAttribute("guild_activity_menu", "height")
 		for i = 1, count do
-			y = ((ctrlset_height + add_y) * (i - 1)) + offset_y
+			y = ((ctrlset_height + add_y) * (i - 1))
 			local menu = gbox:CreateOrGetControlSet("guild_activity_menu", "GuildActivity_Menu_"..i, 0, y)
 			if menu ~= nil then
 				local menu_class_name = GetGuildActivity_MenuClassName(category_type, i)
 				menu:SetUserValue("CATEGORY_TYPE", category_type)
 				menu:SetUserValue("MENU_CLASS_NAME", menu_class_name)
 
-				local slot = GET_CHILD_RECURSIVELY(menu, "slot")
-				if slot ~= nil then
-					local icon_name = "icon_guild_housing_coin_01" -- ** test 용도.
-					SET_SLOT_IMG(slot, icon_name)
+				local icon = GET_CHILD_RECURSIVELY(menu, "icon")
+				if icon ~= nil then
+					local image_name = "guild_activity_menu_"..menu_class_name
+					icon:SetImage(image_name)
 				end
 
 				local name_text = GET_CHILD_RECURSIVELY(menu, "name")
@@ -348,8 +385,26 @@ end
 -- menu - menu ctrlset click
 function GUILD_ACTIVITY_MENU_SELECT_LBTN(parent, btn)
 	local frame = parent:GetTopParentFrame()
-	local gb = parent:GetParent()
-	local ctrlset = gb:GetParent()
+	local ctrlset = parent:GetParent()
+	if frame ~= nil and ctrlset ~= nil then
+		local select_category_type = tonumber(frame:GetUserValue("SELECT_CATEGORY_TYPE"))
+		local category_type = tonumber(ctrlset:GetUserValue("CATEGORY_TYPE"))
+		if select_category_type == category_type then
+			local menu_class_name = ctrlset:GetUserValue("MENU_CLASS_NAME")
+			frame:SetUserValue("SELECT_MENU_CLASS_NAME", menu_class_name)
+
+			local index = GetGuildActivity_MenuIndex(category_type, menu_class_name)
+			SET_VISIBLE_GUILD_ACTIVITY_DEATIL_GBOX(frame, category_type, index)
+			MAKE_GUILD_ACTIVITY_DEATIL_GBOX(frame, category_type, menu_class_name, index)
+			GUILD_ACTIVITY_SET_DETAIL_TITLE(frame, menu_class_name)
+		end
+	end
+end
+
+-- menu - menu ctrlset click
+function GUILD_ACTIVITY_MENU_CTRLSET_SELECT_LBTN(parent, btn)
+	local frame = parent:GetTopParentFrame()
+	local ctrlset = btn:GetParent()
 	if frame ~= nil and ctrlset ~= nil then
 		local select_category_type = tonumber(frame:GetUserValue("SELECT_CATEGORY_TYPE"))
 		local category_type = tonumber(ctrlset:GetUserValue("CATEGORY_TYPE"))
@@ -492,12 +547,12 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_GROWTH_INFO(frame, gbox)
 		local next_level = level + 1
 		local cur_level_cls = GetClassByType("GuildExp", level) 
 		local next_level_cls = GetClassByType("GuildExp", next_level)
-		local desc_text = GET_CHILD_RECURSIVELY(frame, "guild_growth_next_level_desc_text")
-		if desc_text ~= nil then
+		local next_desc_text = GET_CHILD_RECURSIVELY(frame, "guild_growth_next_level_desc_text")
+		if next_desc_text ~= nil then
 			if next_level_cls ~= nil then
-				desc_text:SetTextByKey("desc", TryGetProp(next_level_cls, "Desc", "None"))
+				next_desc_text:SetTextByKey("desc", TryGetProp(next_level_cls, "Desc", "None"))
 			else
-				desc_text:SetTextByKey("desc", ScpArgMsg("MaxLevel"))
+				next_desc_text:SetTextByKey("desc", ScpArgMsg("MaxLevel"))
 			end
 		end
 
@@ -508,13 +563,24 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_GROWTH_INFO(frame, gbox)
 		local exp_gauge = GET_CHILD_RECURSIVELY(frame, "guild_growth_exp_gauge")
 		if cur_level_text ~= nil and next_level_text ~= nil and exp_gauge ~= nil then
 			cur_level_text:SetTextByKey("cur_level", level)
-			if next_level_cls ~= nil then
+			if cur_level_cls ~= nil and next_level_cls ~= nil then
 				local max_exp = TryGetProp(next_level_cls, "Exp", 0) - TryGetProp(cur_level_cls, "Exp", 0)
 				exp_gauge:SetPoint(ret_exp, max_exp)
 				next_level_text:SetTextByKey("next_level", next_level)
 			else
 				exp_gauge:SetPoint(1000, 1000)
 				next_level_text:SetTextByKey("next_level", ScpArgMsg("MaxLevel"))
+			end
+		end
+
+		local cur_desc_text = GET_CHILD_RECURSIVELY(frame, "guild_growth_cur_level_desc_text")
+		if cur_desc_text ~= nil then
+			if cur_level_cls ~= nil and next_level_cls ~= nil then
+				local cur_level_start_exp = TryGetProp(cur_level_cls, "Exp", 0)
+				local next_level_start_exp = TryGetProp(next_level_cls, "Exp", 0)
+				local required_exp = next_level_start_exp - cur_level_start_exp
+				local percent = math.floor((ret_exp / required_exp) * 100)
+				cur_desc_text:SetTextByKey("desc", percent)
 			end
 		end
 
@@ -538,6 +604,10 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_GROWTH_INFO(frame, gbox)
 							local y = start_y + (height * (idx - 1))
 							local ctrlset = rank_gbox:CreateOrGetControlSet("guild_growth_contribution_rank_info", "GuildGrowthContribution_Rank_Info_"..idx, 0, y)
 							if ctrlset ~= nil then
+								if idx % 2 == 0 then
+									ctrlset:SetSkinName("guild_activity_detail_bg_light_green")
+								end
+
 								local rank_text = GET_CHILD_RECURSIVELY(ctrlset, "rank")
 								if rank_text ~= nil then
 									rank_text:SetTextByKey("value", idx)
@@ -657,7 +727,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_ABILITY_INFO(frame, gbox)
 
 		local start_x = 60
 		local start_y = 150
-		local offset_x = 10
+		local offset_x = 40
 		local width = ui.GetControlSetAttribute("guild_ability_info", "width")
 		local list, cnt = GetClassList("Guild_Ability")
 		for i = 0, cnt - 1 do
@@ -698,14 +768,17 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_ABILITY_INFO(frame, gbox)
 					local btn = GET_CHILD_RECURSIVELY(info, "btn")
 					if btn ~= nil then
 						if cur_level >= max_level then
-							btn:ShowWindow(0)
+							local disable_skin_name = frame:GetUserConfig("DISABLE_BTN_SKIN")
+							btn:SetImage(disable_skin_name)
+							btn:SetEnable(0)
 						else
 							if enable_used_abil_point <= 0 then
-								local disable_color = frame:GetUserConfig("DISABLE_COLOR")
-								btn:SetColorTone(disable_color)
+								local disable_skin_name = frame:GetUserConfig("DISABLE_BTN_SKIN")
+								btn:SetImage(disable_skin_name)
 								btn:SetEnable(0)
 							else
-								btn:SetColorTone("FFFFFFFF")
+								local enable_skin_name = frame:GetUserConfig("ENALBE_BTN_SKIN")
+								btn:SetImage(enable_skin_name)
 								btn:SetEnable(1)	
 							end
 							btn:ShowWindow(1)
@@ -771,8 +844,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_INFO(frame, gbox)
 	-- agit extension level pic
 	local agit_extension_step_pic = GET_CHILD_RECURSIVELY(frame, "agit_extension_step_pic")
 	if agit_extension_step_pic ~= nil then
-		-- ** 이미지 추가되면 변경할 부분 : 길드 확장 단계 정보.
-		agit_extension_step_pic:SetImage("housing_level_icon_0"..extension_level)
+		agit_extension_step_pic:SetImage("guild_agit_extension_grade_green_"..extension_level)
 	end
 
 	-- agit extension level gauge
@@ -781,10 +853,17 @@ function CREATE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_INFO(frame, gbox)
 		agit_extension_step_gauge:SetPoint(extension_level, max_level)
 	end
 
+	-- agit_extension_step_text
+	local agit_extension_step_text = GET_CHILD_RECURSIVELY(frame, "agit_extension_step_text")
+	if agit_extension_step_text ~= nil then
+		agit_extension_step_text:SetTextByKey("cur_lv", extension_level)
+		agit_extension_step_text:SetTextByKey("max_lv", max_level)	
+	end
+
 	-- agit extension need matrial
 	local need_material_gbox = GET_CHILD_RECURSIVELY(frame, "agit_extension_need_material_gbox")
 	if need_material_gbox ~= nil then
-		local start_y = 40
+		local start_y = 50
 		local offset_y = 5
 		local height = ui.GetControlSetAttribute("guild_agit_extension_material_info", "height")
 		local need_material_name_list = { "ExtensionNeedGuildLevel", "ExtensionNeedSilver", "ExtensionNeedMileage" }
@@ -795,7 +874,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_INFO(frame, gbox)
 	-- agit extension step
 	local step_info_inner_gbox = GET_CHILD_RECURSIVELY(frame, "agit_extension_step_info_inner_gbox")
 	if step_info_inner_gbox ~= nil then
-		local start_y = 0
+		local start_y = 5
 		local offset_y = 5
 		local height = ui.GetControlSetAttribute("guild_agit_extension_step_info", "height")
 		MAKE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_STEP_INFO_CTRLSET(step_info_inner_gbox, start_y, offset_y, height, max_level)
@@ -809,7 +888,6 @@ function MAKE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_NEED_MATERIAL_CTRLSET(gbox, m
 		local ctrlset = gbox:CreateOrGetControlSet("guild_agit_extension_material_info", "AgitExtension_Material_info_"..i, 0, y)
 		if ctrlset ~= nil then
 			local mat_name = mat_list[i]
-			local icon_name = "icon_guild_housing_coin_01" -- ** test 용도 : 이미지 나오면 각 이름에 대한 이미지 설정 해야 함.
 			local name = ScpArgMsg(mat_name)
 			local value = 0
 			if cls ~= nil then
@@ -818,6 +896,7 @@ function MAKE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_NEED_MATERIAL_CTRLSET(gbox, m
 			
 			local slot = GET_CHILD_RECURSIVELY(ctrlset, "slot")
 			if slot ~= nil then
+				local icon_name = "guild_agit_"..mat_name
 				SET_SLOT_IMG(slot, icon_name)
 			end
 
@@ -844,8 +923,7 @@ function MAKE_GUILD_ACTIVITY_DETAIL_AGIT_EXTENSION_STEP_INFO_CTRLSET(gbox, start
 			if cls ~= nil then
 				local pic = GET_CHILD_RECURSIVELY(ctrlset, "pic")
 				if pic ~= nil then
-					-- ** 단계 이미지가 추가되면 변경할 부분
-					pic:SetImage("housing_level_icon_0"..i)
+					pic:SetImage("guild_agit_extension_grade_white_"..i)
 				end
 
 				local desc_text = GET_CHILD_RECURSIVELY(ctrlset, "desc")
@@ -926,6 +1004,15 @@ function GET_CTRLSET_NAME_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, menu_idx)
 	return ctrlset_names[menu_idx] or "None"
 end
 
+-- guild quest common - set detail title
+function SET_DETAIL_TITLE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, contents_name)
+	local detail_title = GET_CHILD_RECURSIVELY(frame, "detail_title")
+	if detail_title ~= nil then
+		local title = dic.getTranslatedStr(contents_name)
+		detail_title:SetTextByKey("title", title)
+	end
+end
+
 -- guild quest common - set visible
 function SET_VISIBLE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST_INFO_LIST(frame, menu_idx, visible)	
 	local list_gbox_name = GET_LIST_GBOX_NAME_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, menu_idx)
@@ -942,6 +1029,7 @@ function BEFORE_VIEW_GUILD_ACTIVITY_DETAIL_GUILD_QUEST_VIEW(frame)
 	local index = GetGuildActivity_MenuIndex(select_category_type, menu_class_name)
 	SET_VISIBLE_GUILD_ACTIVITY_DEATIL_GBOX(frame, select_category_type, index)
 	MAKE_GUILD_ACTIVITY_DEATIL_GBOX(frame, select_category_type, menu_class_name, index)
+	GUILD_ACTIVITY_SET_DETAIL_TITLE(frame, menu_class_name)
 end
 
 -- guild quest common - remove info
@@ -964,19 +1052,13 @@ function GET_SLOT_IMG_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(cls, menu_idx, is_sub)
 		if menu_idx == MENU_IDX.BOSS_RAID then
 			-- guild boss raid
 			local boss_name = TryGetProp(cls, "BossName", "None")
-			local mon_cls = GetClass("Monster", boss_name)
-			if mon_cls ~= nil then
-				return TryGetProp(mon_cls, "Icon", "None")
-			end
-		elseif is_sub == false and (menu_idx == MENU_IDX.MISSION or menu_idx == MENU_IDX.BLOCKADE) then
-			return "guild_event_indeon" -- ** test 용도 : 별도 처리 필요.
-		elseif is_sub == true and menu_idx == MENU_IDX.BLOCKADE then
+			return "guild_boss_raid_"..boss_name
+		elseif is_sub == false and menu_idx == MENU_IDX.MISSION then
+			return "guild_quest_slot_pic"
+		elseif menu_idx == MENU_IDX.BLOCKADE then
 			-- blockade boss
 			local boss_name = TryGetProp(cls, "BossName", "None")
-			local mon_cls = GetClass("Monster", boss_name)
-			if mon_cls ~= nil then
-				return TryGetProp(mon_cls, "Icon", "None")
-			end
+			return "guild_blockade_"..boss_name
 		end
 	end
 	return "None"
@@ -1010,7 +1092,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST_INFO(frame, gbox, menu_idx)
 				if list ~= nil and cnt > 0 then
 					local start_y = 0
 					if menu_idx == MENU_IDX.BLOCKADE then 
-						start_y = 20
+						start_y = 80
 						local rank_btn = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_btn")
 						if rank_btn ~= nil then
 							rank_btn:ShowWindow(1)
@@ -1035,6 +1117,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST_INFO(frame, gbox, menu_idx)
 									local y = start_y + (height * (info_idx - 1)) + (offset_y * (info_idx - 1))
 									local info = list_gbox:CreateOrGetControlSet("guild_quest_info", ctrlset_name..info_idx, 0, y)
 									if info ~= nil then
+										info:SetGravity(ui.RIGHT, ui.TOP)
 										info:SetUserValue("GUILD_EVENT_CTRL", "YES")
 										info:SetUserValue("GUILD_EVENT_NAME", TryGetProp(cls, "ClassName", "None"))
 										info:SetUserValue("GUILD_EVENT_ID", TryGetProp(cls, "ClassID", 0))
@@ -1197,7 +1280,7 @@ function MAKE_REWARD_SLOT_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, class_name, m
 			local height = gbox:GetHeight()
 			local gap = 5
 			local slots_per_row = math.floor((width - gap) / (slot_size + gap))
-			local start_x = 5
+			local start_x = 20
 			local start_y = 10
 
 			local guild_exp = list[1]
@@ -1254,10 +1337,10 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_RAID_BOSS(frame, guild_event_id, men
 			boss_pic:SetImage(img)
 		end
 
-		-- ** 맵 이미지 : 아직 작업 안됨 - 맵 이미지가 길드 보스 레이드 및 길드 미션 리뉴얼 다음 제작되어야 함.
 		local map_pic = GET_CHILD_RECURSIVELY(frame, "guild_boss_raid_map_pic")
 		if map_pic ~= nil then
-			-- map_pic:SetImage("")
+			local image_name = "map_"..TryGetProp(cls, "ClassName", "None")
+			map_pic:SetImage(image_name)
 		end
 
 		local desc_text = GET_CHILD_RECURSIVELY(frame, "guild_boss_raid_desc_text")
@@ -1272,11 +1355,18 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_RAID_BOSS(frame, guild_event_id, men
 		local start_btn = GET_CHILD_RECURSIVELY(frame, "guild_boss_raid_start_btn")
 		if start_btn ~= nil then
 			if is_enable == true then
+				local enable_skin_name = frame:GetUserConfig("ENALBE_BTN_SKIN")
+				start_btn:SetImage(enable_skin_name)
 				start_btn:SetEnable(1)
 			else
+				local disable_skin_name = frame:GetUserConfig("DISABLE_BTN_SKIN")
+				start_btn:SetImage(disable_skin_name)
 				start_btn:SetEnable(0)
 			end
 		end
+
+		local name = TryGetProp(cls, "Name", "None")
+		SET_DETAIL_TITLE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, name)
 	end
 	frame:Invalidate()
 end
@@ -1303,16 +1393,15 @@ end
 function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_MISSION(frame, guild_event_id, menu_idx, is_enable)
 	local cls = GetClassByType("GuildEvent", guild_event_id)
 	if cls ~= nil then
-		-- ** 보스 이미지 : 보스 이미지로 하기에는 길드 미션 리뉴얼을 시켜야 가능할 듯해 보인다.
 		local mission_pic = GET_CHILD_RECURSIVELY(frame, "guild_mission_pic")
 		if mission_pic ~= nil then
-			-- mission_pic:SetImage("")
+			mission_pic:SetImage("guild_mission_icon")
 		end
 
-		-- ** 맵 이미지 : 아직 작업 안됨 - 맵 이미지가 길드 보스 레이드 및 길드 미션 리뉴얼 다음 제작되어야 함.
 		local map_pic = GET_CHILD_RECURSIVELY(frame, "guild_mission_map_pic")
 		if map_pic ~= nil then
-			-- map_pic:SetImage("")
+			local image_name = "map_"..TryGetProp(cls, "ClassName", "None")
+			map_pic:SetImage(image_name)
 		end
 
 		local desc_text = GET_CHILD_RECURSIVELY(frame, "guild_mission_desc_text")
@@ -1327,11 +1416,18 @@ function CREATE_GUILD_ACTIVITY_DETAIL_GUILD_MISSION(frame, guild_event_id, menu_
 		local start_btn = GET_CHILD_RECURSIVELY(frame, "guild_mission_start_btn")
 		if start_btn ~= nil then
 			if is_enable == true then
+				local enable_skin_name = frame:GetUserConfig("ENALBE_BTN_SKIN")
+				start_btn:SetImage(enable_skin_name)
 				start_btn:SetEnable(1)
 			else
+				local disable_skin_name = frame:GetUserConfig("DISABLE_BTN_SKIN")
+				start_btn:SetImage(disable_skin_name)
 				start_btn:SetEnable(0)
 			end
 		end
+
+		local name = TryGetProp(cls, "Name", "None")
+		SET_DETAIL_TITLE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, name)
 	end
 	frame:Invalidate()
 end
@@ -1352,6 +1448,11 @@ function REMOVE_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame)
 	if gbox ~= nil then
 		RemoveChildByPattern(gbox, "guild_quest_reward_slot_")
 	end
+
+	gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_gbox")
+	if gbox ~= nil then
+		RemoveChildByPattern(gbox, "guild_blockade_boss_info_")
+	end
 end
 
 -- blockade - sub gbox info create
@@ -1369,18 +1470,12 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, menu_idx, 
 			boss_pic:SetImage(img)
 		end
 
-		local boss_info_ctrlset_1 = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_1")
-		local boss_info_ctrlset_2 = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_2")
-		local boss_info_ctrlset_3 = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_3")
-		local boss_info_ctrlset_4 = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_4")
-		local boss_info_ctrlset_5 = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_5")
-		local boss_info_ctrlset_6 = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_6")
-		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, boss_info_ctrlset_1, 1)
-		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, boss_info_ctrlset_2, 2)
-		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, boss_info_ctrlset_3, 3)
-		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, boss_info_ctrlset_4, 4)
-		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, boss_info_ctrlset_5, 5)
-		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, boss_info_ctrlset_6, 6)
+		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, "guild_blockade_boss_info_1", 1)
+		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, "guild_blockade_boss_info_2", 2)
+		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, "guild_blockade_boss_info_3", 3)
+		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, "guild_blockade_boss_info_4", 4)
+		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, "guild_blockade_boss_info_5", 5)
+		SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, "guild_blockade_boss_info_6", 6)
 
 		local desc_text = GET_CHILD_RECURSIVELY(frame, "guild_blockade_desc_text")
 		if desc_text ~= nil then
@@ -1394,66 +1489,79 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, menu_idx, 
 		local start_btn = GET_CHILD_RECURSIVELY(frame, "guild_blockade_start_btn")
 		if start_btn ~= nil then
 			if is_enable == true then
+				local enable_skin_name = frame:GetUserConfig("ENALBE_BTN_SKIN")
+				start_btn:SetImage(enable_skin_name)
 				start_btn:SetEnable(1)
 			else
+				local disable_skin_name = frame:GetUserConfig("DISABLE_BTN_SKIN")
+				start_btn:SetImage(disable_skin_name)
 				start_btn:SetEnable(0)
 			end
 		end
+
+		local name = TryGetProp(cls, "Name", "None")
+		SET_DETAIL_TITLE_GUILD_ACTIVITY_DETAIL_GUILD_QUEST(frame, name)
 	end
 	frame:Invalidate()
 end
 
 -- blockade - set boss info
-function SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(guild_event_id, ctrlset, index)
+function SET_BOSS_INFO_CTRLSET_GUILD_ACTIVITY_DETAIL_BLOCKADE(frame, guild_event_id, ctrlset_name, index)
 	local setting_info_list = {}
-	setting_info_list[1] = { "Name", "Name" }
-	setting_info_list[2] = { "RaceType", "RaceType" }
-	setting_info_list[3] = { "Attribute", "Attribute" }
-	setting_info_list[4] = { "MonInfo_ArmorMaterial", "ArmorMaterial" }
-	setting_info_list[5] = { "Level", "Level" }
-	setting_info_list[6] = { "Area", "Name" }
+	setting_info_list[1] = { "Name", "Name", { left = 30, top = 50, right = 0, bottom = 0 } }
+	setting_info_list[2] = { "RaceType", "RaceType", { left = 30, top = 100, right = 0, bottom = 0 }  }
+	setting_info_list[3] = { "Attribute", "Attribute", { left = 290, top = 50, right = 0, bottom = 0 } }
+	setting_info_list[4] = { "MonInfo_ArmorMaterial", "ArmorMaterial", { left = 290, top = 100, right = 0, bottom = 0 } }
+	setting_info_list[5] = { "Level", "Level", { left = 550, top = 50, right = 0, bottom = 0 } }
+	setting_info_list[6] = { "Area", "Name", { left = 550, top = 100, right = 0, bottom = 0 } }
 
-	local info = setting_info_list[index]
-	if info ~= nil then
-		local info_name = info[1]
-		local name_text = GET_CHILD_RECURSIVELY(ctrlset, "name")
-		if name_text ~= nil then
-			name_text:SetTextByKey("value", ScpArgMsg(info_name))
-		end
+	local gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_boss_info_gbox")
+	if gbox ~= nil then
+		local ctrlset = gbox:CreateOrGetControlSet("guild_blockade_info", ctrlset_name, 0, 0)
+		if ctrlset ~= nil then
+			local info = setting_info_list[index]
+			if info ~= nil then
+				local margin = info[3]
+				ctrlset:SetMargin(margin.left, margin.top, margin.right, margin.bottom)
 
-		local value_text = GET_CHILD_RECURSIVELY(ctrlset, "value")
-		if value_text ~= nil then
-			local prop_name = info[2]
-			local cls = GetClassByType("GuildEvent", guild_event_id)
-			if cls ~= nil then
-				if info_name == "Area" then
-					local map_cls_name = "None"
-					if guild_event_id == 501 then
-						map_cls_name = "guild_f_remains_37_3"
-					elseif guild_event_id == 502 then
-						map_cls_name = "Raid_Veliora"
-					elseif guild_event_id == 503 then
-						map_cls_name = "guild_ep14_2_d_castle_2"
-					end
+				local info_text = GET_CHILD_RECURSIVELY(ctrlset, "info")
+				if info_text ~= nil then
+					local info_name = info[1]
+					info_text:SetTextByKey("name", ScpArgMsg(info_name))
 
-					local map_cls = GetClass("Map", map_cls_name)
-					if map_cls ~= nil then
-						local name = TryGetProp(map_cls, "Name", "None")
-						value_text:SetTextByKey("value", name)
-					end
-				else
-					local boss_name = TryGetProp(cls, "BossName", "None")
-					local mon_cls = GetClass("Monster", boss_name)
-					if mon_cls ~= nil then
-						local prop_value = TryGetProp(mon_cls, prop_name)
-						if info_name == "Name" or info_name == "Level" then
-							value_text:SetTextByKey("value", prop_value)
-						else
-							local value = ScpArgMsg(prop_value)
-							if info_name == "Attribute" then
-								value = ScpArgMsg("MonInfo_Attribute_"..prop_value)
+					local prop_name = info[2]
+					local cls = GetClassByType("GuildEvent", guild_event_id)
+					if cls ~= nil then
+						if info_name == "Area" then
+							local map_cls_name = "None"
+							if guild_event_id == 501 then
+								map_cls_name = "guild_f_remains_37_3"
+							elseif guild_event_id == 502 then
+								map_cls_name = "Raid_Veliora"
+							elseif guild_event_id == 503 then
+								map_cls_name = "guild_ep14_2_d_castle_2"
 							end
-							value_text:SetTextByKey("value", value)
+
+							local map_cls = GetClass("Map", map_cls_name)
+							if map_cls ~= nil then
+								local name = TryGetProp(map_cls, "Name", "None")
+								info_text:SetTextByKey("value", name)
+							end
+						else
+							local boss_name = TryGetProp(cls, "BossName", "None")
+							local mon_cls = GetClass("Monster", boss_name)
+							if mon_cls ~= nil then
+								local prop_value = TryGetProp(mon_cls, prop_name)
+								if info_name == "Name" or info_name == "Level" then
+									info_text:SetTextByKey("value", prop_value)
+								else
+									local value = ScpArgMsg(prop_value)
+									if info_name == "Attribute" then
+										value = ScpArgMsg("MonInfo_Attribute_"..prop_value)
+									end
+									info_text:SetTextByKey("value", value)
+								end
+							end
 						end
 					end
 				end
@@ -1485,11 +1593,17 @@ function OPEN_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_SUB_GBOX(parent, btn)
 		SET_VISIBLE_GUILD_ACTIVITY_GUILD_QUEST_DETAIL_SUB_GBOX_SUBTYPE(frame, "guild_blockade_rank", 1)
 		REMOVE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
 		CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
+		GUILD_ACTIVITY_SET_DETAIL_TITLE(frame, "GuildBlockadeRankInfo")
 	end
 end
 
 -- blockade - rank info remove
 function REMOVE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
+	local info_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_info_gbox")
+	if info_gbox ~= nil then
+		RemoveChildByPattern(info_gbox, "guild_blockade_info_")
+	end
+
 	local reward_list_gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_rank_reward_info_gbox")
 	if reward_list_gbox ~= nil then
 		RemoveChildByPattern(reward_list_gbox, "Blockade_RankReward_Info_")
@@ -1504,9 +1618,6 @@ end
 -- blockade - rank info create
 function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK(frame)
 	INIT_GUILD_ACTIVITY_BLOCKADE_RANK()
-	CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_INFO(frame)
-	CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
-	CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_LIST(frame)
 end
 
 -- blockade - blockade get clear time 
@@ -1544,33 +1655,39 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_INFO(frame)
 			clear_time = ClMsg("HaveNoClearInfo")
 		end
 
-		local info_rank = GET_CHILD_RECURSIVELY(frame, "guild_blockade_info_1")
-		if info_rank ~= nil then
-			local name_text = GET_CHILD_RECURSIVELY(info_rank, "name")
-			if name_text ~= nil then
-				name_text:SetTextByKey("value", ScpArgMsg("ServerRanking"))
-			end
-	
-			local value_text = GET_CHILD_RECURSIVELY(info_rank, "value")
-			if value_text ~= nil then
-				value_text:SetTextByKey("value", guild_rank)
-			end
-		end
+		local gbox = GET_CHILD_RECURSIVELY(frame, "guild_blockade_info_gbox")
+		if gbox ~= nil then
+			local start_x = 20
+			local start_y = 7
+			local space = 5
+			local height = ui.GetControlSetAttribute("guild_blockade_rank", "height")
+			for i = 1, 2 do
+				local x = start_x
+				local y = start_y + (height * (i - 1)) + (space * (i - 1))
+				local ctrlset = gbox:CreateOrGetControlSet("guild_blockade_rank", "guild_blockade_info_"..i, x, y)
+				if ctrlset ~= nil then
+					local name_text = GET_CHILD_RECURSIVELY(ctrlset, "name")
+					if name_text ~= nil then
+						if i == 1 then
+							name_text:SetTextByKey("name", ScpArgMsg("ServerRanking"))
+						else
+							if config.GetServiceNation() == 'GLOBAL' or config.GetServiceNation() == 'PAPAYA' then
+								name_text:SetTextByKey("name", "Time")
+							else
+								name_text:SetTextByKey("name", ScpArgMsg("Auto_SiKan"))
+							end
+						end
+					end
 
-		local info_time = GET_CHILD_RECURSIVELY(frame, "guild_blockade_info_2")
-		if info_time ~= nil then
-			local name_text = GET_CHILD_RECURSIVELY(info_time, "name")
-			if name_text ~= nil then
-				if config.GetServiceNation() == 'GLOBAL' or config.GetServiceNation() == 'PAPAYA' then
-					name_text:SetTextByKey("value", "Time")
-				else
-					name_text:SetTextByKey("value", ScpArgMsg("Auto_SiKan"))
+					local info_text = GET_CHILD_RECURSIVELY(ctrlset, "info")
+					if info_text ~= nil then
+						if i == 1 then
+							info_text:SetTextByKey("info", guild_rank)
+						else
+							info_text:SetTextByKey("info", clear_time)
+						end
+					end
 				end
-			end
-	
-			local value_text = GET_CHILD_RECURSIVELY(info_time, "value")
-			if value_text ~= nil then
-				value_text:SetTextByKey("value", clear_time)
 			end
 		end
 
@@ -1668,9 +1785,11 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
 			local guild_rank = session.boruta_ranking.GetGuildRank(guild_id)
 			local week_num = GET_WEEK_NUM_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
 			local y = 0
+			local offset_y = 5
 			for i = 1, #list do
 				local reward_info = list[i]
 				if reward_info ~= nil then
+					y = y + offset_y
 					local start_rank = reward_info.start_rank
 					local end_rank = reward_info.end_rank
 					local ctrlset = gbox:CreateOrGetControlSet("guild_blockade_rank_reward_info", "Blockade_RankReward_Info_"..i, 0, y)
@@ -1696,7 +1815,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
 						CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO_REWARD_LIST(frame, ctrlset, reward_info.rewardstr)
 
 						local btn = GET_CHILD_RECURSIVELY(ctrlset, "btn")
-						if btn ~= nil then
+						if btn ~= nil then				
 							if session.boruta_ranking.RewardAccepted(week_num) == 1 then
 								btn:SetEnable(0)
 								local pic = GET_CHILD_RECURSIVELY(ctrlset, "pic")
@@ -1706,7 +1825,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
 							elseif guild_rank > 0 and guild_rank >= start_rank and guild_rank <= end_rank then
 								btn:EnableHitTest(0)
 							else
-								btn:SetEnable(0)				
+								btn:SetEnable(0)
 							end
 						end
 						y = y + ctrlset:GetHeight()
@@ -1724,9 +1843,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO_REWARD_LIST(fram
 		gb:RemoveAllChild()
 		local reward_list = StringSplit(reward_str, ';')
 		if reward_list ~= nil and #reward_list > 0 then
-			local offset_small = 5
-			local offset_mid = 10
-			local list_y = offset_small + offset_mid
+			local list_y = 0
 			for i = 1, #reward_list do
 				local reward_list_info = reward_list[i]
 				local reward_ctrlset = gb:CreateOrGetControlSet("guild_blockade_rank_reward_list_info", "Blockade_RankRewardList_Info_"..i, 0, list_y)
@@ -1763,17 +1880,22 @@ function CREATE_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO_REWARD_LIST(fram
 							name_text:EnableSlideShow(0)
 							name_text:SetCompareTextWidthBySlideShow(false)
 						end
-						list_y = list_y + reward_ctrlset:GetHeight() + offset_mid
+						list_y = list_y + reward_ctrlset:GetHeight()
 					end
 				end
 			end
 
 			local btn = GET_CHILD_RECURSIVELY(parent_ctrlset, "btn")
 			if btn ~= nil then
-				btn:Resize(btn:GetWidth(), list_y + offset_mid)
+				btn:Resize(btn:GetWidth(), list_y )
 			end
-			gb:Resize(gb:GetWidth(), list_y + offset_mid)
-			parent_ctrlset:Resize(parent_ctrlset:GetWidth(), list_y + offset_small)
+			gb:Resize(gb:GetWidth(), list_y)
+			parent_ctrlset:Resize(parent_ctrlset:GetWidth(), list_y)
+
+			local text_gb = GET_CHILD_RECURSIVELY(parent_ctrlset, "text_gb")
+			if text_gb ~= nil then
+				text_gb:Resize(text_gb:GetWidth(), list_y)
+			end
 		end
 	end
 end
@@ -1891,6 +2013,54 @@ function SET_GUILD_EMBLEM_ACTIVITY_DETAIL_BLOCKADE_RANK_LIST(code, return_json)
 	end
 end
 
+-- blockade - rank reward
+function GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD(parent, btn)
+	local frame = parent:GetTopParentFrame()
+	local week_num = GET_WEEK_NUM_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_REWARD_INFO(frame)
+	local event_type = GET_EVENT_TYPE_AND_BOSS_NAME_GUILD_ACTIVITY_DETAIL_BLOCAKDE_RANK()
+	boruta.RequestBorutaReward(week_num, event_type)
+end
+
+-- blockade - move zone
+function GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_MOVE(parent, btn)
+	local event_type = GET_EVENT_TYPE_AND_BOSS_NAME_GUILD_ACTIVITY_DETAIL_BLOCAKDE_RANK()
+	ui.MsgBox(ClMsg('Auto_JiyeogeuLo{nl}_iDongHaSiKessSeupNiKka?'), 'EXEC_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_MOVE('.. event_type ..')', 'None')
+end
+
+-- blockade - exec move zone
+function EXEC_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_MOVE(type)
+	local pc = GetMyPCObject()
+
+	-- 매칭 던전중이거나 pvp존이면 이용 불가
+    if session.world.IsIntegrateServer() == true or IsPVPField(pc) == 1 or IsPVPServer(pc) == 1 then
+        ui.SysMsg(ScpArgMsg('ThisLocalUseNot'))
+        return
+    end
+
+    -- 퀘스트나 챌린지 모드로 인해 레이어 변경되면 이용 불가
+    if world.GetLayer() ~= 0 then
+        ui.SysMsg(ScpArgMsg('ThisLocalUseNot'))
+        return
+    end
+
+    -- 프리던전 맵에서 이용 불가
+    local cur_map = GetClass('Map', session.GetMapName())
+    local map_type = TryGetProp(cur_map, 'MapType')
+    if map_type == 'Dungeon' then
+        ui.SysMsg(ScpArgMsg('ThisLocalUseNot'))
+        return
+    end
+
+    -- 레이드 지역에서 이용 불가
+    local zone_keyword = TryGetProp(curMap, 'Keyword', 'None')
+    local keyword_table = StringSplit(zone_keyword, ';')
+    if table.find(keyword_table, 'IsRaidField') > 0 or table.find(keyword_table, 'WeeklyBossMap') > 0 then
+        ui.SysMsg(ScpArgMsg('ThisLocalUseNot'))
+        return
+    end
+    control.CustomCommand('MOVE_TO_ENTER_NPC', type, 1, 0)
+end
+
 ---- detail - guild tower control
 -- craft time reduce buff - create info
 function CREATE_GUILD_ACTIVITY_DETAIL_CRAFT_TIME_REDUCE_BUFF_INFO(frame, gbox)
@@ -1899,9 +2069,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_CRAFT_TIME_REDUCE_BUFF_INFO(frame, gbox)
 	if buff_cls ~= nil then
 		local pic = GET_CHILD_RECURSIVELY(gbox, "buff_pic")
 		if pic ~= nil then
-			local icon = TryGetProp(buff_cls, "Icon", "None")
-			icon = "icon_"..icon
-			pic:SetImage(icon)
+			pic:SetImage("guild_craft_reduce_buff_icon")
 		end
 
 		local name_text = GET_CHILD_RECURSIVELY(gbox, "buff_name_text")
@@ -1934,7 +2102,6 @@ end
 
 -- guild agit move - create info
 function CREATE_GUILD_ACTIVITY_DETAIL_AGIT_MOVE(frame, gbox)
-	-- agit extension, production, weapon_research, armor_research, attribute_research 
 	local extension_level = 1
 	local facilities_level = {}
 	local guild_agit = housing.GetGuildAgitInfo()
@@ -1948,27 +2115,29 @@ function CREATE_GUILD_ACTIVITY_DETAIL_AGIT_MOVE(frame, gbox)
 		-- agit extension level pic
 		local agit_move_extension_step_pic = GET_CHILD_RECURSIVELY(frame, "guild_agit_move_extension_step_pic")
 		if agit_move_extension_step_pic ~= nil then
-			-- ** 이미지 추가되면 변경할 부분 : 길드 확장 단계 정보.
-			agit_move_extension_step_pic:SetImage("housing_level_icon_0"..extension_level)
+			agit_move_extension_step_pic:SetImage("guild_agit_extension_grade_green_"..extension_level)
 		end
 	
-		-- agit extension level gauge
+		-- agit extension level gauge & text
 		local agit_move_extension_step_gauge = GET_CHILD_RECURSIVELY(frame, "guild_agit_move_extension_step_gauge")
-		if agit_move_extension_step_gauge ~= nil then
+		local agit_move_extension_step_gauge_text = GET_CHILD_RECURSIVELY(frame, "guild_agit_move_extension_step_gauge_text")
+		if agit_move_extension_step_gauge ~= nil and agit_move_extension_step_gauge_text ~= nil then
 			local max_level = 5
 			agit_move_extension_step_gauge:SetPoint(extension_level, max_level)
+			agit_move_extension_step_gauge_text:SetTextByKey("cur_lv", extension_level)
+			agit_move_extension_step_gauge_text:SetTextByKey("max_lv", max_level)
 		end
 	
 		-- guild housing facilities
 		local info_gbox = GET_CHILD_RECURSIVELY(gbox, "guild_agit_move_housing_facilities_info_gbox")
 		if info_gbox ~= nil then
-			local facilities_list = {} -- ctrlset_name, class_name, clmsg, **icon_name(이건 새롭게 추가되면 변경 예정.)
+			local facilities_list = {}
 			facilities_list[1] = { "production", "guild_manufacture_workshop_extension", "Housing_ProductionLab", "icon_guild_housing_manufacture" }
 			facilities_list[2] = { "weapon_research", "guild_weapon_lab_extension", "Housing_WeaponLab", "icon_guild_housing_lab_weapon" }
 			facilities_list[3] = { "armor_research", "guild_armor_lab_extension", "Housing_ArmorLab", "icon_guild_housing_lab_armor" }
 			facilities_list[4] = { "attribute_research", "guild_attribute_lab_extension", "Housing_AttributeLab", "icon_guild_housing_lab_attribute" }
 	
-			local start_y = 50
+			local start_y = 40
 			for i = 1, #facilities_list do
 				local name = facilities_list[i][1]
 				local class_name = facilities_list[i][2]
@@ -2015,7 +2184,14 @@ function CREATE_GUILD_ACTIVITY_DETAIL_AGIT_MOVE(frame, gbox)
 end
 
 -- guild agit move - move btn
-function EXEC_AGIT_MOVE_GUILD_ACTIVITY_DETAIL_AGIT_MOVE(parent, btn)
+function GUILD_ACTIVITY_DETAIL_AGIT_MOVE_BTN(parent, btn)
+	local yes_scp = "EXEC_AGIT_MOVE_GUILD_ACTIVITY_DETAIL_AGIT_MOVE"
+	local agit_msg = ScpArgMsg("GuildAgit")
+	local msg = ScpArgMsg("{StartMap}DoYouWantMove", "StartMap", agit_msg)
+	ui.MsgBox(msg, yes_scp, "None")
+end
+
+function EXEC_AGIT_MOVE_GUILD_ACTIVITY_DETAIL_AGIT_MOVE()
 	guild.RequestGuildAgitMove()
 	ui.CloseFrame("guild_activity_ui")
 end
@@ -2037,11 +2213,15 @@ function CREATE_GUILD_ACTIVITY_DETAIL_TOWER_CONTROL(frame, gbox)
 		if is_tower_exist == false then
 			map_text:SetTextByKey("map", ScpArgMsg("NoGuildTowerToShow"))
 			time_text:ShowWindow(0)
-			tower_remove_btn:SetColorTone("FF444444")
+
+			local disable_skin_name = frame:GetUserConfig("DISABLE_BTN_SKIN")
+			tower_remove_btn:SetImage(disable_skin_name)
 			tower_remove_btn:SetEnable(0)
 		else
 			time_text:ShowWindow(1)
-			tower_remove_btn:SetColorTone("FFFFFFFF")
+
+			local enable_skin_name = frame:GetUserConfig("ENALBE_BTN_SKIN")
+			tower_remove_btn:SetImage(enable_skin_name)
 			tower_remove_btn:SetEnable(1)
 			
 			local tower_info = StringSplit(tower_position, '#')
@@ -2051,7 +2231,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_TOWER_CONTROL(frame, gbox)
 				if destroy_party_name == "None" then
 					destroy_party_name = ScpArgMsg("Enemy")
 				end
-				local position_text = "{#FF0000}"..ScpArgMsg("DestroyedByGuild{Name}", "Name", destroy_party_name).."{/}"
+				local position_text = ScpArgMsg("DestroyedByGuild{Name}", "Name", destroy_party_name)
 				map_text:SetTextByKey("map", position_text)
 
 				local destroy_time = tower_info[3]
@@ -2066,7 +2246,7 @@ function CREATE_GUILD_ACTIVITY_DETAIL_TOWER_CONTROL(frame, gbox)
 				local map_cls = GetClassByType("Map", map_id)
 				if map_cls ~= nil then
 					local map_cls_name = TryGetProp(map_cls, "ClassName", "None")
-					local map_link_text = MAKE_LINK_MAP_TEXT(map_cls_name, x, z)
+					local map_link_text = MAKE_LINK_MAP_TEXT_GUILD_ACTIVITY(map_cls_name, x, z)
 					map_text:SetTextByKey("map", map_link_text)
 				end
 

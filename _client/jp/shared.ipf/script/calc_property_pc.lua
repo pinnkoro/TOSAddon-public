@@ -687,7 +687,11 @@ function SCR_Get_RefreshHP(self)
 end
 
 
-function SCR_Get_MHP(self)
+function SCR_Get_MHP(self, add_con)    
+    if add_con == nil then
+        add_con = 0;
+    end
+
     local jobRate = SCR_GET_JOB_RATIO_STAT(self, "MHP");
     local jobMHP = 400 * jobRate;
     
@@ -701,6 +705,8 @@ function SCR_Get_MHP(self)
         stat = 1;
     end
     
+    stat = stat + add_con;
+
     local byLevel = math.floor(jobMHP + ((lv - 1) * 80 * jobRate));
     local byStat = math.floor(((stat * 0.003) + (math.floor(stat / 10) * 0.01)) * byLevel);
 

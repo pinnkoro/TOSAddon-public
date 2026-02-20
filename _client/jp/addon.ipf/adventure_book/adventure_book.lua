@@ -139,20 +139,35 @@ function ADVENTURE_BOOK_RENEW_SELECTED_TAB_ACHIEVE()
     local gb_achieve = GET_CHILD(frame, 'gb_achieve');
     local achieveTab = GET_CHILD(gb_achieve, 'achieveTab');
 	local selectedTabName = achieveTab:GetSelectItemName();
-	
+
+	-- local startTime = os.clock()
 	if selectedTabName == "tab_achieve_main" then
 		ADVENTURE_BOOK_ACHIEVE_MAIN_INIT()
+		-- local endTime = os.clock()
+		-- print(string.format("tab_achieve_main 실행 시간: %.6f 초", endTime - startTime))	
 	elseif selectedTabName == "tab_achieve_search" then
 		ADVENTURE_BOOK_RENEW_ACHIEVE_SEARCH()
+		-- local endTime = os.clock()
+		-- print(string.format("tab_achieve_search 실행 시간: %.6f 초", endTime - startTime))	
 	elseif selectedTabName == "tab_achieve_list_Main" then
 		ADVENTURE_BOOK_RENEW_ACHIEVE_MAINCONT()
+		-- local endTime = os.clock()
+		-- print(string.format("tab_achieve_list_Main 실행 시간: %.6f 초", endTime - startTime))	
 	elseif selectedTabName == "tab_achieve_list_Sub" then
 		ADVENTURE_BOOK_RENEW_ACHIEVE_SUBCONT()
+		-- local endTime = os.clock()
+		-- print(string.format("tab_achieve_list_Sub 실행 시간: %.6f 초", endTime - startTime))	
 	elseif selectedTabName == "tab_achieve_list_Special" then
 		ADVENTURE_BOOK_RENEW_ACHIEVE_SPECIAL()
+		-- local endTime = os.clock()
+		-- print(string.format("tab_achieve_list_Special 실행 시간: %.6f 초", endTime - startTime))	
 	elseif selectedTabName == "tab_achieve_list_Event" then
 		ADVENTURE_BOOK_RENEW_ACHIEVE_EVENT()
+		-- local endTime = os.clock()
+		-- print(string.format("tab_achieve_list_Event 실행 시간: %.6f 초", endTime - startTime))	
 	end
+	-- local endTime = os.clock()
+	-- print(string.format("total 실행 시간: %.6f 초", endTime - startTime))
 end
 
 function ADVENTURE_BOOK_RENEW_SELECTED_TAB_ADVENTURE()
@@ -184,7 +199,8 @@ function ADVENTURE_BOOK_ON_MSG(frame, msg, argStr, argNum)
 	local frame = ui.GetFrame('adventure_book')
     local mainTab = GET_CHILD(frame, 'mainTab');
 	local selectedMainTabName = mainTab:GetSelectItemName();
-	
+	ADVENTURE_BOOK_ACHIEVE_CONTENT.INVALIDATE_CACHE();
+	-- InvalidateListSplitCache();
 	if msg == "UPDATE_ADVENTURE_BOOK" then  
 		if selectedMainTabName == "tab_main_achieve" then
 			ADVENTURE_BOOK_ACHIEVE_MAIN_INIT()
@@ -1535,7 +1551,6 @@ function ADVENTURE_BOOK_ACHIEVE_INIT_LEVEL_REWARD()
 	local CurAchieveLevel = GetAchieveLevel()
 
 	local isShow = achieve_main_level_reward_bg:IsVisible()
-
 	-- 외부 상자 버튼 업데이트
 	if isShow == 0 then
 		for i = 0, cnt - 1 do
@@ -1554,7 +1569,6 @@ function ADVENTURE_BOOK_ACHIEVE_INIT_LEVEL_REWARD()
 
 	-- 내부 리스트 업데이트
 	level_reward_body_scroll:RemoveAllChild()
-
 	for i = 0, cnt - 1 do
 		local cls = GetClassByIndexFromList(list, i);
 		ADVENTURE_BOOK_ACHIEVE_LEVEL_REWARD_CTRL(level_reward_body_scroll, i, cls)

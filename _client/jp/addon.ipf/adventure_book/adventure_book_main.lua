@@ -12,6 +12,7 @@ function ADVENTURE_BOOK_MAIN_INIT(parent, mainPage)
     if mainPage == nil then
         mainPage = parent:GetChild('page_main')
     end
+--	local startTime = os.clock()
 
     ReqAdventureBookRankingForMainPage();
 
@@ -19,6 +20,10 @@ function ADVENTURE_BOOK_MAIN_INIT(parent, mainPage)
     ADVENTURE_BOOK_MAIN_INIT_POINT_GAGUE(parent);
 
     ADVENTURE_BOOK_MAIN_REWARD(frame);
+--	local endTime = os.clock()
+
+--	print(string.format("실행 시간: %.6f 초", endTime - startTime))
+
 end
 
 function ADVENTURE_BOOK_MAIN_INIT_MY_CHAR_INFO(mainPage)

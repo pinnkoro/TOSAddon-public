@@ -720,6 +720,15 @@
 		<image name="icon_cler_SledgeHammer" file="\icon\skill\cleric\icon_cler_SledgeHammer.png" imgrect="0 0 128 128" CMM_Caption="슬레지해머"/>
 		<image name="icon_cler_SwingHammer" file="\icon\skill\cleric\icon_cler_SwingHammer.png" imgrect="0 0 128 128" CMM_Caption="스윙 해머"/>
 		<image name="icon_cler_sledger_buff" file="\icon\skill\cleric\icon_cler_sledger_buff.png" imgrect="0 0 128 128" CMM_Caption="슬레저의 투지"/>
+		<image name="icon_cler_gravehand" file="\icon\skill\cleric\icon_cler_gravehand.png" imgrect="0 0 128 128" CMM_Caption="그레이브 핸드"/>
+		<image name="icon_cler_mourningchime" file="\icon\skill\cleric\icon_cler_mourningchime.png" imgrect="0 0 128 128" CMM_Caption="애도의 차임"/>
+		<image name="icon_cler_passingbell" file="\icon\skill\cleric\icon_cler_passingbell.png" imgrect="0 0 128 128" CMM_Caption="패싱 벨"/>
+		<image name="icon_cler_deeperresonance" file="\icon\skill\cleric\icon_cler_deeperresonance.png" imgrect="0 0 128 128" CMM_Caption="깊은 공명"/>
+		<image name="icon_cler_restingground" file="\icon\skill\cleric\icon_cler_restingground.png" imgrect="0 0 128 128" CMM_Caption="안식의 묘지"/>
+		<image name="icon_cler_resonantpulse" file="\icon\skill\cleric\icon_cler_resonantpulse.png" imgrect="0 0 128 128" CMM_Caption="공명 파동"/>
+		<image name="icon_cler_deathknell" file="\icon\skill\cleric\icon_cler_deathknell.png" imgrect="0 0 128 128" CMM_Caption="데스 넬"/>
+		<image name="icon_cler_gravechill" file="\icon\skill\cleric\icon_cler_gravechill.png" imgrect="0 0 128 128" CMM_Caption="무덤의 한기"/>
+		<image name="icon_cler_mourning" file="\icon\skill\cleric\icon_cler_mourning.png" imgrect="0 0 128 128" CMM_Caption="애도"/>
 	</imagelist>
 	<imagelist category="warrior_skillicon">
 		<image name="icon_warri_thrust" file="\icon\skill\warrior\icon_warri_thrust.png" imgrect="0 0 128 128" CMM_Caption="쓰러스트"/>
@@ -3858,6 +3867,26 @@
 		<image name="ability_scout_Grimmark106" file="\icon\icon_ability_scout06.tga" imgrect="768 128 128 128" CMM_Caption="[아츠] 혈기 분출: 상급 강화"/>
 		<image name="ability_scout_Grimmark10" file="\icon\icon_ability_scout06.tga" imgrect="896 128 128 128" CMM_Caption="[아츠] 갈증의 연쇄: 해갈"/>
 		<image name="ability_scout_Grimmark11" file="\icon\icon_ability_scout06.tga" imgrect="0 256 128 128" CMM_Caption="사냥표식: 몰이 사냥"/>
+		<image name="ability_cleric_Kneller100" file="\icon\icon_ability_cleric10.tga" imgrect="512 640 128 128" CMM_Caption="조종의 울림"/>
+		<image name="ability_cleric_Kneller1" file="\icon\icon_ability_cleric10.tga" imgrect="0 512 128 128" CMM_Caption="그레이브 핸드: 강화"/>
+		<image name="ability_cleric_Kneller2" file="\icon\icon_ability_cleric10.tga" imgrect="256 512 128 128" CMM_Caption="애도의 차임: 강화"/>
+		<image name="ability_cleric_Kneller3" file="\icon\icon_ability_cleric10.tga" imgrect="512 512 128 128" CMM_Caption="패싱 벨: 강화"/>
+		<image name="ability_cleric_Kneller4" file="\icon\icon_ability_cleric10.tga" imgrect="768 512 128 128" CMM_Caption="안식의 묘지: 강화"/>
+		<image name="ability_cleric_Kneller5" file="\icon\icon_ability_cleric10.tga" imgrect="0 640 128 128" CMM_Caption="공명 파동: 강화"/>
+		<image name="ability_cleric_Kneller6" file="\icon\icon_ability_cleric10.tga" imgrect="256 640 128 128" CMM_Caption="데스 넬: 강화"/>
+		<image name="ability_cleric_Kneller101" file="\icon\icon_ability_cleric10.tga" imgrect="128 512 128 128" CMM_Caption="[아츠] 그레이브 핸드: 상급 강화"/>
+		<image name="ability_cleric_Kneller102" file="\icon\icon_ability_cleric10.tga" imgrect="384 512 128 128" CMM_Caption="[아츠] 애도의 차임: 상급 강화"/>
+		<image name="ability_cleric_Kneller103" file="\icon\icon_ability_cleric10.tga" imgrect="640 512 128 128" CMM_Caption="[아츠] 패싱 벨: 상급 강화"/>
+		<image name="ability_cleric_Kneller104" file="\icon\icon_ability_cleric10.tga" imgrect="896 512 128 128" CMM_Caption="[아츠] 안식의 묘지: 상급 강화"/>
+		<image name="ability_cleric_Kneller105" file="\icon\icon_ability_cleric10.tga" imgrect="128 640 128 128" CMM_Caption="[아츠] 공명 파동: 상급 강화"/>
+		<image name="ability_cleric_Kneller106" file="\icon\icon_ability_cleric10.tga" imgrect="384 640 128 128" CMM_Caption="[아츠] 데스 넬: 상급 강화"/>
+		<image name="ability_cleric_Kneller7" file="\icon\icon_ability_cleric10.tga" imgrect="640 640 128 128" CMM_Caption="그레이브 핸드: 무덤의 한기"/>
+		<image name="ability_cleric_Kneller8" file="\icon\icon_ability_cleric10.tga" imgrect="768 640 128 128" CMM_Caption="애도의 차임: 한기 공명"/>
+		<image name="ability_cleric_Kneller9" file="\icon\icon_ability_cleric10.tga" imgrect="0 768 128 128" CMM_Caption="패싱 벨: 진혼의 발걸음"/>
+		<image name="ability_cleric_Kneller10" file="\icon\icon_ability_cleric10.tga" imgrect="896 640 128 128" CMM_Caption="안식의 묘지: 무덤의 한기"/>
+		<image name="ability_cleric_Kneller11" file="\icon\icon_ability_cleric10.tga" imgrect="128 768 128 128" CMM_Caption="공명 파동: 한기 공명"/>
+		<image name="ability_cleric_Kneller107" file="\icon\icon_ability_cleric10.tga" imgrect="128 768 128 128" CMM_Caption="[아츠] 데스 넬: 선고"/>
+		<image name="ability_cleric_Kneller12" file="\icon\icon_ability_cleric10.tga" imgrect="896 640 128 128" CMM_Caption="안식의 묘지: 묘벽"/>
 	</imagelist>
 	<imagelist category="abilityicon_common">
 		<image name="ability_common_DaggerMastery" file="\icon\icon_ability_common.tga" imgrect="0 0 128 128" CMM_Caption="단검 마스터리"/>

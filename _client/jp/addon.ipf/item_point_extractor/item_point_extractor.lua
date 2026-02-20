@@ -12,7 +12,7 @@ end
 function ITEM_POINT_EXTRACTOR_OPEN(frame)
 	local pointName = frame:GetUserValue("POINT_NAME")
 	local title = GET_CHILD(frame,"title")
-	print(pointName..'_extract')
+	
 	title:SetTextByKey("title",ClMsg(pointName..'_extract'))
 	local question = GET_CHILD(frame,"question")
 	question:SetTextTooltip(ClMsg(pointName.."_extract_tooltip"));

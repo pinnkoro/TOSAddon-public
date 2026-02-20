@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GameList>
+    <Game Name="EP18_1_F_TABLELAND_72_MQ6_MGAME" minLv="0" maxLv="0" playerCountCheckDestroy="1" startWaitSec="-1">
+        <StageList>
+            <Stage Name="QuestMission">
+                <ObjList>
+                    <Obj Type="Monster" MonType="71103" Pos="1191.75#288.11#412.68" genCount="1" genTime="20000" autoGen="0" objectKey="0" searchRange="100" tendency="0"/>
+                    <Obj Type="Monster" MonType="71103" Pos="1073.39#288.11#540.55" genCount="1" genTime="20000" autoGen="0" objectKey="1" searchRange="100" tendency="0"/>
+                    <Obj Type="Monster" MonType="71102" Pos="1365.12#288.11#662.03" genCount="1" genTime="20000" autoGen="0" objectKey="2" searchRange="100" tendency="0"/>
+                    <Obj Type="Monster" MonType="71102" Pos="1186.62#288.11#695.21" genCount="1" genTime="20000" autoGen="0" objectKey="3" searchRange="100" tendency="0"/>
+                    <Obj Type="Monster" MonType="71102" Pos="1367.50#288.11#480.27" genCount="1" genTime="20000" autoGen="0" objectKey="4" searchRange="100" tendency="0"/>
+                    <Obj Type="Monster" MonType="57975" Pos="1086.61#288.11#641.95" genCount="1" genTime="20000" autoGen="0" objectKey="5"/>
+                    <Obj Type="Monster" MonType="57975" Pos="1092.27#288.11#443.13" genCount="1" genTime="20000" autoGen="0" objectKey="6"/>
+                    <Obj Type="Monster" MonType="71103" Pos="1285.10#288.11#729.35" genCount="1" genTime="20000" autoGen="0" objectKey="7"/>
+                    <Obj Type="Monster" MonType="71103" Pos="1425.05#288.11#593.01" genCount="1" genTime="20000" autoGen="0" objectKey="8"/>
+                    <Obj Type="Monster" MonType="71103" Pos="1275.40#288.11#404.34" genCount="1" genTime="20000" autoGen="0" objectKey="9"/>
+                </ObjList>
+                <StageEvents>
+                    <Event execMS="5000" execCount="1" eventName="FirstMonsterGen">
+                        <execList>
+                            <ToolScp Scp="GAME_ST_EVT_EXEC_VALUE" Client="NO" UseSleep="NO">
+                                <Str Str="is_start"/>
+                                <Num Num="1"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_EVT_EXEC_CREMON" Client="NO" UseSleep="NO">
+                                <MGameObjIndex List="QuestMission/0/QuestMission/1/QuestMission/2/QuestMission/3/QuestMission/4"/>
+                                <Num Num="1"/>
+                                <Num Num="0"/>
+                            </ToolScp>
+                            <ToolScp Scp="GAME_ST_EVT_EXEC_STAGE_START" Client="NO" UseSleep="NO">
+                                <Str Str="ClearCheck"/>
+                            </ToolScp>
+                        </execList>
+                    </Event>
+                    <Event execMS="3000" execCount="1" eventName="StartBattle" execWithStart="0">
+                        <execList>
+                            <ToolScp Scp="MGAME_EVT_SCP_CMD" Client="NO" UseSleep="NO">
+                                <Str Str="SCR_EP17_1_INSERT_HATE"/>
+                            </ToolScp>
+                        </execList>
+                    </Event>
+                    <Event isOr="1" eventName="FailCheck">
+                        <condList>
+                            <ToolScp Scp="MGAME_EVT_COND_PCCNT_IMMEDIATELY" Client="NO" UseSleep="NO">
+                                <Num Num="0"/>
+                            </ToolScp>
+                        </condList>
+                        <execList>
+                            <ToolScp Scp="MGAME_MSG_ICON" Client="YES" UseSleep="NO">
+                                <Str Str="모든 PC가 전투 불능상태가 되어 퀘스트에 실패하였습니다."/>
+                                <Str Str="!"/>
+                                <Num Num="3"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_EVT_EXEC_DELMON" Client="NO" UseSleep="NO">
+                                <MGameObjPtr List="QuestMission/0/QuestMission/1/QuestMission/2/QuestMission/3/QuestMission/4"/>
+                            </ToolScp>
+                            <ToolScp Scp="GAME_ST_EVT_EXEC_STAGE_DISABLE" Client="NO" UseSleep="NO">
+                                <Str Str="ClearCheck"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_EVT_SCP_CMD" Client="NO" UseSleep="NO">
+                                <Str Str="SCR_EP18_1_F_TABLELAND_72_MINI_QUEST_FAIL"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_END" Client="NO" UseSleep="NO">
+                                <Num Num="1"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_EVT_SCRIPT" Client="NO" UseSleep="NO">
+                                <Str Str="SCR_EP18_1_F_TABLELAND_72_MQ6_TRACK_MINIGAME_END"/>
+                            </ToolScp>
+                        </execList>
+                    </Event>
+                    <Event eventName="ClearCheck" execWithStart="0">
+                        <condList>
+                            <ToolScp Scp="MGAME_EVT_COND_PCCNT_OVER" Client="NO" UseSleep="NO">
+                                <Num Num="1"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_EVT_COND_MONCNT_ALIVE" Client="NO" UseSleep="NO">
+                                <MGameObj List="QuestMission/0/QuestMission/1/QuestMission/2/QuestMission/3/QuestMission/4/QuestMission/5/QuestMission/6/QuestMission/7/QuestMission/8/QuestMission/9"/>
+                                <Num Num="0"/>
+                            </ToolScp>
+                        </condList>
+                        <execList>
+                            <ToolScp Scp="MGAME_EVT_EXEC_DELMON" Client="NO" UseSleep="NO">
+                                <MGameObjPtr List="QuestMission/0/QuestMission/1/QuestMission/2/QuestMission/3/QuestMission/4/QuestMission/5/QuestMission/6/QuestMission/7/QuestMission/8/QuestMission/9"/>
+                            </ToolScp>
+                            <ToolScp Scp="GAME_ST_EVT_EXEC_STAGE_DISABLE" Client="NO" UseSleep="NO">
+                                <Str Str="FailCheck"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_END" Client="NO" UseSleep="NO">
+                                <Num Num="1"/>
+                            </ToolScp>
+                            <ToolScp Scp="MGAME_EVT_SCRIPT" Client="NO" UseSleep="NO">
+                                <Str Str="SCR_EP18_1_F_TABLELAND_72_MQ6_TRACK_MINIGAME_CLEAR"/>
+                            </ToolScp>
+                        </execList>
+                    </Event>
+                    <Event execCount="2" eventName="Init">
+                        <execList>
+                            <ToolScp Scp="MGAME_EVT_SCRIPT" Client="NO" UseSleep="NO">
+                                <Str Str="SCR_EP18_1_F_TABLELAND_72_MQ6_TRACK_MINIGAME_INIT"/>
+                            </ToolScp>
+                        </execList>
+                    </Event>
+                </StageEvents>
+            </Stage>
+        </StageList>
+    </Game>
+</GameList>

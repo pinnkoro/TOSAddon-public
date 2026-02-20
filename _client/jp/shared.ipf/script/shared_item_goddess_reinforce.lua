@@ -1,7 +1,7 @@
 -- shared_item_goddess_reinforce.lua, 가디스 장비 강화 관련 
 -- item_goddess_reinforce.xml
 
-local equip_end_lv = 540
+local equip_end_lv = 550
 local popoboost_item_lv = 520;
 
 item_goddess_reinforce = {}  -- namespace
@@ -908,6 +908,10 @@ function setting_lv_material_acc(mat_list_by_lv, lv)
 		seasonCoin = "JurateCertificate" -- 주화
 		medusaReinforceMisc = "misc_ep17_acc_NoTrade" -- 레이드 재료
 		misc_BlessedStone = 'misc_BlessedStone_1'
+	elseif lv == 550 then
+		seasonCoin = "AustejaCertificate" -- 주화
+		medusaReinforceMisc = "misc_ep18_acc_NoTrade" -- 레이드 재료
+		misc_BlessedStone = 'misc_BlessedStone_2'
 	end
 
 	-- 여기서 레벨별 재료를 세팅한다.	
@@ -1148,6 +1152,8 @@ function setting_lv_misc_material(mat_list_by_lv, lv, group)
 		elseif lv == 530 then
 			misc1 = "misc_ore28" 
 		elseif lv == 540 then
+			misc1 = "misc_ore29" 
+		elseif lv == 550 then
 			misc1 = "misc_ore29" 
 		end
 

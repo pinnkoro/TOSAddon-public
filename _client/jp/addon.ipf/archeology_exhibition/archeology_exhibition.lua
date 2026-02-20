@@ -36,7 +36,7 @@ function ARCHEOLOGY_EXHIBITION_OPEN(frame)
     UPDATE_EXHIBITION_EFFECT_TEXT(frame)
 	SET_EXP_TEXT(frame)
 
-    pc.ReqExecuteTx_Item("ARC_EQUIP_ITEM", "")
+    pc.ReqExecuteTx_Item("ARC_OPEN_LOGGING", "")
 end
 
 function ARCHEOLOGY_EXHIBITION_CLOSE(frame)

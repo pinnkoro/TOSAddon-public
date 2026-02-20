@@ -10370,6 +10370,7 @@
 		<image name="Map_Redania" file="\skin\indunmap\Map_Redania.png" imgrect="0 0 295 450" CMM_Caption="레다니아"/>
 		<image name="Map_Ashark_DemonLair" file="\skin\indunmap\Map_Ashark_DemonLair.png" imgrect="0 0 295 450" CMM_Caption="마족 소굴 : 아샤크"/>
 		<image name="Map_Laimara" file="\skin\indunmap\Map_Laimara.png" imgrect="0 0 295 450" CMM_Caption="라이마라"/>
+		<image name="Map_Zmei" file="\skin\indunmap\Map_Zmei.png" imgrect="0 0 295 450" CMM_Caption="즈메이"/>
 	</imagelist>
 	<imagelist category="jootest_image">
 		<image name="market_hairacc" file="\skin\market_skin.tga" imgrect="1927 447 60 60" CMM_Caption="마켓_헤어악세사리"/>
@@ -13305,6 +13306,7 @@
 		<image name="moncard_green" file="\skin\monstercard.tga" imgrect="1271 0 384 546"/>
 		<image name="moncard_yellow" file="\skin\monstercard.tga" imgrect="1657 0 384 546"/>
 		<image name="moncard_gray" file="\skin\monstercard2.tga" imgrect="0 0 384 546"/>
+		<image name="moncard_purple_rare" file="\skin\monstercard2.tga" imgrect="384 0 384 546"/>
 		<image name="first_blow" file="\skin\mainframe_03.tga" imgrect="750 355 274 135" CMM_Caption="첫타 텍스트"/>
 		<image name="last_blow" file="\skin\mainframe_03.tga" imgrect="750 216 274 135" CMM_Caption="막타 텍스트"/>
 		<image name="legend_cardslot" file="\skin\monstercard.tga" imgrect="708 545 114 176" CMM_Caption="레젼드 카드 슬롯"/>
@@ -13389,6 +13391,7 @@
 		<image name="indun_material_clicked" file="\skin\indun_skin.tga" imgrect="469 717 65 65"/>
 		<image name="card_reinforce_legend_bg" file="\skin\card_reinforce_legend_bg.tga" imgrect="0 0 571 620" CMM_Caption="레전드 카드 합성 배경"/>
 		<image name="card_reinforce_legend_Slogutis_bg" file="\skin\card_reinforce_legend_Slogutis_bg.tga" imgrect="0 0 571 620" CMM_Caption="슬로거티스 제작 배경"/>
+		<image name="bosscardupgrade_bg" file="\skin\bosscardupgrade_bg.png" imgrect="0 0 571 620" CMM_Caption="레이드 카드 강화 배경"/>
 	</imagelist>
 	<imagelist category="colony_image">
 		<image name="colony_vic_frame" file="\skin\colony.tga" imgrect="0 0 581 532" CMM_Caption="콜로니 승리 프레임"/>
@@ -14262,6 +14265,7 @@
 		<image name="emoticonItem_2510_183" file="\icon\emoticon\popo_spider_sis2.png" imgrect="0 0 128 128"/>
 		<image name="emoticonItem_184" file="\icon\emoticon\santapopo1.png" imgrect="0 0 128 128"/>
 		<image name="emoticonItem_185" file="\icon\emoticon\santapopo2.png" imgrect="0 0 128 128"/>
+		<image name="emoticonItem_186" file="\icon\emoticon\dubai.png" imgrect="0 0 128 128"/>
 	</imagelist>
 	<imagelist category="itemtooltip_image">
 		<image name="circle_gem" file="\skin\tooltip_skin_3.tga" imgrect="805 228 30 30"/>
@@ -14890,6 +14894,7 @@
 		<image name="icon_gesture_queencard" file="\icon\social.tga" imgrect="1 811 80 80"/>
 		<image name="icon_gesture_KawaikuteGomen" file="\icon\social.tga" imgrect="82 811 80 80"/>
 		<image name="icon_gesture_SparklingPop" file="\icon\social.tga" imgrect="163 811 80 80"/>
+		<image name="icon_gesture_reset" file="\icon\social.tga" imgrect="244 811 80 80"/>
 	</imagelist>
 	<imagelist>
 		<image name="chat_page_arrow_left" file="\skin\mainframe_A.tga" imgrect="766 943 40 40"/>
@@ -15128,6 +15133,7 @@
 		<image name="minimap_aetherblader" file="\icon\minimap_icon3.tga" imgrect="81 1214 80 80"/>
 		<image name="minimap_hermit" file="\icon\minimap_icon3.tga" imgrect="162 1218 80 80"/>
 		<image name="minimap_grimmark" file="\icon\minimap_icon3.tga" imgrect="243 1218 80 80"/>
+		<image name="minimap_kneller" file="\icon\minimap_icon3.tga" imgrect="324 1218 80 80"/>
 	</imagelist>
 	<imagelist category="quest_tags">
 		<image name="quest_tag_1_MAIN" file="\icon\minimap_icon.tga" imgrect="61 31 16 16"/>
@@ -15643,6 +15649,8 @@
 		<image name="Dlg_port_veliora" file="\npcimg\veliora.png" imgrect="0 0 908 900" CMM_Caption="벨리오라"/>
 		<image name="Dlg_port_laimara" file="\npcimg\laimara.png" imgrect="0 0 960 900" CMM_Caption="라이마라"/>
 		<image name="Dlg_port_grimmark" file="\npcimg\grimmark_master.png" imgrect="0 0 855 900" CMM_Caption="그림마크"/>
+		<image name="Dlg_port_uriel_cat" file="\npcimg\uriel_cat.png" imgrect="0 0 600 843" CMM_Caption="엘"/>
+		<image name="Dlg_port_kneller" file="\npcimg\kneller_master.png" imgrect="0 0 790 1000" CMM_Caption="넬러"/>
 	</imagelist>
 	<imagelist category="Dlg_boss">
 		<image name="balloon_Skiaclipse" file="\skin\monster_Dlg.tga" imgrect="0 0 220 260" CMM_Caption="스키아클립스"/>
@@ -15665,6 +15673,7 @@
 		<image name="balloon_boss_redania" file="\skin\monster_Dlg_02.tga" imgrect="0 522 220 260" CMM_Caption="레다니아"/>
 		<image name="balloon_boss_laimara" file="\skin\monster_Dlg_02.tga" imgrect="442 522 220 260" CMM_Caption="라이마라"/>
 		<image name="balloon_boss_veliora" file="\skin\monster_Dlg_02.tga" imgrect="221 522 220 260" CMM_Caption="벨리오라"/>
+		<image name="balloon_boss_zmei" file="\skin\monster_Dlg_02.tga" imgrect="0 783 220 260" CMM_Caption="즈메이"/>
 	</imagelist>
 	<imagelist category="bufficon">
 		<image name="icon_Str_up" file="\icon\buff_icon.tga" imgrect="256 384 128 128" CMM_Caption="힘+"/>
@@ -16453,6 +16462,7 @@
 		<image name="icon_buff_ridepet_cloudkepa" file="\icon\buff_icon6.tga" imgrect="641 1920 128 128" CMM_Caption="구름 속의 케파 버프"/>
 		<image name="icon_buff_ridepet_dragonboat" file="\icon\buff_icon6.tga" imgrect="768 1920 128 128" CMM_Caption="단오절 버프"/>
 		<image name="icon_buff_ridepet_unicorn" file="\icon\buff_icon6.tga" imgrect="896 1920 128 128" CMM_Caption="유니콘 버프"/>
+		<image name="icon_guild_dignity_Buff" file="\icon\guild_dignity_Buff.png" imgrect="0 0 128 128" CMM_Caption=""/>
 		<image name="icon_raid_upinis_autoclear" file="\icon\buff_icon7.tga" imgrect="0 0 128 128" CMM_Caption="우피니스 자동 소탕 버프"/>
 		<image name="icon_raid_Slogutis_autoclear" file="\icon\buff_icon7.tga" imgrect="128 0 128 128" CMM_Caption="슬로거티스 자동 소탕 버프"/>
 		<image name="icon_hallucination_powder" file="\icon\buff_icon7.tga" imgrect="256 0 128 128" CMM_Caption="환각 가루"/>
@@ -16517,6 +16527,10 @@
 		<image name="icon_raid_laimara_posion" file="\icon\buff_icon7.tga" imgrect="256 1024 128 128" CMM_Caption="라이마라의 신경독"/>
 		<image name="icon_raid_laimara_drain_power" file="\icon\buff_icon7.tga" imgrect="384 1024 128 128" CMM_Caption="흡수된 영혼의 힘"/>
 		<image name="icon_buff_harpseal" file="\icon\buff_icon7.tga" imgrect="512 1024 128 128" CMM_Caption="하프 물범"/>
+		<image name="icon_buff_zmei_fear" file="\icon\buff_icon7.tga" imgrect="640 1024 128 128" CMM_Caption="드래곤 피어"/>
+		<image name="icon_buff_zmei_ash" file="\icon\buff_icon7.tga" imgrect="768 1024 128 128" CMM_Caption="질식"/>
+		<image name="icon_raid_zmei_autoclear" file="\icon\buff_icon7.tga" imgrect="896 1024 128 128" CMM_Caption="즈메이 자동 소탕"/>
+		<image name="icon_buff_Dujokku" file="\icon\buff_icon7.tga" imgrect="0 1151 128 128" CMM_Caption="즈메이 자동 소탕"/>
 	</imagelist>
 	<imagelist category="housing_bufficon">
 		<image name="icon_Weapon_Klaida" file="\icon\icon_hosing_buff.tga" imgrect="0 0 128 128"/>
@@ -16964,6 +16978,9 @@
 		<image name="175_boss_Redania" file="\skin\bosscard\175_boss_Redania.tga" imgrect="0 0 330 440"/>
 		<image name="176_boss_Laimara" file="\skin\bosscard\176_boss_Laimara.tga" imgrect="0 0 330 440"/>
 		<image name="177_boss_Veliora" file="\skin\bosscard\177_boss_Veliora.tga" imgrect="0 0 330 440"/>
+		<image name="178_boss_Zmei1" file="\skin\bosscard\178_boss_Zmei1.tga" imgrect="0 0 330 440"/>
+		<image name="178_boss_Zmei2" file="\skin\bosscard\178_boss_Zmei2.tga" imgrect="0 0 330 440"/>
+		<image name="178_boss_Zmei3" file="\skin\bosscard\178_boss_Zmei3.tga" imgrect="0 0 330 440"/>
 	</imagelist>
 	<imagelist category="sub_card3">
 		<image name="legend_card_fragment_lv1" file="\skin\bosscard\legend_card_fragment_lv1.tga" imgrect="0 0 330 440"/>
@@ -17388,6 +17405,12 @@
 		<image name="plate_achieve_Grimmark" file="\skin\user_title_skin2.tga" imgrect="214 476 214 34" CMM_Caption="그림마크 칭호"/>
 		<image name="plate_shade_of_the_decennial_tree" file="\skin\user_title_skin2.tga" imgrect="428 476 214 34" CMM_Caption=""/>
 		<image name="plate_achieve_Merry_Xmas" file="\skin\user_title_skin2.tga" imgrect="642 476 214 34" CMM_Caption="Merry X'mas 칭호"/>
+		<image name="plate_achieve_Kneller_weekraid" file="\skin\user_title_skin2.tga" imgrect="856 476 214 34" CMM_Caption="넬러 주보레 칭호"/>
+		<image name="plate_achieve_Kneller" file="\skin\user_title_skin2.tga" imgrect="1070 476 214 34" CMM_Caption="넬러 칭호"/>
+		<image name="plate_achieve_Boss_Zmei_gold" file="\skin\user_title_skin2.tga" imgrect="0 510 214 34" CMM_Caption="즈메이 골드"/>
+		<image name="plate_achieve_Boss_Zmei_silver" file="\skin\user_title_skin2.tga" imgrect="214 510 214 34" CMM_Caption="즈메이 실버"/>
+		<image name="plate_achieve_Boss_Zmei_bronze" file="\skin\user_title_skin2.tga" imgrect="428 510 214 34" CMM_Caption="즈메이 브론즈"/>
+		<image name="plate_achieve_Boss_Zmei" file="\skin\user_title_skin2.tga" imgrect="642 510 214 34" CMM_Caption="즈메이 150회 클리어"/>
 	</imagelist>
 	<imagelist category="skin_hair">
 		<image name="icon_skintone_01_m01" file="\skin\skinhair\icon_skintone_01_m01.png" imgrect="0 0 80 80" CMM_Caption="남성 01"/>
@@ -17680,6 +17703,8 @@
 		<image name="icon_fullscreen_menu_contentsboard" file="\skin\ui_hud_icon.tga" imgrect="640 640 128 128"/>
 		<image name="icon_fullscreen_menu_totalmenu" file="\skin\ui_hud_icon.tga" imgrect="768 640 128 128"/>
 		<image name="icon_fullscreen_menu_equipment_processing" file="\skin\ui_hud_icon.tga" imgrect="896 640 128 128"/>
+		<image name="icon_fullscreen_menu_guild_dress_room" file="\skin\ui_hud_icon.tga" imgrect="895 764 128 128"/>
+		<image name="icon_fullscreen_menu_guild_activity" file="\skin\ui_hud_icon.tga" imgrect="895 892 128 128"/>
 		<image name="fullscreen_menu_category" file="\skin\ui_hud_icon.tga" imgrect="0 918 350 50"/>
 		<image name="fullscreen_menu_button" file="\skin\ui_hud_icon.tga" imgrect="0 768 350 50" CMM_Caption="전체메뉴배경버튼"/>
 		<image name="fullscreen_menu_button_cursoron" file="\skin\ui_hud_icon.tga" imgrect="0 818 350 50"/>
@@ -17964,4 +17989,449 @@
 	<imagelist category="event_collection">
 		<image name="10th_Merry_XMas_Collection_Bg" file="\skin\event_collection_bg\10th_Merry_XMas_Collection.png" imgrect="0 0 700 450" CMM_Caption="10주년 기념 컬렉션 배경 - X'Mas"/>
 	</imagelist>
+	<imagelist category="guild_dress_room">
+		<!-- sysmenu  -->
+		<image name="guild_dress_room_bg_S" file="\skin\guild_dress_room_bg\guild_dress_room_bg_S.png" imgrect="0 0 1400 900" CMM_Caption="길드 드레스 룸 배경화면 S급"/>
+		<image name="guild_dress_room_bg_A" file="\skin\guild_dress_room_bg\guild_dress_room_bg_A.png" imgrect="0 0 1400 900" CMM_Caption="길드 드레스 룸 배경화면 A급"/>
+		<image name="guild_dress_room_bg_B" file="\skin\guild_dress_room_bg\guild_dress_room_bg_B.png" imgrect="0 0 1400 900" CMM_Caption="길드 드레스 룸 배경화면 B급"/>
+		<image name="sysmenu_guild_dress_room" file="\skin\HUD.tga" imgrect="1166 1049 38 33" CMM_Caption="길드 드레스 룸 아이콘"/>
+		<image name="sysmenu_guild_dress_room_cursoron" file="\skin\HUD.tga" imgrect="1204 1049 38 33" CMM_Caption="길드 드레스 룸 아이콘"/>
+		<image name="sysmenu_guild_dress_room_clicked" file="\skin\HUD.tga" imgrect="1242 1049 38 33" CMM_Caption="길드 드레스 룸 아이콘"/>
+		<image name="guild_dress_room_rank_1" file="\skin\HUD.tga" imgrect="693 1132 23 33" CMM_Caption="길드 드레스 룸 랭킹 1위"/>
+		<image name="guild_dress_room_rank_2" file="\skin\HUD.tga" imgrect="716 1132 23 33" CMM_Caption="길드 드레스 룸 랭킹 2위"/>
+		<image name="guild_dress_room_rank_3" file="\skin\HUD.tga" imgrect="739 1132 23 33" CMM_Caption="길드 드레스 룸 랭킹 3위"/>
+		<image name="guild_dress_room_get_inventory_btn" file="\skin\HUD.tga" imgrect="693 1165 36 36" CMM_Caption="인벤토리 가져오기"/>
+		<image name="guild_dress_room_get_inventory_btn_cursoron" file="\skin\HUD.tga" imgrect="693 1165 36 36" CMM_Caption="인벤토리 가져오기"/>
+		<image name="guild_dress_room_get_inventory_btn_clicked" file="\skin\HUD.tga" imgrect="693 1165 36 36" CMM_Caption="인벤토리 가져오기"/>
+		<image name="guild_dress_room_pose_btn" file="\skin\HUD.tga" imgrect="693 1201 73 73" CMM_Caption="제스쳐 선택 버튼"/>
+		<image name="guild_dress_room_pose_btn_cursoron" file="\skin\HUD.tga" imgrect="693 1201 73 73" CMM_Caption="제스쳐 선택 버튼"/>
+		<image name="guild_dress_room_pose_btn_clicked" file="\skin\HUD.tga" imgrect="693 1201 73 73" CMM_Caption="제스쳐 선택 버튼"/>
+		<image name="guild_dress_room_dignity_btn" file="\skin\HUD.tga" imgrect="766 1201 73 73" CMM_Caption="길드의 위엄 효과 버튼"/>
+		<image name="guild_dress_room_dignity_btn_cursoron" file="\skin\HUD.tga" imgrect="766 1201 73 73" CMM_Caption="길드의 위엄 효과 버튼"/>
+		<image name="guild_dress_room_dignity_btn_clicked" file="\skin\HUD.tga" imgrect="766 1201 73 73" CMM_Caption="길드의 위엄 효과 버튼"/>
+		<image name="guild_dress_room_left_rot_btn" file="\skin\HUD.tga" imgrect="766 1132 86 60" CMM_Caption="왼쪽 회전 버튼"/>
+		<image name="guild_dress_room_left_rot_btn_cursoron" file="\skin\HUD.tga" imgrect="766 1132 86 60" CMM_Caption="왼쪽 회전 버튼"/>
+		<image name="guild_dress_room_left_rot_btn_clicked" file="\skin\HUD.tga" imgrect="766 1132 86 60" CMM_Caption="왼쪽 회전 버튼"/>
+		<image name="guild_dress_room_right_rot_btn" file="\skin\HUD.tga" imgrect="852 1132 86 60" CMM_Caption="오른쪽 회전 버튼"/>
+		<image name="guild_dress_room_right_rot_btn_cursoron" file="\skin\HUD.tga" imgrect="852 1132 86 60" CMM_Caption="오른쪽 회전 버튼"/>
+		<image name="guild_dress_room_right_rot_btn_clicked" file="\skin\HUD.tga" imgrect="852 1132 86 60" CMM_Caption="오른쪽 회전 버튼"/>
+		<image name="guild_dress_room_notice" file="\skin\HUD.tga" imgrect="839 1192 52 45" CMM_Caption="경고 문구 이미지"/>
+		<image name="guild_dress_room_rank_s" file="\skin\HUD.tga" imgrect="839 1238 42 42" CMM_Caption="S등급"/>
+		<image name="guild_dress_room_rank_a" file="\skin\HUD.tga" imgrect="881 1238 42 42" CMM_Caption="A등급"/>
+		<image name="guild_dress_room_rank_b" file="\skin\HUD.tga" imgrect="923 1238 42 42" CMM_Caption="B등급"/>
+
+		<image name="guild_dress_room_dignity_list_bg" file="\skin\HUD.tga" imgrect="969 1172 420 31" CMM_Caption="길드 위엄 효과 리스트 배경"/>
+		<image name="guild_dress_room_popup_title_bg" file="\skin\HUD.tga" imgrect="969 1203 420 41" CMM_Caption="길드 드레스 룸 팝업창 타이틀 배경"/>
+		<image name="guild_dress_room_sortfilter_small_title_bg" file="\skin\HUD.tga" imgrect="969 1244 420 36" CMM_Caption="필터 팝업창 소제목 배경"/>
+		<image name="guild_dress_room_sortfilter_select_all_btn" file="\skin\HUD.tga" imgrect="969 1116 97 27" CMM_Caption="필터 팝업창 모두 선택 버튼 배경"/>
+		<image name="guild_dress_room_sortfilter_select_all_btn_cursoron" file="\skin\HUD.tga" imgrect="969 1116 97 27" CMM_Caption="필터 팝업창 모두 선택 버튼 배경"/>
+		<image name="guild_dress_room_sortfilter_select_all_btn_clicked" file="\skin\HUD.tga" imgrect="969 1116 97 27" CMM_Caption="필터 팝업창 모두 선택 버튼 배경"/>
+		<image name="guild_dress_room_sortfilter_deselect_all_btn" file="\skin\HUD.tga" imgrect="969 1144 97 27" CMM_Caption="필터 팝업창 모두 해제 버튼 배경"/>
+		<image name="guild_dress_room_sortfilter_deselect_all_btn_cursoron" file="\skin\HUD.tga" imgrect="969 1144 97 27" CMM_Caption="필터 팝업창 모두 해제 버튼 배경"/>
+		<image name="guild_dress_room_sortfilter_deselect_all_btn_clicked" file="\skin\HUD.tga" imgrect="969 1144 97 27" CMM_Caption="필터 팝업창 모두 해제 버튼 배경"/>
+		<image name="guild_dress_room_popup_question" file="\skin\HUD.tga" imgrect="940 1172 29 29" CMM_Caption="필터 팝업창 도움말"/>
+		<image name="guild_dress_room_popup_close" file="\skin\HUD.tga" imgrect="940 1201 29 29" CMM_Caption="필터 팝업창 닫기"/>
+	</imagelist>
+	<imagelist category="guild_activity_ui_image">
+		<!-- sysmenu -->
+		<image name="sysmenu_guild_representative" file="\skin\HUD.tga" imgrect="1166 1082 38 33" CMM_Caption="길드 전체 아이콘"/>
+		<image name="sysmenu_guild_representative_cursoron" file="\skin\HUD.tga" imgrect="1204 1082 38 33" CMM_Caption="길드 전체 아이콘"/>
+		<image name="sysmenu_guild_representative_clicked" file="\skin\HUD.tga" imgrect="1242 1082 38 33" CMM_Caption="길드 전체 아이콘"/>
+		<image name="sysmenu_guild_activity" file="\skin\HUD.tga" imgrect="1166 1016 38 33" CMM_Caption="길드 콘텐츠 아이콘"/>
+		<image name="sysmenu_guild_activity_cursoron" file="\skin\HUD.tga" imgrect="1204 1016 38 33" CMM_Caption="길드 콘텐츠 아이콘"/>
+		<image name="sysmenu_guild_activity_clicked" file="\skin\HUD.tga" imgrect="1242 1016 38 33" CMM_Caption="길드 콘텐츠 아이콘"/>
+		<!-- category - btn icon -->
+		<image name="guild_activity_category_guild_growth" file="\skin\guild_activity_ui_hud.tga" imgrect="0 1055 75 75" CMM_Caption="길드 성장 카테고리"/>
+		<image name="guild_activity_category_guild_growth_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="75 1055 75 75" CMM_Caption="길드 성장 카테고리"/>
+		<image name="guild_activity_category_guild_growth_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="150 1055 75 75" CMM_Caption="길드 성장 카테고리"/>
+		<image name="guild_activity_category_guild_quest" file="\skin\guild_activity_ui_hud.tga" imgrect="0 1130 75 75" CMM_Caption="길드 퀘스트 카테고리"/>
+		<image name="guild_activity_category_guild_quest_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="75 1130 75 75" CMM_Caption="길드 퀘스트 카테고리"/>
+		<image name="guild_activity_category_guild_quest_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="150 1130 75 75" CMM_Caption="길드 퀘스트 카테고리"/>
+		<image name="guild_activity_category_guild_tower" file="\skin\guild_activity_ui_hud.tga" imgrect="0 1205 75 75" CMM_Caption="길드 타워 카테고리"/>
+		<image name="guild_activity_category_guild_tower_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="75 1205 75 75" CMM_Caption="길드 타워 카테고리"/>
+		<image name="guild_activity_category_guild_tower_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="150 1205 75 75" CMM_Caption="길드 타워 카테고리"/>
+		<!-- menu - btn icon -->
+		<image name="guild_activity_menu_GuildGrowth" file="\skin\guild_activity_ui_hud.tga" imgrect="282 1109 57 57" CMM_Caption="길드 성장 메뉴"/>
+		<image name="guild_activity_menu_GuildGrowth_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="225 1109 57 57" CMM_Caption="길드 성장 메뉴"/>
+		<image name="guild_activity_menu_GuildGrowth_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="225 1109 57 57" CMM_Caption="길드 성장 메뉴"/>
+		<image name="guild_activity_menu_GuildAbility" file="\skin\guild_activity_ui_hud.tga" imgrect="282 1166 57 57" CMM_Caption="길드 특성 메뉴"/>
+		<image name="guild_activity_menu_GuildAbility_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="225 1166 57 57" CMM_Caption="길드 특성 메뉴"/>
+		<image name="guild_activity_menu_GuildAbility_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="225 1166 57 57" CMM_Caption="길드 특성 메뉴"/>
+		<image name="guild_activity_menu_GuildAgitExtension" file="\skin\guild_activity_ui_hud.tga" imgrect="282 1223 57 57" CMM_Caption="아지트 확장 메뉴"/>
+		<image name="guild_activity_menu_GuildAgitExtension_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="225 1223 57 57" CMM_Caption="아지트 확장 메뉴"/>
+		<image name="guild_activity_menu_GuildAgitExtension_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="225 1223 57 57" CMM_Caption="아지트 확장 메뉴"/>
+		<image name="guild_activity_menu_GuildIBossSummon" file="\skin\guild_activity_ui_hud.tga" imgrect="396 1052 57 57" CMM_Caption="길드 보스 레이드 메뉴"/>
+		<image name="guild_activity_menu_GuildIBossSummon_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="339 1052 57 57" CMM_Caption="길드 보스 레이드 메뉴"/>
+		<image name="guild_activity_menu_GuildIBossSummon_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="339 1052 57 57" CMM_Caption="길드 보스 레이드 메뉴"/>
+		<image name="guild_activity_menu_GuildMission" file="\skin\guild_activity_ui_hud.tga" imgrect="396 1109 57 57" CMM_Caption="길드 미션 메뉴"/>
+		<image name="guild_activity_menu_GuildMission_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="339 1109 57 57" CMM_Caption="길드 미션 메뉴"/>
+		<image name="guild_activity_menu_GuildMission_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="339 1109 57 57" CMM_Caption="길드 미션 메뉴"/>
+		<image name="guild_activity_menu_GuildBlockade" file="\skin\guild_activity_ui_hud.tga" imgrect="396 1166 57 57" CMM_Caption="봉쇄전 메뉴"/>
+		<image name="guild_activity_menu_GuildBlockade_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="339 1166 57 57" CMM_Caption="봉쇄전 메뉴"/>
+		<image name="guild_activity_menu_GuildBlockade_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="339 1166 57 57" CMM_Caption="봉쇄전 메뉴"/>
+		<image name="guild_activity_menu_GuildCraftTimeReduceBuff" file="\skin\guild_activity_ui_hud.tga" imgrect="510 1109 57 57" CMM_Caption="제작 시간 감소 버프 메뉴"/>
+		<image name="guild_activity_menu_GuildCraftTimeReduceBuff_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="453 1109 57 57" CMM_Caption="제작 시간 감소 버프 메뉴"/>
+		<image name="guild_activity_menu_GuildCraftTimeReduceBuff_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="453 1109 57 57" CMM_Caption="제작 시간 감소 버프 메뉴"/>
+		<image name="guild_activity_menu_GuildAgitMove" file="\skin\guild_activity_ui_hud.tga" imgrect="510 1166 57 57" CMM_Caption="아지트로 이동 메뉴"/>
+		<image name="guild_activity_menu_GuildAgitMove_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="453 1166 57 57" CMM_Caption="아지트로 이동 메뉴"/>
+		<image name="guild_activity_menu_GuildAgitMove_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="453 1166 57 57" CMM_Caption="아지트로 이동 메뉴"/>
+		<image name="guild_activity_menu_GuildTowerControl" file="\skin\guild_activity_ui_hud.tga" imgrect="510 1223 57 57" CMM_Caption="길드 타워 조작 메뉴"/>
+		<image name="guild_activity_menu_GuildTowerControl_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="453 1223 57 57" CMM_Caption="길드 타워 조작 메뉴"/>
+		<image name="guild_activity_menu_GuildTowerControl_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="453 1223 57 57" CMM_Caption="길드 타워 조작 메뉴"/>
+		<image name="guild_activity_menu_select_btn" file="\skin\guild_activity_ui_hud.tga" imgrect="717 1150 30 30" CMM_Caption="매뉴 + 버튼"/>
+		<image name="guild_activity_menu_select_btn_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="717 1150 30 30" CMM_Caption="매뉴 + 버튼"/>
+		<image name="guild_activity_menu_select_btn_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="717 1150 30 30" CMM_Caption="매뉴 + 버튼"/>
+		<!-- detail - btn -->
+		<image name="guild_activity_detail_btn" file="\skin\guild_activity_ui_hud.tga" imgrect="423 712 220 46" CMM_Caption="상세 페이지 버튼(노랑)"/>
+		<image name="guild_activity_detail_btn_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="423 758 220 46" CMM_Caption="상세 페이지 버튼(노랑)"/>
+		<image name="guild_activity_detail_btn_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="423 804 220 46" CMM_Caption="상세 페이지 버튼(노랑)"/>
+		<image name="guild_activity_detail_btn_disable" file="\skin\guild_activity_ui_hud.tga" imgrect="423 850 220 46" CMM_Caption="상세 페이지 버튼(노랑) 비활성화"/>
+		<image name="guild_activity_detail_btn_disable_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="423 850 220 46" CMM_Caption="상세 페이지 버튼(노랑)"/>
+		<image name="guild_activity_detail_btn_disable_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="423 850 220 46" CMM_Caption="상세 페이지 버튼(노랑)"/>
+		<image name="guild_blockade_rank_btn" file="\skin\guild_activity_ui_hud.tga" imgrect="1218 1182 70 98" CMM_Caption="봉쇄전 - 랭킹 버튼"/>
+		<image name="guild_blockade_rank_btn_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="1218 1182 70 98" CMM_Caption="봉쇄전 - 랭킹 버튼"/>
+		<image name="guild_blockade_rank_btn_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="1218 1182 70 98" CMM_Caption="봉쇄전 - 랭킹 버튼"/>
+		<image name="guild_quest_back_btn" file="\skin\guild_activity_ui_hud.tga" imgrect="1157 1220 60 60" CMM_Caption="길드 퀘스트 - 뒤로 버튼"/>
+		<image name="guild_quest_back_btn_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="1157 1220 60 60" CMM_Caption="길드 퀘스트 - 뒤로 버튼"/>
+		<image name="guild_quest_back_btn_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="1157 1220 60 60" CMM_Caption="길드 퀘스트 - 뒤로 버튼"/>
+		<!-- detail - icon -->
+		<image name="guild_ability_member_extend" file="\skin\guild_activity_ui_hud.tga" imgrect="567 1180 100 100" CMM_Caption="길드 특성 - 최대 인원 증가"/>
+		<image name="guild_ability_taming" file="\skin\guild_activity_ui_hud.tga" imgrect="667 1180 100 100" CMM_Caption="길드 특성 - 테이밍"/>
+		<image name="guild_ability_farming" file="\skin\guild_activity_ui_hud.tga" imgrect="767 1180 100 100" CMM_Caption="길드 특성 - 농사"/>
+		<image name="guild_agit_extension_grade_bg" file="\skin\guild_activity_ui_hud.tga" imgrect="867 1190 100 90" CMM_Caption="길드 아지트 확장 - 단계 표시 배경"/>
+		<image name="guild_agit_extension_grade_green_1" file="\skin\guild_activity_ui_hud.tga" imgrect="967 1250 22 31" CMM_Caption="길드 아지트 확장 - 녹색 1단계"/>
+		<image name="guild_agit_extension_grade_green_2" file="\skin\guild_activity_ui_hud.tga" imgrect="989 1250 22 31" CMM_Caption="길드 아지트 확장 - 녹색 2단계"/>
+		<image name="guild_agit_extension_grade_green_3" file="\skin\guild_activity_ui_hud.tga" imgrect="1011 1250 22 31" CMM_Caption="길드 아지트 확장 - 녹색 3단계"/>
+		<image name="guild_agit_extension_grade_green_4" file="\skin\guild_activity_ui_hud.tga" imgrect="1033 1250 22 31" CMM_Caption="길드 아지트 확장 - 녹색 4단계"/>
+		<image name="guild_agit_extension_grade_green_5" file="\skin\guild_activity_ui_hud.tga" imgrect="1055 1250 22 31" CMM_Caption="길드 아지트 확장 - 녹색 5단계"/>
+		<image name="guild_agit_extension_grade_white_1" file="\skin\guild_activity_ui_hud.tga" imgrect="967 1219 22 31" CMM_Caption="길드 아지트 확장 - 흰색 1단계"/>
+		<image name="guild_agit_extension_grade_white_2" file="\skin\guild_activity_ui_hud.tga" imgrect="989 1219 22 31" CMM_Caption="길드 아지트 확장 - 흰색 2단계"/>
+		<image name="guild_agit_extension_grade_white_3" file="\skin\guild_activity_ui_hud.tga" imgrect="1011 1219 22 31" CMM_Caption="길드 아지트 확장 - 흰색 3단계"/>
+		<image name="guild_agit_extension_grade_white_4" file="\skin\guild_activity_ui_hud.tga" imgrect="1033 1219 22 31" CMM_Caption="길드 아지트 확장 - 흰색 4단계"/>
+		<image name="guild_agit_extension_grade_white_5" file="\skin\guild_activity_ui_hud.tga" imgrect="1055 1219 22 31" CMM_Caption="길드 아지트 확장 - 녹색 5단계"/>
+		<image name="guild_agit_ExtensionNeedGuildLevel" file="\skin\guild_activity_ui_hud.tga" imgrect="567 1130 50 50" CMM_Caption="길드 아지트 확장 - 길드 레벨"/>
+		<image name="guild_agit_ExtensionNeedSilver" file="\skin\guild_activity_ui_hud.tga" imgrect="617 1130 50 50" CMM_Caption="길드 아지트 확장 - 길드 자금"/>
+		<image name="guild_agit_ExtensionNeedMileage" file="\skin\guild_activity_ui_hud.tga" imgrect="667 1130 50 50" CMM_Caption="길드 아지트 확장 - 길드 마일리지"/>
+		<image name="guild_quest_slot_pic" file="\skin\guild_activity_ui_hud.tga" imgrect="567 1050 80 80" CMM_Caption="길드 퀘스트 - 대표 아이콘"/>
+		<image name="guild_quest_user_count" file="\skin\guild_activity_ui_hud.tga" imgrect="747 1150 30 30" CMM_Caption="길드 퀘스트 - 인원수"/>
+		<image name="guild_quest_time_limit" file="\skin\guild_activity_ui_hud.tga" imgrect="777 1150 30 30" CMM_Caption="길드 퀘스트 - 제한시간"/>
+		<image name="guild_quest_ticket" file="\skin\guild_activity_ui_hud.tga" imgrect="807 1150 30 30" CMM_Caption="길드 퀘스트 - 티켓"/>
+		<image name="guild_quest_move" file="\skin\guild_activity_ui_hud.tga" imgrect="1077 1200 80 80" CMM_Caption="길드 퀘스트 - 이동 아이콘"/>
+		<image name="guild_mission_icon" file="\icon\guild\guild_mission_icon.png" imgrect="0 0 261 262" CMM_Caption="길드 미션 아이콘"/>
+		<image name="guild_craft_reduce_buff_icon" file="\icon\guild\guild_craft_reduce_buff_icon.png" imgrect="0 0 310 310" CMM_Caption="길드 제작 시간 감소 버프 아이콘"/>
+		<image name="guild_tower_icon" file="\icon\guild\guild_tower_icon.png" imgrect="0 0 361 361" CMM_Caption="길드 타워 아이콘"/>
+		<!-- detail - map image -->
+		<image name="map_GFB_BORUTA_RENEWAL" file="\skin\guild_quest_map\guild_boss_raid_boruta_map.png" imgrect="0 0 840 340" CMM_Caption="길드 보스 레이드 - 보루타 맵"/>
+		<image name="map_GFB_Giltine_1" file="\skin\guild_quest_map\guild_boss_raid_giltine_map.png" imgrect="0 0 840 340" CMM_Caption="길드 보스 레이드 - 길티네 맵"/>
+		<image name="map_GM_Romuva" file="\skin\guild_quest_map\guild_mission_romuva_map.png" imgrect="0 0 840 340" CMM_Caption="길드 미션 - 나모트 수호 맵"/>
+		<image name="map_GM_Cathedral" file="\skin\guild_quest_map\guild_mission_cathedral_map.png" imgrect="0 0 840 340" CMM_Caption="길드 미션 - 대성당 탈환 맵"/>
+		<image name="map_GM_FallenDragoon_1" file="\skin\guild_quest_map\guild_mission_fallendragoon_map.png" imgrect="0 0 840 340" CMM_Caption="길드 미션 - 타락한 드라군 맵"/>
+		<image name="map_GM_ForestSilence_1" file="\skin\guild_quest_map\guild_mission_forestsilence_map.png" imgrect="0 0 840 340" CMM_Caption="길드 미션 - 침묵의 숲 맵"/>
+		<image name="map_GM_Baubas_1" file="\skin\guild_quest_map\guild_mission_baubas_map.png" imgrect="0 0 840 340" CMM_Caption="길드 미션 - 바우바스 맵"/>
+		<!-- detail - tab -->
+		<image name="guild_detail_tab_small" file="\skin\guild_activity_ui_hud.tga" imgrect="635 610 40 40" CMM_Caption="길드 콘텐츠 UI 텝"/>
+		<image name="guild_detail_tab_small_cursoron" file="\skin\guild_activity_ui_hud.tga" imgrect="635 651 40 40"/>
+		<image name="guild_detail_tab_small_clicked" file="\skin\guild_activity_ui_hud.tga" imgrect="635 610 40 40"/>
+	</imagelist>
+	<skinlist category="guild_activity_ui_skin">
+		<!-- frame - top : 갈색 -->
+		<skin name="guild_activity_frame_top_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 0 260 49"/>
+			<img name="topcore" imgrect="261 0 161 49"/>
+			<img name="topright" imgrect="423 0 277 49"/>
+			<img name="bodyleft" imgrect="0 0 260 1"/>
+			<img name="bodycore" imgrect="261 0 161 1"/>
+			<img name="bodyright" imgrect="423 0 277 1"/>
+			<img name="bottomleft" imgrect="0 0 260 1"/>
+			<img name="bottomcore" imgrect="261 0 161 1"/>
+			<img name="bottomright" imgrect="423 0 277 1"/>
+		</skin>
+		<!-- category & menu - top : 진한 갈색(고동색) -->
+		<skin name="guild_activity_category_menu_top_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 213 67 34"/>
+			<img name="topcore" imgrect="769 213 45 34"/>
+			<img name="topright" imgrect="815 213 250 34"/>
+			<img name="bodyleft" imgrect="701 213 67 1"/>
+			<img name="bodycore" imgrect="769 213 45 1"/>
+			<img name="bodyright" imgrect="815 213 250 1"/>
+			<img name="bottomleft" imgrect="701 213 67 1"/>
+			<img name="bottomcore" imgrect="769 213 45 1"/>
+			<img name="bottomright" imgrect="815 213 250 1"/>
+		</skin>
+		<!-- category - body : 갈색 -->
+		<skin name="guild_activity_category_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 84 48 128"/>
+			<img name="topcore" imgrect="49 84 152 128"/>
+			<img name="topright" imgrect="202 84 48 128"/>
+			<img name="bodyleft" imgrect="0 213 48 1"/>
+			<img name="bodycore" imgrect="49 213 152 1"/>
+			<img name="bodyright" imgrect="202 213 48 1"/>
+			<img name="bottomleft" imgrect="0 366 48 1"/>
+			<img name="bottomcore" imgrect="49 366 152 1"/>
+			<img name="bottomright" imgrect="202 366 48 1"/>
+		</skin>
+		<!-- category - button : 갈색 -->
+		<skin name="guild_activity_category_btn" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 500 250 120"/>
+			<img name="topcore" imgrect="0 500 250 120"/>
+			<img name="topright" imgrect="0 500 250 120"/>
+			<img name="bodyleft" imgrect="0 500 250 1"/>
+			<img name="bodycore" imgrect="0 500 250 1"/>
+			<img name="bodyright" imgrect="0 500 250 1"/>
+			<img name="bottomleft" imgrect="0 500 250 1"/>
+			<img name="bottomcore" imgrect="0 500 250 1"/>
+			<img name="bottomright" imgrect="0 500 250 1"/>
+		</skin>
+		<skin name="guild_activity_category_btn_cursoron" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 621 250 125"/>
+			<img name="topcore" imgrect="0 621 250 125"/>
+			<img name="topright" imgrect="0 621 250 125"/>
+			<img name="bodyleft" imgrect="0 621 250 1"/>
+			<img name="bodycore" imgrect="0 621 250 1"/>
+			<img name="bodyright" imgrect="0 621 250 1"/>
+			<img name="bottomleft" imgrect="0 621 250 1"/>
+			<img name="bottomcore" imgrect="0 621 250 1"/>
+			<img name="bottomright" imgrect="0 621 250 1"/>
+		</skin>
+		<skin name="guild_activity_category_btn_clicked" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 621 250 125"/>
+			<img name="topcore" imgrect="0 621 250 125"/>
+			<img name="topright" imgrect="0 621 250 125"/>
+			<img name="bodyleft" imgrect="0 621 250 1"/>
+			<img name="bodycore" imgrect="0 621 250 1"/>
+			<img name="bodyright" imgrect="0 621 250 1"/>
+			<img name="bottomleft" imgrect="0 621 250 1"/>
+			<img name="bottomcore" imgrect="0 621 250 1"/>
+			<img name="bottomright" imgrect="0 621 250 1"/>
+		</skin>
+		<!-- menu - button : 녹색 -->
+		<skin name="guild_activity_menu_btn" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 747 250 125"/>
+			<img name="topcore" imgrect="0 747 250 125"/>
+			<img name="topright" imgrect="0 747 250 125"/>
+			<img name="bodyleft" imgrect="0 747 250 1"/>
+			<img name="bodycore" imgrect="0 747 250 1"/>
+			<img name="bodyright" imgrect="0 747 250 1"/>
+			<img name="bottomleft" imgrect="0 747 250 1"/>
+			<img name="bottomcore" imgrect="0 747 250 1"/>
+			<img name="bottomright" imgrect="0 747 250 1"/>
+		</skin>
+		<skin name="guild_activity_menu_btn_cursoron" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 831 250 125"/>
+			<img name="topcore" imgrect="0 831 250 125"/>
+			<img name="topright" imgrect="0 831 250 125"/>
+			<img name="bodyleft" imgrect="0 831 250 1"/>
+			<img name="bodycore" imgrect="0 831 250 1"/>
+			<img name="bodyright" imgrect="0 831 250 1"/>
+			<img name="bottomleft" imgrect="0 831 250 1"/>
+			<img name="bottomcore" imgrect="0 831 250 1"/>
+			<img name="bottomright" imgrect="0 831 250 1"/>
+		</skin>
+		<skin name="guild_activity_menu_btn_clicked" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="0 831 250 125"/>
+			<img name="topcore" imgrect="0 831 250 125"/>
+			<img name="topright" imgrect="0 831 250 125"/>
+			<img name="bodyleft" imgrect="0 831 250 1"/>
+			<img name="bodycore" imgrect="0 831 250 1"/>
+			<img name="bodyright" imgrect="0 831 250 1"/>
+			<img name="bottomleft" imgrect="0 831 250 1"/>
+			<img name="bottomcore" imgrect="0 831 250 1"/>
+			<img name="bottomright" imgrect="0 831 250 1"/>
+		</skin>
+		<!-- detail main - top : 그라데이션 노랑 -->
+		<skin name="guild_activity_detail_main_top_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="251 553 51 57"/>
+			<img name="topcore" imgrect="304 553 1 57"/>
+			<img name="topright" imgrect="305 553 100 57"/>
+			<img name="bodyleft" imgrect="251 609 51 1"/>
+			<img name="bodycore" imgrect="304 609 1 1"/>
+			<img name="bodyright" imgrect="305 609 100 1"/>
+			<img name="bottomleft" imgrect="251 609 51 1"/>
+			<img name="bottomcore" imgrect="304 609 1 1"/>
+			<img name="bottomright" imgrect="305 609 100 1"/>
+		</skin>
+		<!-- detail main - body : 아이보리 -->
+		<skin name="guild_activity_detail_main_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="251 84 89 180"/>
+			<img name="topcore" imgrect="341 84 45 180"/>
+			<img name="topright" imgrect="387 84 313 180"/>
+			<img name="bodyleft" imgrect="251 265 89 1"/>
+			<img name="bodycore" imgrect="341 265 45 1"/>
+			<img name="bodyright" imgrect="387 265 313 1"/>
+			<img name="bottomleft" imgrect="251 311 89 1"/>
+			<img name="bottomcore" imgrect="341 311 45 1"/>
+			<img name="bottomright" imgrect="387 311 313 1"/>
+		</skin>
+		<!-- detail - slot -->
+		<skin name="guild_growth_up_slot" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="slot" imgrect="1773 1005 275 275"/>
+			<img name="mouseon" imgrect="1773 1005 275 275"/>
+			<img name="cooltime" imgrect="1773 1005 275 275"/>
+			<img name="selected" imgrect="1773 1005 275 275"/>
+		</skin>
+		<skin name="guild_ability_slot_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="slot" imgrect="423 611 101 101"/>
+			<img name="mouseon" imgrect="423 611 101 101"/>
+			<img name="cooltime" imgrect="423 611 101 101"/>
+			<img name="selected" imgrect="423 611 101 101"/>
+		</skin>
+		<!-- detail - gauge -->
+		<skin name="guild_activity_detail_gauge" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="bgleft" imgrect="0 915 1 16"/>
+			<img name="bgmiddle" imgrect="0 915 738 16"/>
+			<img name="bgright" imgrect="0 915 1 16"/>
+			<img name="barleft" imgrect="0 932 1 14"/>
+			<img name="barmiddle" imgrect="0 932 738 14"/>
+			<img name="barright" imgrect="0 932 1 14"/>
+		</skin>
+		<!-- detail - bg frame : 녹색 -->
+		<skin name="guild_activity_detail_bg_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 316 164 30"/>
+			<img name="topcore" imgrect="866 316 37 30"/>
+			<img name="topright" imgrect="904 316 164 30"/>
+			<img name="bodyleft" imgrect="701 316 164 1"/>
+			<img name="bodycore" imgrect="866 316 37 1"/>
+			<img name="bodyright" imgrect="904 316 164 1"/>
+			<img name="bottomleft" imgrect="701 316 164 1"/>
+			<img name="bottomcore" imgrect="866 316 37 1"/>
+			<img name="bottomright" imgrect="904 316 164 1"/>
+		</skin>
+		<!-- detail - bg frame : 연한 녹색 -->
+		<skin name="guild_activity_detail_bg_light_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 347 164 30"/>
+			<img name="topcore" imgrect="866 347 37 30"/>
+			<img name="topright" imgrect="904 347 164 30"/>
+			<img name="bodyleft" imgrect="701 347 164 1"/>
+			<img name="bodycore" imgrect="866 347 37 1"/>
+			<img name="bodyright" imgrect="904 347 164 1"/>
+			<img name="bottomleft" imgrect="701 347 164 1"/>
+			<img name="bottomcore" imgrect="866 347 37 1"/>
+			<img name="bottomright" imgrect="904 347 164 1"/>
+		</skin>
+		<!-- detail - bg frame : 노랑(그라데이션) -->
+		<skin name="guild_activity_detail_bg_yellow" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="251 611 61 119"/>
+			<img name="topcore" imgrect="313 611 45 119"/>
+			<img name="topright" imgrect="359 611 61 119"/>
+			<img name="bodyleft" imgrect="251 731 61 1"/>
+			<img name="bodycore" imgrect="313 731 1 1"/>
+			<img name="bodyright" imgrect="359 731 61 1"/>
+			<img name="bottomleft" imgrect="251 777 61 1"/>
+			<img name="bottomcore" imgrect="313 777 45 1"/>
+			<img name="bottomright" imgrect="359 777 61 1"/>
+		</skin>
+		<!-- detail - top frame : 초록(그라데이션) -->
+		<skin name="guild_activity_detail_top_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 0 242 40"/>
+			<img name="topcore" imgrect="944 0 45 40"/>
+			<img name="topright" imgrect="990 0 165 40"/>
+			<img name="bodyleft" imgrect="701 0 242 1"/>
+			<img name="bodycore" imgrect="944 0 1 1"/>
+			<img name="bodyright" imgrect="990 0 165 1"/>
+			<img name="bottomleft" imgrect="701 0 242 40"/>
+			<img name="bottomcore" imgrect="944 0 45 40"/>
+			<img name="bottomright" imgrect="990 0 165 40"/>
+		</skin>
+		<!-- detail - bg frame : 초록(그라데이션) -->
+		<skin name="guild_activity_detail_bg_samll_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 41 39 19"/>
+			<img name="topcore" imgrect="741 41 21 19"/>
+			<img name="topright" imgrect="763 41 392 19"/>
+			<img name="bodyleft" imgrect="701 61 39 1"/>
+			<img name="bodycore" imgrect="741 61 1 1"/>
+			<img name="bodyright" imgrect="763 61 392 1"/>
+			<img name="bottomleft" imgrect="701 83 39 18"/>
+			<img name="bottomcore" imgrect="741 83 21 18"/>
+			<img name="bottomright" imgrect="763 83 392 18"/>
+		</skin>
+		<!-- detail - list frame : 초록(그라데이션) -->
+		<skin name="guild_activity_detail_list_bg_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 102 39 110"/>
+			<img name="topcore" imgrect="741 102 40 110"/>
+			<img name="topright" imgrect="782 102 370 110"/>
+			<img name="bodyleft" imgrect="701 102 1 1"/>
+			<img name="bodycore" imgrect="741 102 1 1"/>
+			<img name="bodyright" imgrect="782 102 1 1"/>
+			<img name="bottomleft" imgrect="701 102 39 110"/>
+			<img name="bottomcore" imgrect="741 102 40 110"/>
+			<img name="bottomright" imgrect="782 102 370 110"/>
+		</skin>
+		<!-- detail - desc bg : 진한 갈색 -->
+		<skin name="guild_activity_detail_desc_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 213 67 34"/>
+			<img name="topcore" imgrect="769 213 45 34"/>
+			<img name="topright" imgrect="815 213 337 34"/>
+			<img name="bodyleft" imgrect="701 248 67 1"/>
+			<img name="bodycore" imgrect="769 248 45 1"/>
+			<img name="bodyright" imgrect="815 248 337 1"/>
+			<img name="bottomleft" imgrect="701 281 67 32"/>
+			<img name="bottomcore" imgrect="769 281 45 32"/>
+			<img name="bottomright" imgrect="815 281 337 32"/>
+		</skin>
+		<!-- detail - info bg : 진노랑 -->
+		<skin name="guild_activity_detail_info_bg" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 378 134 42"/>
+			<img name="topcore" imgrect="836 378 45 42"/>
+			<img name="topright" imgrect="882 378 134 42"/>
+			<img name="bodyleft" imgrect="701 421 134 1"/>
+			<img name="bodycore" imgrect="836 421 45 1"/>
+			<img name="bodyright" imgrect="882 421 134 1"/>
+			<img name="bottomleft" imgrect="701 467 134 41"/>
+			<img name="bottomcore" imgrect="836 467 45 41"/>
+			<img name="bottomright" imgrect="882 467 134 41"/>
+		</skin>
+		<!-- detail - tab bg - big : 초록 -->
+		<skin name="guild_activity_detail_tab" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="leftopen" imgrect="524 610 110 40"/>
+			<img name="bodyopen" imgrect="524 610 110 40"/>
+			<img name="rightopen" imgrect="524 610 110 40"/>
+			<img name="leftclose" imgrect="524 651 110 40"/>
+			<img name="bodyclose" imgrect="524 651 110 40"/>
+			<img name="rightclose" imgrect="524 651 110 40"/>
+			<img name="topopen" imgrect="635 610 40 40"/>
+			<img name="centeropen" imgrect="635 610 40 40"/>
+			<img name="bottomopen" imgrect="635 610 40 40"/>
+			<img name="topclose" imgrect="635 651 40 40"/>
+			<img name="centerclose" imgrect="635 651 40 40"/>
+			<img name="bottomclose" imgrect="635 651 40 40"/>
+		</skin>
+		<!-- detail - info bg - 진초록 -->
+		<skin name="guild_activity_detail_info_bg_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="701 509 71 120"/>
+			<img name="topcore" imgrect="701 509 71 120"/>
+			<img name="topright" imgrect="701 509 71 120"/>
+			<img name="bodyleft" imgrect="701 509 71 120"/>
+			<img name="bodycore" imgrect="701 509 1 120"/>
+			<img name="bodyright" imgrect="701 509 71 120"/>
+			<img name="bottomleft" imgrect="701 509 71 120"/>
+			<img name="bottomcore" imgrect="701 509 71 120"/>
+			<img name="bottomright" imgrect="701 509 71 120"/>
+		</skin>
+		<!-- detail - info bg - 연초록 -->
+		<skin name="guild_activity_detail_info_bg_light_green" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="775 509 245 120"/>
+			<img name="topcore" imgrect="775 509 1 120"/>
+			<img name="topright" imgrect="775 509 1 120"/>
+			<img name="bodyleft" imgrect="775 509 245 1"/>
+			<img name="bodycore" imgrect="775 509 1 1"/>
+			<img name="bodyright" imgrect="775 509 1 1"/>
+			<img name="bottomleft" imgrect="775 509 245 120"/>
+			<img name="bottomcore" imgrect="775 509 1 120"/>
+			<img name="bottomright" imgrect="775 509 1 120"/>
+		</skin>
+		<!-- detail - info bg - 노랑 -->
+		<skin name="guild_activity_detail_info_bg_yelllow" texture="\skin\guild_activity_ui_hud.tga">
+			<img name="topleft" imgrect="251 495 171 37"/>
+			<img name="topcore" imgrect="423 495 1 37"/>
+			<img name="topright" imgrect="524 495 177 37"/>
+			<img name="bodyleft" imgrect="251 495 171 1"/>
+			<img name="bodycore" imgrect="423 495 1 1"/>
+			<img name="bodyright" imgrect="524 495 177 1"/>
+			<img name="bottomleft" imgrect="251 495 171 37"/>
+			<img name="bottomcore" imgrect="423 495 1 37"/>
+			<img name="bottomright" imgrect="524 495 177 37"/>
+		</skin>
+	</skinlist>
+
+
 </skinset>

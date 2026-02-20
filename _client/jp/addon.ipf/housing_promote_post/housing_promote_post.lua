@@ -250,6 +250,7 @@ function HOUSING_PROMOTE_POST_OPEN_MY_HOUSE()
         ui.MsgBox(ScpArgMsg("PERSONAL_HOUSING_ACTIVE_CHECK_MSG"), "PERSONAL_HOUSING_CREATE_REQUEST", "None");
     else
         local frame = ui.GetFrame("housing_promote_post");
+        frame:SetUserValue("MYPAGE_RETRY_COUNT", "0"); -- 재시도 카운트 초기화
 
         HOUSING_PROMOTE_POST_CLOSE(frame)
         HOUSING_PROMOTE_POST_INIT(frame);
@@ -279,7 +280,10 @@ function PERSONAL_HOUSING_CREATE_REQUEST()
 end
 
 function HOUSING_PROMOTE_POST_MY_HOUSE_UPDATE(code, ret_json)
+    local aidx = session.loginInfo.GetAID();
+
     if code ~= 200 then
+        IMC_LOG("HOUSING_MYPAGE_FETCH_FAILED", "AID[{AID}], HttpCode[{CODE}]", aidx, code);
         if code == 404 then
             HOUSING_PROMOTE_POST_MY_HOUSE_NONE_POST();
         end
@@ -287,12 +291,31 @@ function HOUSING_PROMOTE_POST_MY_HOUSE_UPDATE(code, ret_json)
     end
 
     local parsed = json.decode(ret_json);
-    
+
+    -- 신규 생성 직후 타이밍 이슈: channel_id가 없으면 재시도
+    if parsed["channel_id"] == nil or parsed["channel_id"] == "" then
+        local frame = ui.GetFrame("housing_promote_post");
+        local retry_count = tonumber(frame:GetUserValue("MYPAGE_RETRY_COUNT") or "0");
+
+        if retry_count < 3 then
+            IMC_LOG("HOUSING_MYPAGE_RETRY", "AID[{AID}], RetryCount[{COUNT}], Reason[EmptyChannelID]", aidx, retry_count);
+            frame:SetUserValue("MYPAGE_RETRY_COUNT", tostring(retry_count + 1));
+            ReserveScript("HOUSING_PROMOTE_POST_RETRY_FETCH", 1.0);
+            return;
+        else
+            IMC_LOG("HOUSING_MYPAGE_RETRY_FAILED", "AID[{AID}], MaxRetryReached[3]", aidx);
+            HOUSING_PROMOTE_POST_MY_HOUSE_NONE_POST();
+            return;
+        end
+    end
+
+    -- 정상 응답
+    local frame = ui.GetFrame("housing_promote_post");
+    frame:SetUserValue("MYPAGE_RETRY_COUNT", "0"); -- 재시도 카운트 초기화
+
     if parsed["thumbnail_id"] ~= nil and parsed["channel_id"] ~= nil and parsed["page_id"] ~= nil then
         GetHousingThumbnailImage("HOUSING_PROMOTE_POST_THUMNAIL_UPDATE", parsed["channel_id"], parsed["page_id"], parsed["thumbnail_id"], "None");
     end
-
-    local frame = ui.GetFrame("housing_promote_post");
     frame:SetUserValue("TITLE", parsed["title"]);
     frame:SetUserValue("TEAM_NAME", parsed["team_name"]);
 
@@ -342,6 +365,13 @@ function HOUSING_PROMOTE_POST_MY_HOUSE_UPDATE(code, ret_json)
     housing_warp_btn:SetEventScriptArgString(ui.LBUTTONUP, parsed["channel_id"]);
 
     frame:ShowWindow(1);
+end
+
+-- 신규 하우징 생성 직후 타이밍 이슈 대응: 재시도 함수
+function HOUSING_PROMOTE_POST_RETRY_FETCH()
+    local aidx = session.loginInfo.GetAID();
+    IMC_LOG("HOUSING_MYPAGE_RETRY_EXECUTE", "AID[{AID}], Retrying GetMyHousingPageInfo", aidx);
+    GetMyHousingPageInfo("HOUSING_PROMOTE_POST_MY_HOUSE_UPDATE", aidx);
 end
 
 function HOUSING_PROMOTE_POST_MY_HOUSE_NONE_POST()

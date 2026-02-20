@@ -1489,9 +1489,15 @@ function DRAW_EQUIP_DESC(tooltipframe, invitem, yPos, mainframename)
 	
 	local tooltip_equip_property_CSet = gBox:CreateOrGetControlSet('tooltip_equip_desc', 'tooltip_equip_desc', 0, yPos - 2);
 	local property_gbox = GET_CHILD(tooltip_equip_property_CSet,'property_gbox','ui::CGroupBox')
-		
-	local inner_yPos = 0;	
+
+	local inner_yPos = 0;
 	inner_yPos = ADD_ITEM_PROPERTY_TEXT(property_gbox, desc, 0, inner_yPos);
+
+	-- 추가 커스텀 정보 표시
+	local custom_info = GET_CUSTOM_EQUIP_INFO(invitem);	
+	if custom_info ~= "" then
+		inner_yPos = ADD_ITEM_PROPERTY_TEXT(property_gbox, custom_info, 0, inner_yPos);
+	end
 
 	local BOTTOM_MARGIN = tooltipframe:GetUserConfig("BOTTOM_MARGIN"); -- 맨 아랫쪽 여백
 	tooltip_equip_property_CSet:Resize(tooltip_equip_property_CSet:GetWidth(),tooltip_equip_property_CSet:GetHeight() + property_gbox:GetHeight() + property_gbox:GetY() + BOTTOM_MARGIN);
@@ -4263,4 +4269,60 @@ function DRAW_EQUIP_CORE_ITEM(invitem, property_gbox, inner_yPos)
     end
 
     return inner_yPos
+end
+
+-- 커스텀 장비 정보 가져오기
+function GET_CUSTOM_EQUIP_INFO(invitem)
+	if invitem == nil then
+		return ""
+	end
+
+	if shared_guild_dress_room.is_valid_item(invitem) == false then
+		return ""
+	end
+
+	local name = TryGetProp(invitem, 'ClassName', 'None')
+	local cls = GetClass('guild_dress_room', name)
+	
+	if cls == nil then
+		return ""
+	end
+	
+	local custom_text = ""
+	custom_text = custom_text .. "{nl} {nl}" .. ClMsg("GuildDressRoomItem")
+
+	-- 등급 정보
+	local grade = TryGetProp(cls, 'Grade', 'None')	
+	if grade ~= 'None' then
+		local grade_color = "#ffffff"
+		if grade == 'S' then
+			grade_color = "#ff6600"
+		elseif grade == 'A' then
+			grade_color = "#9966ff"
+		elseif grade == 'B' then
+			grade_color = "#66ccff"
+		end
+		custom_text = custom_text .. "{nl}" .. ClMsg("GuildDressRoomItemGrade") .. ": {" .. grade_color .. "}" .. grade .. "{/}"
+	end
+
+	-- 획득 가능 옵션(1레벨 기준) 텍스트 추가
+	custom_text = custom_text .. "{nl}" .. ClMsg("GuildDressRoomItemOption")
+
+	-- 최대 레벨 정보
+	local max_level = TryGetProp(cls, 'MaxLevel', 0)
+	local option_list = shared_guild_dress_room.get_item_option_list(invitem)
+	local level_value = option_list[1]		
+	if level_value ~= 'None' and level_value ~= '' then		
+		local options = SCR_STRING_CUT(level_value, ';')
+		for i = 1, #options do
+			local option_data = SCR_STRING_CUT(options[i], '/')
+			if #option_data == 2 then
+				local option_name = option_data[1]
+				local option_value = option_data[2]
+				custom_text = custom_text .. "{nl}{@st42}- {#00ccff}" .. ClMsg(option_name) .. " {#ffffff}+" .. option_value .. "{/}"
+			end
+		end
+	end	
+
+	return custom_text
 end

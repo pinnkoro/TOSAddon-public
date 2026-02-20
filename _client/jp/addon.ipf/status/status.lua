@@ -621,7 +621,7 @@ function STATUS_BTN_UP_VISIBLE(frame, controlsetName, pc, visible)
     local statusUpControlSet = GET_CHILD(gboxctrl, controlsetName, "ui::CControlSet");
 
     local statName = controlsetName;
-    if pc[statName] + session.GetUserConfig(statName .. "_UP") >= 9999 then
+    if pc[statName] + session.GetUserConfig(statName .. "_UP") >= MAX_STATUS_POINT then
         visible = 0;
     end
 

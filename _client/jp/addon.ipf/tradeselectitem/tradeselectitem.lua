@@ -1035,7 +1035,7 @@ function OPEN_TRADE_SELECT_ITEM_STIRNG_SPLIT(invItem)
 	for i = 1, index do
 		local itemName = TryGetProp(cls, "SelectItemClsMsg_"..i)
 		local conditionfunction = nil;
-		if itemobj.StringArg2 == "popo_special_box" then
+		if TryGetProp(itemobj, 'StringArg2', 'None') == "popo_special_box" then
 			conditionfunction = SET_SELECT_CONDITION_POPOBOOST
 		end
 

@@ -689,6 +689,8 @@
 		<Class ClassID="2468" ClassName="TreeDayPlayerCount" Data="지금까지 [식목일] 비료를 총 {count}개 사용했습니다."/>
 		<Class ClassID="2469" ClassName="jurate_coin_shop" Data="여신의 증표(유라테) 상점"/>
 		<Class ClassID="2470" ClassName="austeja_coin_shop" Data="여신의 증표(아우스테야) 상점"/>
+		<Class ClassID="2471" ClassName="blessed_goddess" Data="여신의 축복"/>
+		<Class ClassID="2472" ClassName="event_blessed_goddess" Data="[이벤트] 여신의 축복"/>
 	</Category>
 	<Category Name="ClassContents">
 		<Class ClassID="2500" ClassName="FullWeeklyGainClassResetExp" Data="주간 획득 가능한 클래스 변경 포인트를 모두 달성하였습니다."/>
@@ -1923,6 +1925,8 @@
 		<Class ClassID="5330" ClassName="ARCHEOLOGY_DMG_REDUCE" Data="받는 데미지 감소"/>
 		<Class ClassID="5331" ClassName="ARCHEOLOGY_MOVE_SPEED" Data="이동 속도"/>
 		<Class ClassID="5332" ClassName="DR_CONST" Data="회피"/>
+		<Class ClassID="5333" ClassName="tooltip_Kneller" Data=" - 넬러 모든 스킬 레벨 {img green_up_arrow 16 16}1{nl} {nl}{@st66d}{s15} - 안식의 묘지 최종 대미지 {img green_up_arrow 16 16}50%{nl}{@st66d}{s15} - 공명 파동 최종 대미지 {img green_up_arrow 16 16}50%"/>
+		<Class ClassID="5334" ClassName="tooltip_Kneller_Lv4" Data="{nl} {nl}{@st66d}{s15}- 데스 넬 최종 대미지{img green_up_arrow 16 16}100%"/>
 	</Category>
 	<Category Name="PeriodicTitle">
 		<Class ClassID="6001" ClassName="TournamentChampion" Data="토너먼트 챔피언"/>
@@ -2014,9 +2018,9 @@
 		<Class ClassID="6088" ClassName="fireMage_bless_1_set5_desc" Data="5개 장착 : {@st47}{s15}{#66b3ff}화염진{/}{/}{/}"/>
 		<Class ClassID="6089" ClassName="fireMage_bless_1_set5_desc2" Data="{@st47}{s15}{#66b3ff}[화염진]{/}{/}{/}  공격시 일정 확률로 공격자 주변에 화염진이 생성됩니다. 화염진에 접촉하면 최대 HP의 10%를 회복하며 [멜린의 은총] 버프를 얻습니다. 계속 화염진에 접촉하여 버프를 중첩시키면 중첩에 따라 공격력(+3,000)이 증가합니다. 최대 중첩은 5 입니다."/>
 		<Class ClassID="6090" ClassName="tooltip_EP16_NECK_02" Data=" {nl} 착용시 다음의 능력치들이 아이템의 공격력에 비례하여 추가적으로 증가합니다.{nl} - 방어력 {img green_up_arrow 16 16}{a}{nl}- 치명타 저항 {img green_up_arrow 16 16}{b}{nl}- 블록 {img green_up_arrow 16 16}{c}{nl}- 치유력 {img green_up_arrow 16 16}{d}{nl} {nl}또한 20초마다 250범위내 파티원과 적에게 일정 효과를 부여합니다. 이 효과는 아이템의 공격력에 비례하여 증가합니다.{nl} {nl}파티원 : {ol}{#00cc00}[솔리드 스킨]{/}{/} 지속시간 16초{nl} - 공격력{img green_up_arrow 16 16}{e}{nl} {nl}적 : {ol}{#ff0055}[러스트 웨폰]{/}{/} 지속 시간 4초{nl} - 치명타 발생 {img green_down_arrow 16 16}{f}{nl} - 추가 대미지 {img green_down_arrow 16 16}{g}{nl} - 이동 속도 {img green_down_arrow 16 16}{h}{nl} - 하나의 대상은 하나의 디버프만 가질 수 있습니다.{nl} {nl}드래곤의 기운 2단계 효과(모든 부위 착용 시 활성화){nl} - 효과 적용 주기 5초 감소 {nl} {nl}{#0000FF}[솔리드 스킨]은 [샛별의 비호] 효과와 동시에 적용되지 않습니다.{/}"/>
-		<Class ClassID="6091" ClassName="tooltip_EP16_NECK_01" Data=" {nl} 착용시 {ol}{#00cc00}[뇌격 충전]{/}{/} 가능 시간 {c}초 감소 {nl} {nl} 공격 적중 시 2초마다 {ol}{#00cc00}[뇌격 충전]{/}{/} 효과를 얻습니다. {ol}{#00cc00}[뇌격 충전]{/}{/}효과가 {ol}{#00bbbb}30{/}{/}중첩에 도달하면, {ol}{#00bbbb}기본 공격{/}{/}을 통해 피해를 입힌 단일 대상에게 낙인을 찍어 {ol}{#cc00ff}[뇌격]{/}{/}효과를 발동시킵니다. {nl} {nl}{ol}{#cc00ff}[뇌격]{/}{/} {nl}- 0.5초마다 250범위내 낙인 대상에게 공격력이 +{aa} 추가된 +{a}%의 무속성 피해를 최대 30회 입힙니다. {ol}{#cc00ff}[뇌격]{/}{/}효과 중엔 {ol}{#00cc00}[뇌격 충전]{/}{/}이 되지 않습니다. {nl} - 발동 효과에 의한 추가 타격을 제외한 모든 공격이 {ol}{#00cc00}[뇌격 충전]{/}{/}효과를 얻습니다.{nl} - [드래곤의 기운] 2단계 효과(모든 부위 착용 시 활성화){nl}피해 계수 +{b}%{nl}- PvP 지역에서는 절반의 계수로 적용됩니다."/>
-		<Class ClassID="6092" ClassName="tooltip_EP16_NECK_03" Data=" {nl} 착용시 {ol}{#00cc00}[수옥 충전]{/}{/} 가능 시간 {c}초 감소 {nl} {nl} 피해를 입거나, 공격 적중 시 1.5초마다 {ol}{#00cc00}[수옥 충전]{/}{/} 효과를 얻습니다. {ol}{#00cc00}[수옥 충전]{/}{/}효과가 {ol}{#00bbbb}100{/}{/}중첩에 도달하면, 30초동안 유지되는 {ol}{#cc00ff}[수옥]{/}{/} 효과가 발동됩니다.{nl} {nl}{ol}{#cc00ff}[수옥]{/}{/} {nl}- 최대 HP만큼 피해를 흡수하는 보호막이 생성됩니다.{nl}- 3초마다 주변의 최대 3명의 대상에게 공격력이 +{aa} 추가된 +{a}%의 무속성 피해를 입힙니다. {ol}{#cc00ff}[수옥]{/}{/}효과 중엔 {ol}{#00cc00}[수옥 충전]{/}{/}이 되지 않습니다.{nl} - 발동 효과에 의한 추가 타격을 제외한 모든 공격이 {ol}{#00cc00}[수옥 충전]{/}{/}효과를 얻습니다.{nl} - [드래곤의 기운] 2단계 효과(모든 부위 착용 시 활성화){nl}피해 계수 +{b}%{nl}- PvP 지역에서는 절반의 계수로 적용됩니다."/>
-		<Class ClassID="6093" ClassName="tooltip_EP16_NECK_04" Data=" {nl} 착용시 {ol}{#00cc00}[염무 충전]{/}{/} 가능 시간 {c}초 감소 {nl} {nl} 공격 적중 시 2초마다 {ol}{#00cc00}[염무 충전]{/}{/} 효과를 얻습니다. {ol}{#00cc00}[염무 충전]{/}{/}효과가 {ol}{#00bbbb}5{/}{/}중첩에 도달하면, 다음 공격 적중 시 주변 최대 3명의 대상에게 피해를 입힙니다.. {nl} {nl}{ol}{#cc00ff}[염무]{/}{/} {nl}- 대상에게 공격력이 +{aa} 추가된 +{a}%의 무속성 피해를 입힙니다. {nl} - 발동 효과에 의한 추가 타격을 제외한 모든 공격이 {ol}{#00cc00}[염무 충전]{/}{/}효과를 얻습니다.{nl} - [드래곤의 기운] 2단계 효과(모든 부위 착용 시 활성화){nl}피해 계수 +{b}%{nl}- PvP 지역에서는 절반의 계수로 적용됩니다."/>
+		<Class ClassID="6091" ClassName="tooltip_EP16_NECK_01" Data=" {nl} 착용시 {ol}{#00cc00}[뇌격 충전]{/}{/} 가능 시간 {c}초 감소 {nl} {nl} 공격 적중 시 2초마다 {ol}{#00cc00}[뇌격 충전]{/}{/} 효과를 얻습니다. {ol}{#00cc00}[뇌격 충전]{/}{/}효과가 {ol}{#00bbbb}30{/}{/}중첩에 도달하면, {ol}{#00bbbb}기본 공격{/}{/}을 통해 피해를 입힌 단일 대상에게 낙인을 찍어 {ol}{#cc00ff}[뇌격]{/}{/}효과를 발동시킵니다. {nl} {nl}{ol}{#cc00ff}[뇌격]{/}{/} {nl}- 0.5초마다 250범위내 낙인 대상에게 공격력이 {#cc00ff}+{aa}{/} 추가된 {#cc00ff}+{a}{/}%의 무속성 피해를 최대 30회 입힙니다. {ol}{#cc00ff}[뇌격]{/}{/}효과 중엔 {ol}{#00cc00}[뇌격 충전]{/}{/}이 되지 않습니다. {nl} - 발동 효과에 의한 추가 타격을 제외한 모든 공격이 {ol}{#00cc00}[뇌격 충전]{/}{/}효과를 얻습니다.{nl} - [드래곤의 기운] 2단계 효과(모든 부위 착용 시 활성화){nl}피해 계수 {#cc00ff}+{b}{/}%{nl}- PvP 지역에서는 절반의 계수로 적용됩니다."/>
+		<Class ClassID="6092" ClassName="tooltip_EP16_NECK_03" Data=" {nl} 착용시 {ol}{#00cc00}[수옥 충전]{/}{/} 가능 시간 {c}초 감소 {nl} {nl} 피해를 입거나, 공격 적중 시 1.5초마다 {ol}{#00cc00}[수옥 충전]{/}{/} 효과를 얻습니다. {ol}{#00cc00}[수옥 충전]{/}{/}효과가 {ol}{#00bbbb}100{/}{/}중첩에 도달하면, 30초동안 유지되는 {ol}{#cc00ff}[수옥]{/}{/} 효과가 발동됩니다.{nl} {nl}{ol}{#cc00ff}[수옥]{/}{/} {nl}- 최대 HP만큼 피해를 흡수하는 보호막이 생성됩니다.{nl}- 3초마다 주변의 최대 3명의 대상에게 공격력이 {#cc00ff}+{aa}{/} 추가된 {#cc00ff}+{a}{/}%의 무속성 피해를 입힙니다. {ol}{#cc00ff}[수옥]{/}{/}효과 중엔 {ol}{#00cc00}[수옥 충전]{/}{/}이 되지 않습니다.{nl} - 발동 효과에 의한 추가 타격을 제외한 모든 공격이 {ol}{#00cc00}[수옥 충전]{/}{/}효과를 얻습니다.{nl} - [드래곤의 기운] 2단계 효과(모든 부위 착용 시 활성화){nl}피해 계수 {#cc00ff}+{b}{/}%{nl}- PvP 지역에서는 절반의 계수로 적용됩니다."/>
+		<Class ClassID="6093" ClassName="tooltip_EP16_NECK_04" Data=" {nl} 착용시 {ol}{#00cc00}[염무 충전]{/}{/} 가능 시간 {c}초 감소 {nl} {nl} 공격 적중 시 2초마다 {ol}{#00cc00}[염무 충전]{/}{/} 효과를 얻습니다. {ol}{#00cc00}[염무 충전]{/}{/}효과가 {ol}{#00bbbb}5{/}{/}중첩에 도달하면, 다음 공격 적중 시 주변 최대 3명의 대상에게 피해를 입힙니다.. {nl} {nl}{ol}{#cc00ff}[염무]{/}{/} {nl}- 대상에게 공격력이 {#cc00ff}+{aa}{/} 추가된 {#cc00ff}+{a}{/}%의 무속성 피해를 입힙니다. {nl} - 발동 효과에 의한 추가 타격을 제외한 모든 공격이 {ol}{#00cc00}[염무 충전]{/}{/}효과를 얻습니다.{nl} - [드래곤의 기운] 2단계 효과(모든 부위 착용 시 활성화){nl}피해 계수 {#cc00ff}+{b}{/}%{nl}- PvP 지역에서는 절반의 계수로 적용됩니다."/>
 		<Class ClassID="6094" ClassName="enable_acc_upgrade_msg1" Data="{@st47}{s15}{#00FFFF}[장비 연성 도우미] 큐폴{/}{/}{/}을 통해 무속성 피해 계수를 상승시킬 수 있습니다."/>
 		<Class ClassID="6095" ClassName="enable_acc_upgrade_msg2" Data="{@st47}{s15}{#00FFFF}[장비 연성 도우미] 큐폴{/}{/}{/}을 통해 {ol}{#00cc00}[솔리드 스킨]{/}{/}의 공격력 증가 효과를 상승시킬 수 있습니다."/>
 		<Class ClassID="6096" ClassName="EP16_EFFECT_NAME01" Data="{#00cc00}[뇌격]{/}"/>
@@ -2671,6 +2675,10 @@
 		<Class ClassID="10656" ClassName="DropLimitItemCountOver" Data="최대 획득량에 도달하여 더 이상 획득하실 수 없습니다."/>
 		<Class ClassID="10657" ClassName="DropLimitItemCount" Data="{name} 획득 현황 : 획득수({now}/{limit})"/>
 	<Class ClassID="10658" ClassName="NotEnoughItem2" Data="추가 보상권 아이템이 부족합니다"/>
+		<Class ClassID="10659" ClassName="NotBossCardUpgradeTarget" Data="강화 대상 카드가 아닙니다"/>
+		<Class ClassID="10660" ClassName="MaterialNotMatchCard" Data="현재 재료로 강화할 수 없는 카드입니다"/>
+		<Class ClassID="10661" ClassName="ReallyUpgradeCard{NAME}" Data="{NAME}을 정말로 강화 하시겠습니까?"/>
+		<Class ClassID="10662" ClassName="PleaseSelectTargetCardFirst" Data="강화 대상을 골라주세요"/>
 	</Category>
 	<Category Name="FoodTable">
 		<Class ClassID="20001" ClassName="IncreaseHP{Value}For{Time}Minute" Data="{Time}분 동안 HP가 {Value}% 증가합니다."/>
@@ -3171,6 +3179,7 @@
 		<Class ClassID="21496" ClassName="destory_now2" Data="DESTROY"/>
 		<Class ClassID="21497" ClassName="Succession2" Data="SUCCESSION"/>
 		<Class ClassID="21498" ClassName="TP_Exchange" Data="분해"/>
+		<Class ClassID="21499" ClassName="NewEpisodeLockMsg_Episode_18_1" Data="{@st59}해당 에피소드의 클리어 보상은 추후 공개될 예정입니다.{nl}{#FFFF00}[Episode18-1]{/}의 퀘스트 시작은 {#FFFF00}라이마의 성소{/}의 {#FFFF00}라이마 NPC{/}로부터 시작할 수 있습니다."/>
 	</Category>
 	<Category Name="ChatText">
 		<Class ClassID="22001" ClassName="Guard" Data="방어"/>
@@ -11218,6 +11227,10 @@
 		<Class ClassID="92446" ClassName="icepiece25" Data="빙하 주화"/>
 		<Class ClassID="92447" ClassName="pointextract" Data="포인트 변환"/>
 		<Class ClassID="92448" ClassName="costumeextract" Data="코스튬 분해"/>
+		<Class ClassID="92449" ClassName="Goddess_Raid_Zmei_Party" Data="봉인된 용의 고원: 가디스(파티)"/>
+		<Class ClassID="92450" ClassName="Goddess_Raid_Zmei_Auto" Data="봉인된 용의 고원: 가디스(자동 매칭)"/>
+		<Class ClassID="92451" ClassName="Goddess_Raid_Zmei_Solo" Data="봉인된 용의 고원: 가디스(1인)"/>
+		<Class ClassID="92452" ClassName="Goddess_Raid_Zmei_Waring" Data="강력한 힘이 서로를 끌어 당깁니다"/>
 	</Category>
 	<Category Name="BattleText">
 		<Class ClassID="100001" ClassName="ADD_DAMAGE_{Auto_1}!" Data="추가 대미지 {Auto_1}!"/>
@@ -11870,6 +11883,32 @@
 		<Class ClassID="102547" ClassName="GuildMission_Cathedral_GoddessBlessing_Swiftness" Data="신속의 가호"/>
 		<Class ClassID="102548" ClassName="GuildMission_Cathedral_ReadyStage" Data="5초뒤에 다음 스테이지가 진행됩니다."/>
 		<Class ClassID="102549" ClassName="GuildQuest_GuildLv_Notice" Data="길드 레벨이 부족합니다"/>
+		<Class ClassID="102550" ClassName="GuildAgitRaid" Data="길드 아지트 레이드"/>
+		<Class ClassID="102551" ClassName="GuildDressRoomItem" Data="{@st42b}{#00ff00}[길드 드레스룸 아이템]{/}"/>
+		<Class ClassID="102552" ClassName="GuildDressRoomItemGrade" Data="{@st42}{#ffcc00}등급{/}{/}"/>
+		<Class ClassID="102553" ClassName="GuildDressRoomItemOption" Data="{@st42}{#88ffff}길드의 위엄(1레벨 기준){/}{/}"/>
+		<Class ClassID="102554" ClassName="TimelimitedItemsCannotBeUsed" Data="기간제 아이템은 사용할 수 없습니다."/>
+		<Class ClassID="102555" ClassName="NotEnoughGuildContributionPoint" Data="길드 기여도가 부족합니다."/>		
+		<Class ClassID="102556" ClassName="AlreadyMaxLevelGuildDressRoomItem" Data="이미 최대 레벨의 길드 드레스룸 아이템입니다."/>
+		<Class ClassID="102557" ClassName="NotEnoughGuildDressRoomItemLevel" Data="길드 드레스룸 아이템 레벨이 부족합니다."/>
+		<Class ClassID="102558" ClassName="GUILD_SYSTEM_MSG_102558" Data="[{#33FF33}{SELF}{/}]님이 길드 드레스룸 아이템 {#33FF33}{item_name} 레벨[{NUM}]{/} 달성!"/>
+		<Class ClassID="102559" ClassName="NoGuildDignityEffect" Data="길드의 위엄 효과가 없습니다."/>
+		<Class ClassID="102560" ClassName="ReallyRegisterGuildDressRoomItem" Data="{#0001ff}[{item}]{/}을/를{nl}길드 드레스룸에 등록합니다.{nl} {nl}{#ff0100}등록에 사용된 코스튬 아이템은 소멸{/}되며,{nl}최대 레벨 달성 후 길드 드레스룸에서 우클릭 시{nl}해당 코스튬 아이템을{nl}{#0001ff}팀 귀속 상태로 생성{/}할 수 있습니다.{nl} {nl}계속하시겠습니까?"/>
+		<Class ClassID="102561" ClassName="InconsistentGuildDressRoomItem" Data="등록하고자 하는 코스튬과 일치하지 않는 아이템 입니다."/>
+		<Class ClassID="102562" ClassName="DoNotExistItemGuildDressRoom" Data="등록하고자 하는 코스튬이 존재하지 않습니다."/>
+		<Class ClassID="102563" ClassName="GuildDressRoomContextMenuTitle" Data="코스튬 메뉴"/>
+		<Class ClassID="102564" ClassName="GuildDressRoomContextMenu_Preview" Data="미리보기(입어보기)"/>
+		<Class ClassID="102565" ClassName="GuildDressRoomContextMenu_GetItem" Data="인벤토리로 가져오기(꺼내기)"/>
+		<Class ClassID="102566" ClassName="GuildDressRoomNotEquipPreview" Data="코스튬 미리보기가 불가능한 아이템입니다."/>
+		<Class ClassID="102567" ClassName="GuildDressRoomDignityNotExist" Data="적용되는 길드 위엄 효과가 없습니다."/>
+		<Class ClassID="102568" ClassName="GuildDressRoomNoticeMsg1" Data="※ 길드 드레스룸에 등록된 코스튬 아이템은 소멸됩니다."/>
+		<Class ClassID="102569" ClassName="GuildDressRoomNoticeMsg2" Data="※ 코스튬 아이템은 최대 레벨 달성 후 기간제(7일) 아이템으로 생성이 가능합니다."/>
+		<Class ClassID="102570" ClassName="GuildBlockadeRankInfo" Data="봉쇄전 랭킹 정보"/>
+		<Class ClassID="102571" ClassName="GuildAgit" Data="길드 아지트"/>
+		<Class ClassID="102572" ClassName="GuildJoinTimeLimit" Data="해당 기능을 사용할 수 있는 시간까지 약 {DAYS}일 {HOURS}시간 {MINUTES}분 남았습니다."/>
+		<Class ClassID="102573" ClassName="GuildJoinTimeLimit2" Data="해당 기능을 사용할 수 있는 시간까지 약 {HOURS}시간 {MINUTES}분 남았습니다."/>
+		<Class ClassID="102574" ClassName="AnotherRequestProcessing" Data="다른 길드원의 선행 요청을 처리하고 있습니다. 잠시 후 다시 시도해 주십시오."/>		
+		<Class ClassID="102575" ClassName="GrowthGuildFeatureLimit" Data="성장 지원 길드는 해당 기능을 이용하실 수 없습니다."/>
 	</Category>
 	<Category Name="EqupClasses">
 		<Class ClassID="103001" ClassName="THSword" Data="양손검"/>
@@ -12132,6 +12171,7 @@
 		<Class ClassID="107039" ClassName="DefaultCostumeIsLock" Data="클래스 코스튬이 현재 잠금 상태에 있습니다."/>
 		<Class ClassID="107040" ClassName="MaterialItemIsLockEither" Data="잠금 상태인 아이템이 있습니다.{nl} 잠금을 풀고 다시 시도해주세요."/>
 		<Class ClassID="107041" ClassName="Guild_Mission_Blockade_Check_Msg" Data="이미 봉쇄전을 참여한 상태 입니다."/>
+		<Class ClassID="107042" ClassName="CantExecCuzTeamBelonging" Data="팀 귀속 아이템은 불가능합니다."/>
 	</Category>
 	<Category Name="ChatMsg">
 		<Class ClassID="108001" ClassName="GetOut!WeMustTransportStones!" Data="비켜주십시오! 빨리 돌을 운반해야 합니다."/>
@@ -15667,6 +15707,7 @@
 		<Class ClassID="139440" ClassName="ChallengeExpertModeReset_MSG2_Level" Data="[Lv.{count}] 분열 특이점 1회 추가 횟수를 받으셨습니다"/>
 		<Class ClassID="139441" ClassName="ChallengeModeReset_MSG2_Level" Data="[Lv.{count}] 챌린지 모드 1회 추가 횟수를 받으셨습니다"/>
 		<Class ClassID="139442" ClassName="ChallengeModeReset_MSG1_Level" Data="[Lv.{count}] 챌린지 모드 입장 가능 횟수가 0 인 경우에만 사용 가능합니다."/>
+		<Class ClassID="139443" ClassName="DontSellCharacterbelongingItem" Data="캐릭터에 귀속된 아이템은 리사이클 메달로 변환할 수 없습니다."/>
 		</Category>
 	<Category Name="SkillMsg">
 		<Class ClassID="200001" ClassName="DontBuildCampThisAria" Data="해당 지역에서는 거점을 설치할 수 없습니다."/>
@@ -15782,6 +15823,8 @@
 		<Class ClassID="201071" ClassName="ZoomIn" Data="줌 인"/>
 		<Class ClassID="201072" ClassName="ZoomOut" Data="줌 아웃"/>
 		<Class ClassID="201083" ClassName="DirectionSkipAndStart" Data="등장 연출 건너뛰기"/>
+		<Class ClassID="201084" ClassName="Auto_DowaJwo_Uriel" Data="도와달라냥!"/>
+		<Class ClassID="201085" ClassName="Auto_DowaJwo_Uriel2" Data="몬스터를 처치하고, 속박된 엘을 풀어주었다"/>
 	</Category>
 	<Category Name="QuestAutoTool">
 		<Class ClassID="202001" Data="퀘스트 툴 파일 복사"/>
@@ -16336,6 +16379,8 @@
 		<Class ClassID="301024" ClassName="YouCanUseItFromLevel15OrHigher" Data="15 레벨 이상부터 이용 가능합니다."/>
 		<Class ClassID="301025" ClassName="ContainWarningItem2" Data="확률형 아이템 목록 "/>
 		<Class ClassID="301026" ClassName="ContainWarningItem_URL" Data="{nl} {nl}인터넷 브라우저를 실행합니다."/>
+		<Class ClassID="301027" ClassName="ContainWarningItem3" Data="상품별 확률 정보는{nl}{#85070a}[확률형 아이템 목록]{/}버튼을 클릭하여{nl} 확인할 수 있습니다."/>
+		<Class ClassID="301028" ClassName="BlessedCubeGachaEvent" Data="정말 개봉하시겠습니까? {nl} {nl} [이벤트] 여신의 축복을 통해 획득하는{nl} 아이템은 {#85070a}팀 창고 이동만 가능{/}합니다.{nl}"/>
 	</Category>
 	<Category Name="Event">
 		<Class ClassID="302001" ClassName="ArborDayEvent" Data="봄볕 이벤트"/>
@@ -17201,6 +17246,7 @@
 		<Class ClassID="302918" ClassName="archeology_identify_check" Data="유물을 감정하시겠습니까?"/>
 		<Class ClassID="302919" ClassName="archeology_effect" Data="{@st42}{#FFDD66}[고고학 특수 효과]{/}{/}"/>
 		<Class ClassID="302920" ClassName="archeology_cost{COST}" Data="{@st42}{#FFDD66}코스트 : {COST}{/}{/}"/>
+		<Class ClassID="302921" ClassName="EVENT_2602_NEWYEAR_SHOP" Data="[이벤트] TOS 백금화 상점"/>
 	</Category>
 	<Category Name="Account">
 		<Class ClassID="303001" ClassName="MaxAccountWarehouseCount" Data="팀 창고"/>
@@ -18168,6 +18214,7 @@
 		<Class ClassID="560083" ClassName="emoticon_00" Data="{nl} {nl}사용한 캐릭터가 채팅 이모티콘을 흭득합니다.{nl} {nl}{#FF0000}사용 후 복구가 불가능합니다.{nl} {nl}{@st66d_y}이모티콘을 습득하시겠습니까?"/>
 		<Class ClassID="560084" ClassName="emoticonItem_2503_176" Data="{nl} {nl}사용한 캐릭터가 채팅 이모티콘을 흭득합니다.{nl} {nl}{#FF0000}사용 후 복구가 불가능합니다.{nl} {nl}{@st66d_y}이모티콘을 습득하시겠습니까?"/>
 		<Class ClassID="560085" ClassName="emoticonItem_2503_177" Data="{nl} {nl}사용한 캐릭터가 채팅 이모티콘을 흭득합니다.{nl} {nl}{#FF0000}사용 후 복구가 불가능합니다.{nl} {nl}{@st66d_y}이모티콘을 습득하시겠습니까?"/>
+		<Class ClassID="560086" ClassName="emoticonItem_186" Data="{nl} {nl}사용한 캐릭터가 채팅 이모티콘을 흭득합니다.{nl} {nl}{#FF0000}사용 후 복구가 불가능합니다.{nl} {nl}{@st66d_y}이모티콘을 습득하시겠습니까?"/>
 	</Category>
 	<Category Name="Gesture">
 		<Class ClassID="570000" ClassName="Already_Gesture" Data="이미 보유한 제스처입니다."/>
@@ -18289,7 +18336,7 @@
 		<Class ClassID="594017" ClassName="NoQuestToShow" Data="표시할 퀘스트가 없습니다."/>
 		<Class ClassID="594018" ClassName="NoNPCToShow" Data="표시할 NPC가 없습니다."/>
 		<Class ClassID="594019" ClassName="NoMonsterToShow" Data="표시할 몬스터가 없습니다."/>
-		<Class ClassID="594020" ClassName="NoGuildTowerToShow" Data="길드에 속해 있지 않거나, 길드 타워가 설치되지 않았습니다."/>
+		<Class ClassID="594020" ClassName="NoGuildTowerToShow" Data="길드에 속해 있지 않거나{nl}길드 타워가 설치되지 않았습니다."/>
 		<Class ClassID="594021" ClassName="challenge_level_enable" Data="챌린지"/>
 		<Class ClassID="594022" ClassName="challenge_level_disable" Data="챌린지 불가"/>
 		<Class ClassID="594023" ClassName="NoGoddessStatue" Data="해당 지역은 여신상이 없거나 활성화되지 않았습니다."/>
@@ -18779,6 +18826,7 @@
 		<Class ClassID="815059" ClassName="GuildAssetLog_UnknownSantuary_Activate" Data="미지의 성역 활성화"/>
 		<Class ClassID="815060" ClassName="Guild_Housing_Dungon_Lab_Enter" Data="다음 미지의 성역 관문을 활성화 합니다.{nl}활성화 하시겠습니까?{nl}{#ff0000}{Name}{/}{#ff0000}{nl}※길드 자금 {SILVER}실버가 소모됩니다{/}"/>
 		<Class ClassID="815061" ClassName="WorldPVP_JoinCheck_UnknownSantuaryPCBuff" Data="{#ff0000}성역의 가호{/}는 팀 배틀리그 참여시 사라지게 됩니다. 참여 하시겠습니까?"/>
+		<Class ClassID="815062" ClassName="Guild_DressRoom" Data="길드 드레스룸"/>
 	</Category>
 	<Category Name="PersonalHousing">
 		<Class ClassID="815100" ClassName="PH_SEL_DLG_1" Data="개인 하우징 활성화"/>
@@ -19685,6 +19733,9 @@
 		<Class ClassID="1106129" ClassName="Grimmark[T]" Data="그림마크[T]"/>
 		<Class ClassID="1106130" ClassName="Grimmark[S]" Data="그림마크[S]"/>
 		<Class ClassID="1106131" ClassName="Grimmark[A]" Data="그림마크[A]"/>
+		<Class ClassID="1106132" ClassName="Kneller" Data="넬러"/>
+		<Class ClassID="1106133" ClassName="Kneller[C]" Data="넬러[C]"/>
+		<Class ClassID="1106134" ClassName="Kneller[W]" Data="넬러[W]"/>
 	</Category>
 	<Category Name="LifeContent">
 		<Class ClassID="1107001" ClassName="archeology" Data="고고학"/>

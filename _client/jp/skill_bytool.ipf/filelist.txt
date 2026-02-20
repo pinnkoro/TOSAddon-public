@@ -76,6 +76,7 @@ C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_b
 C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\job.xml
 C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\kabbalist.xml
 C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\keraunos.xml
+C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\kneller.xml
 C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\kriwi.xml
 C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\kupole.xml
 C:\Users\kohar\Desktop\TOSAddon_Tools-main\TOSAddon_Tools-main\client\jp\skill_bytool.ipf\laima.xml

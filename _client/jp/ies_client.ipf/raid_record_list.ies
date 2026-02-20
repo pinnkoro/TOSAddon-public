@@ -44,3 +44,6 @@ ClassID,ClassName,ButtonScp
 46,"Goddess_Raid_Veliora_Auto","RAID_RECORD_OPEN"
 47,"Goddess_Raid_Veliora_Solo","RAID_RECORD_OPEN"
 48,"Goddess_Raid_Veliora_Party","RAID_RECORD_OPEN"
+49,"Goddess_Raid_Zmei_Auto","RAID_RECORD_OPEN"
+50,"Goddess_Raid_Zmei_Solo","RAID_RECORD_OPEN"
+51,"Goddess_Raid_Zmei_Party","RAID_RECORD_OPEN"

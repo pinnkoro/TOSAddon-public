@@ -176,6 +176,8 @@ function DRAW_RECYCLE_PRICE(invitem, Desc)
 		cls = GetClass('recycle_shop_papaya', name)
 	end
 	
+	local ret, msg = IS_VALID_RECYCLE_ITEM(invitem)
+
 	if cls ~= nil  then
 		local sell = TryGetProp(cls, 'SellPrice', 0)
 		if sell > 0 then				
@@ -183,7 +185,7 @@ function DRAW_RECYCLE_PRICE(invitem, Desc)
 			Desc = replace(Desc, dic.getTranslatedStr(ClMsg('ExchangeRecycleMedal_1')), '')
 			Desc = replace(Desc, dic.getTranslatedStr(ClMsg('ExchangeRecycleMedal_2')), '')
 			
-			if TryGetProp(invitem, 'TeamBelonging', 0) == 0 and TryGetProp(invitem, 'CharacterBelonging', 0) == 0 then
+			if TryGetProp(invitem, 'TeamBelonging', 0) == 0 and TryGetProp(invitem, 'CharacterBelonging', 0) == 0 and ret == true then
 				local suffix = '{nl}' .. ScpArgMsg('ExchangeRecycleMedal', 'value', sell)
 				Desc = Desc .. suffix
 			end

@@ -1,5 +1,6 @@
 ﻿<!-- edited with XMLSPY v2004 rel. 2 U (http://www.xmlspy.com) by imc (imc) -->
-<Category>
+<Category>	
+	<ReadXml Name="guild_dress_room"/>
 	<ReadXml Name="bonescale"/>
 	<ReadXml Name="item_goddess_reinforce"/>
 	<ReadXml Name="item_goddess_reinforce_470"/>
@@ -10,7 +11,8 @@
 	<ReadXml Name="item_goddess_reinforce_520"/>
 	<ReadXml Name="item_goddess_reinforce_530"/>
 	<ReadXml Name="item_goddess_reinforce_540"/>
-	<ReadXml Name="pharmacy_material_type"/>	
+	<ReadXml Name="item_goddess_reinforce_550"/>
+	<ReadXml Name="pharmacy_material_type"/>
 	<ReadXml Name="skill_Simony"/>
 	<ReadXml Name="archeology_property"/>
 	<ReadXml Name="archeology_map_list"/>
@@ -457,5 +459,7 @@
 	<ReadXml Name="demonlair_user_select_info"/>
 	<ReadXml Name="head_partial_anim_mapping"/>
 	<ReadXml Name="facial_expression_list"/>
+	<ReadXml Name="WeatherSetting"/>
 	<ReadXml Name="event_collection"/>
+	<ReadXml Name="bosscardupgrade"/>
 </Category>

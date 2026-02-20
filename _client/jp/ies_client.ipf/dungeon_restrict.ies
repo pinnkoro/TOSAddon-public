@@ -65,3 +65,7 @@ ClassID,ClassName,Category,Icon,Spot_Name,Desc,MsgType
 1068,"1068","Goddess_Raid_Veliora_Party","","사망 제어","DeathCountLimit{count}","DeathCount"
 1069,"1069","Goddess_Raid_Veliora_Party","","회복 제어","치유 스킬의 효과가 감소하고 회복 포션의 재사용 대기시간이 증가합니다.",""
 1070,"1070","DemonLair_Ashark","","회복 제어","치유 스킬의 효과가 감소하고 회복 포션의 재사용 대기시간이 증가합니다.",""
+1071,"1071","Goddess_Raid_Zmei_Solo","","회복 제어","치유 스킬의 효과가 감소하고 회복 포션의 재사용 대기시간이 증가합니다.",""
+1072,"1072","Goddess_Raid_Zmei_Auto","","회복 제어","치유 스킬의 효과가 감소하고 회복 포션의 재사용 대기시간이 증가합니다.",""
+1073,"1073","Goddess_Raid_Zmei_Party","","사망 제어","DeathCountLimit{count}","DeathCount"
+1074,"1074","Goddess_Raid_Zmei_Party","","회복 제어","치유 스킬의 효과가 감소하고 회복 포션의 재사용 대기시간이 증가합니다.",""

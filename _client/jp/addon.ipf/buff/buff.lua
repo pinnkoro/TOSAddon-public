@@ -219,6 +219,9 @@ function SET_BUFF_SLOT(slot, capt, class, buffType, handle, slotlist, buffIndex,
 	elseif class.ClassName == 'Water_jewel_complete_Buff' then
 		icon:SetTooltipType('Water_jewel_Buff')		
 		icon:SetTooltipArg(handle, buffType, buff.arg1);	
+	elseif class.ClassName == 'guild_dignity_Buff' then  
+		icon:SetTooltipType('guild_dignity_Buff')
+		icon:SetTooltipArg(handle, buffType, buff.arg1);
 	else
 	    icon:SetTooltipType('buff');
 	    if buffIndex ~= nil then

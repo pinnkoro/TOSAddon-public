@@ -371,16 +371,16 @@ local function GET_SEARCH_TEXT(frame)
 		local findItem = searchEdit:GetText();
 		searchEdit:Focus()
 		local minLength = 0;
-		local findItemStrLength = findItem.len(findItem);
-		local maxLength = 60;
-		if config.GetServiceNation() == "GLOBAL" then
-			minLength = 1;
-			maxLength = 20;
-		elseif config.GetServiceNation() == "JPN" then
-			maxLength = 60;
-		elseif config.GetServiceNation() == "KOR" or config.GetServiceNation() == "GLOBAL_KOR" then
-			maxLength = 60;
-		end
+		local findItemStrLength = findItem.len(findItem);				
+		local maxLength = MARKET_SEARCH_TEXT_LENGTH;
+		-- if config.GetServiceNation() == "GLOBAL" then
+		-- 	minLength = 1;
+		-- 	maxLength = MARKET_SEARCH_TEXT_LENGTH;
+		-- elseif config.GetServiceNation() == "JPN" then
+		-- 	maxLength = MARKET_SEARCH_TEXT_LENGTH;
+		-- elseif config.GetServiceNation() == "KOR" or config.GetServiceNation() == "GLOBAL_KOR" then
+		-- 	maxLength = MARKET_SEARCH_TEXT_LENGTH;
+		-- end
 		if findItemStrLength ~= 0 then	-- 있다면 길이 조건 체크
 			if findItemStrLength <= minLength then
 				ui.SysMsg(ClMsg("InvalidFindItemQueryMin"));
@@ -590,7 +590,7 @@ function MARKET_FIND_PAGE(frame, page)
 	end
 
 	local optionKey, optionValue = GET_SEARCH_OPTION(frame);
-	local itemCntPerPage = GET_MARKET_SEARCH_ITEM_COUNT(_category);		
+	local itemCntPerPage = GET_MARKET_SEARCH_ITEM_COUNT(_category);	
 	MarketSearch(page + 1, orderByDesc, searchText, category, optionKey, optionValue, itemCntPerPage);	
 	DISABLE_BUTTON_DOUBLECLICK_WITH_CHILD(frame:GetName(), 'commitSet', 'searchBtn', 1);
 	MARKET_OPTION_BOX_CLOSE_CLICK(frame);

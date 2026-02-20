@@ -43,6 +43,9 @@ function GET_LIST_BY_FRAME_TYPE(frame)
     elseif TypeNum == 3 then
         table = GET_GODDESS_CUBE_PROBABILITY("Gacha_Blessed_CUBE_001")
         TopTab:ShowWindow(1); 
+    elseif TypeNum == 4 then
+        table = GET_GODDESS_CUBE_PROBABILITY("Gacha_Blessed_CUBE_001_EVENT")
+        TopTab:ShowWindow(1); 
     else
         table = GET_STEP_GACHA_PROBABILITY_TABLE(Round);
         RounTab:ShowWindow(0)
@@ -118,7 +121,7 @@ end
 function CREATE_LETICIA_PROBABILITY_SLOTS(parent, table)
     local topframe = parent:GetTopParentFrame();
     local TypeNum = topframe:GetUserIValue("Type")
-
+    
     local cnt = parent:GetChildCount() - 1
     local isDiffTable = false;
     if cnt ~= #table then
@@ -151,7 +154,7 @@ function CREATE_LETICIA_PROBABILITY_SLOTS(parent, table)
         local ItemCls = GetClassByStrProp("Item", "ClassName", tab[1])
         local ItemName = TryGetProp(ItemCls, "Name", 'None');
         
-        if TypeNum == 1 or TypeNum == 3 then
+        if TypeNum == 1 or TypeNum == 3 or TypeNum == 4 then
             inSlotCnt:ShowWindow(0)
             cnt:ShowWindow(1);
         else
@@ -179,6 +182,10 @@ function CREATE_LETICIA_PROBABILITY_SLOTS(parent, table)
         SET_BALCK_MARKET_TOOLTIP(icon,ItemCls)
     
         SET_BALCK_MARKET_ITEM_NAME(maintab,ItemCls)
+
+        if TypeNum == 4 then
+            icon:SetTooltipStrArg('team_belonging');
+        end
     end
 end
 

@@ -1,5 +1,25 @@
 ADVENTURE_BOOK_ACHIEVE_CONTENT = {}
 
+
+-- 캐시된 리스트들을 저장할 변수
+local g_achieve_cache = {
+    RewardList = {},
+    ChaseList = {},
+    ExistHistoryList = {},
+    ExceptHistoryList = {},
+    FinishList = {},
+    has_cache = false -- 현재 캐시가 유효한지 여부 (Dirty Flag 역할)
+}
+
+-- 캐시 초기화 함수 (데이터가 변경되었을 때 호출)
+function ADVENTURE_BOOK_ACHIEVE_CONTENT.INVALIDATE_CACHE()
+    g_achieve_cache.has_cache = false
+end
+
+function ADVENTURE_BOOK_ACHIEVE_CONTENT.IS_CACHE()
+    return g_achieve_cache.has_cache
+end
+
 function ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_ALL(category, subCategory, isCheckCompleteOption)
 	local RewardList, ChaseList, ExistHistoryList, ExceptHistoryList, FinishList = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_SPLIT(1)
 	
@@ -20,19 +40,19 @@ function ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_ALL(category, subCategory, isCheckC
 
 	-- 보상 받을 수 있는 목록
 	RewardList = filter_func(RewardList, category, subCategory, searchText)
-	table.sort(RewardList)
+	-- table.sort(RewardList)
 
 	-- 추적중인 업적
 	ChaseList = filter_func(ChaseList, category, subCategory, searchText)
-	table.sort(ChaseList)
+	-- table.sort(ChaseList)
 
 	-- 이력이 있는 업적
 	ExistHistoryList = filter_func(ExistHistoryList, category, subCategory, searchText)
-	table.sort(ExistHistoryList, ADVENTURE_BOOK_ACHIEVE_CONTENT['SORT_BY_PROGRESS_DES'])
+	-- table.sort(ExistHistoryList, ADVENTURE_BOOK_ACHIEVE_CONTENT['SORT_BY_PROGRESS_DES'])
 
 	-- 이력이 없는 업적
 	ExceptHistoryList = filter_func(ExceptHistoryList, category, subCategory, searchText)
-	table.sort(ExceptHistoryList)
+	-- table.sort(ExceptHistoryList)
 
 	-- 완료된 업적
 	-- 완료된 업적 표시하지 않기 체크 확인
@@ -57,7 +77,7 @@ function ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_ALL(category, subCategory, isCheckC
 	end
 	if #FinishList > 0 then
 		FinishList = filter_func(FinishList, category, subCategory, searchText)
-		table.sort(FinishList)
+		-- table.sort(FinishList)
 	end
 
 	-- combine list
@@ -250,6 +270,14 @@ function ADVENTURE_BOOK_ACHIEVE_CONTENT.CHECK_COUNTRY(clsID) -- 국가 체크
 end
 
 function ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_SPLIT(checkChase)
+	if g_achieve_cache.has_cache == true then
+        return g_achieve_cache.RewardList, 
+               g_achieve_cache.ChaseList, 
+               g_achieve_cache.ExistHistoryList, 
+               g_achieve_cache.ExceptHistoryList, 
+               g_achieve_cache.FinishList
+    end
+	
 	local RewardList = {} -- 보상이 있는 업적
 	local ChaseList = {} -- 추적중인 업적
 	local ExistHistoryList = {} -- 이력이 있는 업적
@@ -289,6 +317,27 @@ function ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_SPLIT(checkChase)
 		end
 	end
 	
+	table.sort(RewardList) 
+        
+	-- (2) 추적 목록 정렬
+	table.sort(ChaseList)
+	
+	-- (3) 진행 중 목록 정렬 (가장 무거운 작업! 여기서 딱 한 번만 수행됨)
+	table.sort(ExistHistoryList, ADVENTURE_BOOK_ACHIEVE_CONTENT['SORT_BY_PROGRESS_DES'])
+	
+	-- (4) 미진행 목록 정렬
+	table.sort(ExceptHistoryList)
+	
+	-- (5) 완료 목록 정렬
+	table.sort(FinishList)
+
+	g_achieve_cache.RewardList = RewardList
+	g_achieve_cache.ChaseList = ChaseList
+	g_achieve_cache.ExistHistoryList = ExistHistoryList
+	g_achieve_cache.ExceptHistoryList = ExceptHistoryList
+	g_achieve_cache.FinishList = FinishList
+	g_achieve_cache.has_cache = true -- 이제 캐시가 유효함!
+
 	return RewardList, ChaseList, ExistHistoryList, ExceptHistoryList, FinishList
 end
 
@@ -427,7 +476,6 @@ function ADVENTURE_BOOK_ACHIEVE_CONTENT.ACHIEVE_INFO(clsID)
 	if cls == nil then return nil end
 
 	local retTable = {}
-
 	retTable['clsID'] = clsID
 
 	local main_category = TryGetProp(cls, "MainCategory", "None")

@@ -11,6 +11,5 @@
 	<animation frameOpenAnim="chat_balloon_start" frameCloseAnim="chat_balloon_end"/>
 	<controls>
 		<button name="CONTENTS_INDUN" layout_gravity="center bottom" texttooltip="{@st59}콘텐츠 현황판(F10){/}" clicksound="button_click_big" oversound="button_over" image="sysmenu_instantDungeon" rect="0 0 44 44" margin="0 0 0 50" MouseOnAnim="btn_mouseover" MouseOffAnim="btn_mouseoff" LBtnUpScp="UI_TOGGLE_INDUN"/>
-		<button name="CONTENTS_GUILD" layout_gravity="center bottom" texttooltip="{@st59}길드 콘텐츠{/}" clicksound="button_click_big" oversound="button_over" image="sysmenu_instantDungeon" rect="0 0 44 44" margin="0 0 0 5" MouseOnAnim="btn_mouseover" MouseOffAnim="btn_mouseoff" LBtnUpScp="ui.ToggleFrame(&apos;guild_activity_ui&apos;)"/>
 	</controls>
 </uiframe>

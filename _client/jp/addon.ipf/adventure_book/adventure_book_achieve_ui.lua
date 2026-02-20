@@ -57,7 +57,11 @@ function ADVENTURE_BOOK_ACHIEVE.FILL_LIST(category)
 			end
 		end
 	else
-		category_name = category.."_"..subCategory
+		if subCategory then
+			category_name = category.."_"..subCategory
+		else
+			category_name = category
+		end
 		achieve_list = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_ALL(category, subCategory, 1)
 	end
 
@@ -96,7 +100,9 @@ end
 
 -- category: maincategory_subcategory, ADVENTURE_BOOK_ACHIEVE_LIST_INFO에서 사용
 function ADVENTURE_BOOK_ACHIEVE.FILL_LIST_CONTROL(list, list_box, category)
-	list_box:RemoveAllChild()
+	if (list_box:GetChildCount() - 1) ~= #list and ADVENTURE_BOOK_ACHIEVE_LIST_MAX_SHOW ~= #list and (list_box:GetChildCount() - 1) ~= ADVENTURE_BOOK_ACHIEVE_LIST_MAX_SHOW then
+		list_box:RemoveAllChild()
+	end
 
 	local y = 0
 	local drawGroup = {}
@@ -144,7 +150,7 @@ function ADVENTURE_BOOK_ACHIEVE.FILL_LIST_CONTROL(list, list_box, category)
 		end
 
 		if isDraw == true and cls ~= nil and info ~= nil then
-			local ctrlSet = list_box:CreateOrGetControlSet("adventure_book_achieve_summary", "list_achieve_"..clsID, ui.LEFT, ui.TOP, 0, y, 0, 0)
+			local ctrlSet = list_box:CreateOrGetControlSet("adventure_book_achieve_summary", "list_achieve_"..idx, ui.LEFT, ui.TOP, 0, y, 0, 0)
 			y = ADVENTURE_BOOK_ACHIEVE.UPDATE_LIST_CONTROLSET(cls, clsID, info, ctrlSet, y)
 			drawCnt = drawCnt + 1
 			idxLast = idx

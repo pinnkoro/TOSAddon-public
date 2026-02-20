@@ -11,12 +11,33 @@ function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT(mainPage)
         mainPage = gb_achieve:GetChild('page_achieve_main')
     end
     
+	-- local startTime = os.clock()
+    -- local endTime = os.clock()
+
     ADVENTURE_BOOK_ACHIEVE_INIT_LEVEL_REWARD() -- 업적 레벨 보상
+    --  endTime = os.clock()
+    -- print(string.format("ADVENTURE_BOOK_ACHIEVE_INIT_LEVEL_REWARD 실행 시간: %.6f 초", endTime - startTime))	
+
     ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_MY_CHAR_INFO(mainPage) -- 캐릭터 정보
+    --  endTime = os.clock()
+    -- print(string.format("ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_MY_CHAR_INFO 실행 시간: %.6f 초", endTime - startTime))	
+
     ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_CUR_STATUS(mainPage) -- 업적 현황
+    --  endTime = os.clock()
+    -- print(string.format("ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_CUR_STATUS 실행 시간: %.6f 초", endTime - startTime))	
+
     ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_EXCHANGE_EVENT(mainPage) -- 업적 교환 이벤트
+    --  endTime = os.clock()
+    -- print(string.format("ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_EXCHANGE_EVENT 실행 시간: %.6f 초", endTime - startTime))	
+
     ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_HIGH_PROGRESS(mainPage) -- 진행도가 높은 업적
+    --  endTime = os.clock()
+    -- print(string.format("ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_HIGH_PROGRESS 실행 시간: %.6f 초", endTime - startTime))	
+
     ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_NEW_ACHIEVE(mainPage) -- 신규 업적
+    --  endTime = os.clock()
+    -- print(string.format("ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_NEW_ACHIEVE 실행 시간: %.6f 초", endTime - startTime))	
+
 end
 
 function ADVENTURE_BOOK_ACHIEVE_MAIN_UPDATE(msg)
@@ -103,20 +124,32 @@ function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_MY_CHAR_INFO(mainPage)
     
 end
 
+local g_listFilter = {}
+
 function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_CUR_STATUS(mainPage)
     local frame = ui.GetFrame("adventure_book")
     local gb_achieve = GET_CHILD(frame, "gb_achieve")
     local page_achieve_main = GET_CHILD(gb_achieve, "page_achieve_main")
     local page_achieve_main_left = GET_CHILD(page_achieve_main, "page_achieve_main_left")
 
+
     local listMainCategory = ADVENTURE_BOOK_ACHIEVE_CONTENT.GET_MAIN_CATEGORY_CLASS_LIST()
     local listAll = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_ALL()
-    
+
+    -- if ADVENTURE_BOOK_ACHIEVE_CONTENT.IS_CACHE() == true then
+    --     return;
+    -- end
+    for i = 1, #listMainCategory do
+        local category = listMainCategory[i].ClassName
+        if g_listFilter[category] == nil then
+            g_listFilter[category] = ADVENTURE_BOOK_ACHIEVE_CONTENT.FILTER_CATEGORY(listAll, category)
+        end
+    end
+
     for i = 1, #listMainCategory do
         local category = listMainCategory[i].ClassName
         local ctrlSet = GET_CHILD(page_achieve_main_left, "achieve_main_curstatus_"..category)
-
-        local listFilter = ADVENTURE_BOOK_ACHIEVE_CONTENT.FILTER_CATEGORY(listAll, category)
+        local listFilter = g_listFilter[category]
         if category == "Event" then
             listFilter = ADVENTURE_BOOK_ACHIEVE_CONTENT.FILTER_PERIOD(listFilter, 1)
         else
@@ -124,7 +157,6 @@ function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_CUR_STATUS(mainPage)
         end
         local listComplete = ADVENTURE_BOOK_ACHIEVE_CONTENT.FILTER_COMPLETE(listFilter)
         local listReward = ADVENTURE_BOOK_ACHIEVE_CONTENT.FILTER_REWARD(listFilter)
-
         local icon_pic = GET_CHILD(ctrlSet, "icon_pic", "ui::CPicture")
         icon_pic:SetImage(listMainCategory[i].Icon)
 
@@ -154,6 +186,7 @@ function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_CUR_STATUS(mainPage)
             newreward:SetVisible(0)
         end
     end
+
 end
 
 function ADVENTURE_BOOK_ACHIEVE_SORT_EXCHANGE_EVENT(a, b)
@@ -257,7 +290,10 @@ function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_EXCHANGE_EVENT(mainPage)
     local coming_soon = GET_CHILD(page, "coming_soon")
     local left_btn = GET_CHILD(page, "left_btn")
     local right_btn = GET_CHILD(page, "right_btn")
-
+    
+    if gb:GetChildCount() > 1 then
+        return;
+    end
     gb:RemoveAllChild()
 
     local cnt = 0
@@ -481,16 +517,16 @@ end
 function ADVENTURE_BOOK_ACHIEVE_MAIN_INIT_HIGH_PROGRESS(mainPage)
     local ExistHistoryList = {}
     local ExceptHistoryList = {}
-
-    ExistHistoryList = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_EXIST_HISTORY()
-    table.sort(ExistHistoryList, ADVENTURE_BOOK_ACHIEVE_CONTENT['SORT_BY_PROGRESS_DES'])
     
-    if #ExistHistoryList < 10 then
-        ExceptHistoryList = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_EXCEPT_HISTORY()
-    end
+	local RewardList, ChaseList, ExistHistoryList, ExceptHistoryList, FinishList = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_SPLIT()
+    
+    -- if #ExistHistoryList < 10 then
+    --     ExceptHistoryList = ADVENTURE_BOOK_ACHIEVE_CONTENT.LIST_EXCEPT_HISTORY()
+    -- else
+    --     table.sort(ExistHistoryList, ADVENTURE_BOOK_ACHIEVE_CONTENT['SORT_BY_PROGRESS_DES'])
+    -- end
 
     local drawList = {}
-
     local idx = 1
     while (#drawList) < 10 do
         if #ExistHistoryList < idx then break end

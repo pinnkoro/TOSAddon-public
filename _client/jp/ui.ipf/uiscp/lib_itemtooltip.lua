@@ -313,31 +313,46 @@ function SET_GRADE_TOOLTIP(parent, invitem, starsize)
 	end
 end
 
+-- 그룹별 기본 이미지 매핑 테이블
+local CARD_GROUP_IMAGE_MAP = {
+    ATK                     = "moncard_red",
+    DEF                     = "moncard_blue",
+    UTIL                    = "moncard_purple",
+    STAT                    = "moncard_green",
+    LEG                     = "moncard_yellow",
+    REINFORCE_CARD          = "moncard_gray",
+    REINFORCE_GODDESS_CARD  = "moncard_gray",
+    GODDESS                 = "goddess_card_frame",
+}
+
+-- 레전드 등급일 때 "_rare" 접미사가 붙는 그룹 목록
+local RARE_SUFFIX_GROUPS = {
+    ATK = true,
+    DEF = true,
+    UTIL = true,
+    STAT = true,
+}
+
 function SET_CARD_EDGE_TOOLTIP(parent, invitem)
-	local cardEdge = GET_CHILD(parent, "card_edge", "ui::CPicture");
-	if cardEdge ~= nil and invitem.CardGroupName ~= 'None' then
-		local cardGroupName = invitem.CardGroupName
-		
-		if cardGroupName == 'ATK' then
-			cardEdge:SetImage('moncard_red')
-		elseif cardGroupName == 'DEF' then
-			cardEdge : SetImage('moncard_blue')
-		elseif cardGroupName == 'UTIL' then
-			cardEdge : SetImage('moncard_purple')
-		elseif cardGroupName == 'STAT' then
-			cardEdge : SetImage('moncard_green')
-		elseif cardGroupName == 'LEG' then
-			cardEdge : SetImage('moncard_yellow')
-		elseif cardGroupName == 'REINFORCE_CARD' then
-			cardEdge : SetImage('moncard_gray')
-		elseif cardGroupName == 'GODDESS' then
-			cardEdge : SetImage('goddess_card_frame')
-		elseif cardGroupName == 'REINFORCE_GODDESS_CARD' then
-			cardEdge : SetImage('moncard_gray')
-		else 
-			cardEdge:SetImage('moncard_red')
-		end
-	end
+    -- 1. 방어 코드 (유효성 검사)
+    local cardEdge = GET_CHILD(parent, "card_edge", "ui::CPicture")
+    if cardEdge == nil or invitem.CardGroupName == 'None' then
+        return
+    end
+
+    local groupName = invitem.CardGroupName
+    
+    -- 2. 기본 이미지 가져오기 (테이블에 없으면 기본값 moncard_red)
+    local imageName = CARD_GROUP_IMAGE_MAP[groupName] or "moncard_red"
+
+    -- 3. 레전드 카드 접미사 처리
+    -- 특정 그룹(ATK, DEF, UTIL, STAT)이면서 LegendCard인 경우에만 "_rare" 추가
+    if invitem.Reinforce_Type == "LegendCard" and RARE_SUFFIX_GROUPS[groupName] then
+        imageName = imageName .. "_rare"
+    end
+
+    -- 4. 이미지 적용
+    cardEdge:SetImage(imageName)
 end
 
 function ITEM_COMPARISON_SET_OFFSET(tooltipframe, isReadObj)

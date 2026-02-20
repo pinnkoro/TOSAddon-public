@@ -7,10 +7,14 @@
 	<draw drawtitlebar="false" drawframe="false"/>
 	<script fadeinScp="None" fadeoutScp="None"/>
 	<option hideable="false" closebutton="false"/>
+	<script OpenScp="LOGIN_TITLE_OPEN" CloseScp="LOGIN_TITLE_CLOSE"/>
 	<userconfig FRAME_WIDTH="2000" FRAME_WIDTH_WIDE="2640"/>
 	<controls>
-		<picture name="bgbg" rect="0 0 6000 3000" margin="0 0 0 0" layout_gravity="center center" image="bg_w" stretch="true"/>
-		<picture name="login_img" rect="0 0 1920 1080" margin="0 0 0 0" layout_gravity="center center" image="login_img8f" stretch="true">
+		<picture name="screenmask" rect="0 0 4096 4096" hittest="false" image="fullblack" stretch="true"/>
+		<groupbox name="gbox" rect="0 0 1920 1080" margin="0 0 0 0" layout_gravity="center center" draw="true" hittestbox="true" resizebyparent="false" skin="relic_frame_bg"/>
+		<video name="video" rect="0 0 1920 1080" margin="0 0 0 0" video="None" layout_gravity="center center" stretch="true" playrepeat="true"/> 
+		<!-- <picture name="login_img" rect="0 0 1920 1080" margin="0 0 0 0" layout_gravity="center center" image="login_img9f" stretch="true" > -->
+
 			<!-- <uieffect effect="I_screen_logo019_levitation_red2" scale="4.5" sound="None" offset="200 -150" playtime="2" duration="0" conditon="Always" event="None"/>
 			<uieffect effect="I_screen_logo019_levitation_red2" scale="4.5" sound="None" offset="180 400" playtime="2" duration="0" conditon="Always" event="None"/>
 			<uieffect effect="I_screen_logo019_levitation_red2" scale="4.5" sound="None" offset="-300 350" playtime="2" duration="0" conditon="Always" event="None"/>
@@ -77,7 +81,7 @@
 			<uieffect effect="None" scale="15" sound="None" offset="0 0" playtime="1.3" duration="0" conditon="Always" event="None"/>
 			<uieffect effect="None" scale="15" sound="None" offset="0 0" playtime="1.3" duration="0" conditon="Always" event="None"/>
 			<uieffect effect="None" scale="15" sound="None" offset="0 0" playtime="1.3" duration="0" conditon="Always" event="None"/> -->
-		</picture>
+		<!-- </picture> -->
 		<picture name="login_dummy" rect="0 0 2560 1080" margin="0 0 0 0" layout_gravity="center center" image="None" stretch="false">
 			<uieffect effect="None" scale="15" sound="None" offset="0 0" playtime="1.3" duration="0" conditon="Always" event="None"/>
 		</picture>
@@ -85,6 +89,5 @@
 		<picture name="r1_logo_title_kor" rect="0 0 300 45" margin="-750 450 0 0" layout_gravity="center center" image="None" serviceNation="KOR" stretch="true"/>
 		<picture name="r1_logo_title_tw" rect="0 0 300 45" margin="-750 450 0 0" layout_gravity="center center" image="login3" serviceNation="TAIWAN" stretch="true"/>
 		<picture name="r1_logo1" rect="0 0 400 209" margin="-750 350 0 0" layout_gravity="center center" image="None" stretch="true"/>
-		
 	</controls>
 </uiframe>

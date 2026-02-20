@@ -2499,3 +2499,42 @@ end
 function DEMONLAIR_ASHARK_DEMON_MUTANT_LEAVE(actor, obj, buff)
     actor:SetAuraInfo("None");
 end
+
+function ZMEI_ATTACH_EFFECT_ENTER(actor, obj, buff)
+
+end
+
+function ZMEI_ATTACH_EFFECT_UPDATE(actor, obj, buff)
+    if actor == nil then
+        return;
+    end
+    local handle = actor:GetHandleVal();
+    if info.IsPC(handle) == 1 then
+        return
+    end
+
+    local interval = actor:GetUserIValue("interval")
+    if interval < 25 then
+        actor:SetUserValue("interval", interval + 1);
+        return;
+    end
+    actor:SetUserValue("interval", 0);
+
+    local actorPos = actor:GetPos();
+    local scale = 2.5;
+    effect.PlayGroundUnityEffect(actor, "BodyAura_Fire_Orange_01", scale, actorPos.x, actorPos.y + 100 , actorPos.z, 1, "None", 0, 0, 0, 0)
+end
+
+function ZMEI_ATTACH_EFFECT_LEAVE(actor, obj, buff)
+    if actor == nil then
+        return;
+    end
+
+    local actorPos = actor:GetPos();
+    local scale = 2.5;
+    effect.PlayGroundUnityEffect(actor, "BodyAura_Fire_Orange_01", scale, actorPos.x, actorPos.y + 150 , actorPos.z, 2, "None", 0, 0, 0, 0.5)
+    effect.PlayGroundUnityEffect(actor, "BodyAura_Fire_Orange_01", scale, actorPos.x, actorPos.y + 200 , actorPos.z, 2, "None", 0, 0, 0, 0.8)
+    effect.PlayGroundUnityEffect(actor, "BodyAura_Fire_Orange_01", scale, actorPos.x, actorPos.y + 250 , actorPos.z, 2, "None", 0, 0, 0, 1)
+    effect.PlayGroundUnityEffect(actor, "BodyAura_Fire_Orange_01", scale, actorPos.x, actorPos.y + 300 , actorPos.z, 2, "None", 0, 0, 0, 1.2)
+    effect.PlayGroundUnityEffect(actor, "BodyAura_Fire_Orange_01", scale, actorPos.x, actorPos.y + 350 , actorPos.z, 2, "None", 0, 0, 0, 1.5)
+end

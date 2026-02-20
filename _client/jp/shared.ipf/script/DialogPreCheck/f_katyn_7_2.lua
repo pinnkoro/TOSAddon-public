@@ -25,3 +25,13 @@ function SCR_KATYN72_GHOST_PRE_DIALOG(pc, dialog)
     return 'NO'
 end
 
+function SCR_NPC_KNELLER_DIALOG(self, pc)
+    local zone_name = GetZoneName(pc);
+    local map_cls = GetClass("Map", zone_name);
+    if map_cls ~= nil then
+        local bgm_play_list = TryGetProp(map_cls, "BgmPlayList", "None");
+        StopMusicQueueLocal(pc, bgm_play_list);
+    end
+    PlayMusicQueueLocal(pc, "master_Kneller", true)
+    ShowOkDlg(pc, "MASTER_KNELLER_NPC_basic1")
+end

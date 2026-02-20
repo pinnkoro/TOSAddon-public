@@ -1,4 +1,4 @@
-﻿function MINIMIZEDALARM_ON_INIT(addon, frame)
+function MINIMIZEDALARM_ON_INIT(addon, frame)
 	addon:RegisterMsg('PVP_PLAYING_UPDATE', 'ON_PVP_PLAYING_UPDATE'); 
 	addon:RegisterMsg('PVP_MINE_STATE_UPDATE', 'ON_PVP_MINE_STATE_UPDATE'); 
 	addon:RegisterMsg('GAME_START', 'ON_PVP_PLAYING_UPDATE'); 
@@ -15,7 +15,7 @@ function ON_PVP_PLAYING_UPDATE(frame, msg, argStr,argNum)
 		frame:ShowWindow(1);
 		local pic = GET_CHILD_RECURSIVELY(frame,"pic")
 		pic:SetEventScript(ui.LBUTTONUP,"OPEN_INDUNINFO_TAB_BY_ARG")
-		pic:SetEventScriptArgString(ui.LBUTTONUP,"6")
+		pic:SetEventScriptArgString(ui.LBUTTONUP,"5")
 		pic:SetEventScriptArgNumber(ui.LBUTTONUP,2)
 	else
 		frame:ShowWindow(0);
@@ -67,13 +67,13 @@ function ON_PVP_MINE_STATE_UPDATE(frame,msg,argStr,argNum)
 		pic:SetEnable(0)
 		frame:ShowWindow(1)
 		pic:SetEventScript(ui.LBUTTONUP,"OPEN_INDUNINFO_TAB_BY_ARG")
-		pic:SetEventScriptArgString(ui.LBUTTONUP,"6")
+		pic:SetEventScriptArgString(ui.LBUTTONUP,"5")
 		pic:SetEventScriptArgNumber(ui.LBUTTONUP,1)
 	elseif argStr == "ENABLE" then
 		frame:ShowWindow(1)
 		pic:SetEnable(1)
 		pic:SetEventScript(ui.LBUTTONUP,"OPEN_INDUNINFO_TAB_BY_ARG")
-		pic:SetEventScriptArgString(ui.LBUTTONUP,"6")
+		pic:SetEventScriptArgString(ui.LBUTTONUP,"5")
 		pic:SetEventScriptArgNumber(ui.LBUTTONUP,1)
 	elseif argStr == "UNABLE" then
 		frame:ShowWindow(1)

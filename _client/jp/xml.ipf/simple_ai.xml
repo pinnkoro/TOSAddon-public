@@ -28680,4 +28680,18 @@ return GET_RATE_MHP(self, damage) * 100"/>
             <ToolScp Scp="EnableAIOutOfPC" Client="NO" UseSleep="NO"/>
         </StartList>
     </AI>
+    <AI Name="EP18_1_F_TABLELAND_72_MQ7_URIEL_AI" UpdateMS="1000" ActiveMessageMapInBattle="1">
+        <List>
+            <ToolScp Scp="SAI_FUNC_DIRECT" Client="NO" UseSleep="NO">
+                <Str Str="SCR_EP18_1_F_TABLELAND_72_MQ7_TRACK_UREIL_CHAT"/>
+            </ToolScp>
+        </List>
+    </AI>
+    <AI Name="EP18_1_F_TABLELAND_73_MQ13_SEAL_AI" UpdateMS="1500" ActiveMessageMapInBattle="1">
+        <List>
+            <ToolScp Scp="SAI_FUNC_DIRECT" Client="NO" UseSleep="NO">
+                <Str Str="SCR_EP18_1_F_TABLELAND_73_MQ13_TRACK_EFFECT_AI"/>
+            </ToolScp>
+        </List>
+    </AI>
 </AIList>

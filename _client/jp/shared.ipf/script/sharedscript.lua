@@ -416,11 +416,39 @@ date_time.get_lua_datetime_from_str = function(str)
     return date_time.get_lua_datetime(date_time.get_date_time(str))
 end
 
-date_time.get_lua_datetime = function(_year, _month, _day, _hour, _min, _sec)
+date_time.get_lua_datetime = function(_year, _month, _day, _hour, _min, _sec)    
     if _year == nil or _month == nil or _day == nil or _hour == nil or _min == nil or _sec == nil then
         return nil
 	end
-    return os.time { year = _year, month = _month, day = _day, hour = _hour, min = _min, sec = _sec }
+    
+    -- 2. [수정] 숫자로 확실하게 변환 (문자열이 들어올 경우 대비)
+    local y = tonumber(_year)
+    local m = tonumber(_month)
+    local d = tonumber(_day)
+    local h = tonumber(_hour)
+    local min = tonumber(_min)
+    local s = tonumber(_sec)    
+
+    if y == nil or m == nil or d == nil or h == nil or min == nil or s == nil then
+        return nil
+    end
+
+    if y < 1970 then
+        y = 2000
+        m = 1
+        d = 1
+        h = 0
+        min = 0
+        s = 0
+    end
+
+    local status, result = pcall(os.time, { year = y, month = m, day = d, hour = h, min = min, sec = s })
+
+    if status then        
+        return result
+    else        
+        return os.time({ year = 2000, month = 1, day = 1, hour = 0, min = 0, sec = 0 })
+    end    
 end
 
 -- 루아 시간으로 현재시간을 가져온다.
@@ -2479,6 +2507,9 @@ function STR_KILO_CHANGE(num)
 end
 
 function SCR_POSSIBLE_UI_OPEN_CHECK(pc, questIES, subQuestZoneList, chType)
+    if pc == nil then
+        return ;
+    end
     local ret = "HIDE"
     if questIES.PossibleUI_Notify == 'NO' then
         return ret, subQuestZoneList
@@ -3847,6 +3878,42 @@ function JOB_GRIMMARK_A_PRE_CHECK(pc, jobCount)
     return 'NO'
 end
 
+function JOB_KNELLER_C_PRE_CHECK(pc, jobCount)
+    local aObj = nil
+    if IsServerSection() == 0 then
+        aObj = GetMyAccountObj();
+    else
+        aObj = GetAccountObj(pc);
+    end
+    
+    if aObj ~= nil then
+        local value = TryGetProp(aObj, 'UnlockQuest_Char4_28', 0)
+        if value == 1 then
+            return 'YES'
+        end
+    end
+
+    return 'NO'
+end
+
+function JOB_KNELLER_W_PRE_CHECK(pc, jobCount)
+    local aObj = nil
+    if IsServerSection() == 0 then
+        aObj = GetMyAccountObj();
+    else
+        aObj = GetAccountObj(pc);
+    end
+    
+    if aObj ~= nil then
+        local value = TryGetProp(aObj, 'UnlockQuest_Char2_30', 0)
+        if value == 1 then
+            return 'YES'
+        end
+    end
+
+    return 'NO'
+end
+
 function JOB_SPEARMASTER_PRE_CHECK(pc, jobCount)
     local aObj
     if IsServerSection() == 0 then
@@ -4979,8 +5046,8 @@ end
 function CHECK_TOS_WEEKLY_CONTENTS_RESTRICT_TIME()
     local nation = GET_POPOBOOST_SERVER();
 
-    local start = '2025-07-01 00:00:00';
-    local finish = '2025-07-02 10:00:00';
+    local start = '2026-02-09 00:00:00';
+    local finish = '2026-02-10 10:00:00';
     if nation == 1 then
         start = '2025-03-03 00:00:00';
         finish = '2025-03-05 10:00:00';
@@ -4992,8 +5059,8 @@ function CHECK_TOS_WEEKLY_CONTENTS_RESTRICT_TIME()
 end
 
     if nation == 3 then
-        start = '2025-07-01 00:00:00';
-        finish = '2025-07-02 10:00:00';    
+        start = '2026-02-09 00:00:00';
+        finish = '2026-02-10 10:00:00';    
     end
 
     if date_time.is_between_time(start, finish) == true then
@@ -5222,3 +5289,69 @@ function GET_BORUTA_REWARD(event_id)
     
     return reward, max_rank
 end
+
+
+function GetMyGuildObject()
+	local guild_obj = nil
+	local guild = session.party.GetPartyInfo(PARTY_GUILD)
+	if guild ~= nil then
+		guild_obj = GetIES(guild:GetObject())
+        end
+	return guild_obj
+end
+
+function GetRemainingPenaltyTime(join_time, cur_time, period_days)
+    -- 1. 날짜 문자열을 파싱하여 os.time용 테이블로 변환하는 내부 함수
+    local function parse_time(time_str)
+        local y, m, d, H, M, S = time_str:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+        return os.time({year=y, month=m, day=d, hour=H, min=M, sec=S})
+    end
+
+    -- 2. 문자열을 Timestamp(초 단위)로 변환
+    local join_ts = parse_time(join_time)
+    local cur_ts = parse_time(cur_time)
+
+    -- 3. period_days일을 초 단위로 계산 (30일 * 24시간 * 60분 * 60초)
+    local thirty_days_sec = period_days * 24 * 60 * 60
+    
+    -- 4. 가입일로부터 period_days일 후의 시간(만료 시간) 계산
+    local expire_ts = join_ts + thirty_days_sec
+
+    -- 5. 비교 및 결과 반환
+    if cur_ts >= expire_ts then
+        -- period_days일이 지났음
+        return true, 0, 0, 0
+    else
+        -- period_days일이 지나지 않음 -> 남은 시간 계산
+        local remain_sec = expire_ts - cur_ts
+        
+        local days = math.floor(remain_sec / 86400) -- 1일 = 86400초
+        remain_sec = remain_sec % 86400
+        
+        local hours = math.floor(remain_sec / 3600) -- 1시간 = 3600초
+        remain_sec = remain_sec % 3600
+        
+        local mins = math.floor(remain_sec / 60)    -- 1분 = 60초
+        
+        -- 포맷팅 (예: 29일 3시간 15분)        
+        return false, days, hours, mins
+    end
+end
+
+
+function IS_VALID_RECYCLE_ITEM(invitem)    
+    if TryGetProp(invitem, 'TeamBelonging', 0) == 1 then
+        return false, 'DontSellTaembelongingItem'
+    end
+
+    if TryGetProp(invitem, 'CharacterBelonging', 0) == 1 then
+        return false, 'DontSellCharacterbelongingItem'
+    end
+
+    if TryGetProp(invitem, 'LifeTime', 0) > 0 then
+        return false, 'TimelimitedItemsCannotBeUsed'
+    end
+
+    return true, 'None'
+end
+
