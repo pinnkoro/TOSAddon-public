@@ -32,6 +32,11 @@ Tree of Savior 用のアドオンを作成・改変しています。
 <details>
 <summary>紹介画像 & 更新履歴 (Nexus Addons)</summary>
 
+*   **v1.1.8**
+    *   Quick Launcher: 追加。`` ` ``キーまたはアドオンメニューから、Indun Panel / Indun List Viewer / ギルドアジト移動へワンクリックでアクセス。
+    *   Auto Repair: 修理キットのアイテムID修正（Lv.540→Lv.550）。キットが検出されず繰り返し購入する不具合を修正。
+    *   Another Warehouse: 設定変更が保存されない不具合を修正。
+    *   内部処理: 設定ファイル（save/load）の書き込みをテンポラリファイル経由に変更し、破損耐性を向上。
 *   **v1.1.7**
     *   Indun Panel / Indun List Viewer / Quickslot Operate: 新レイド「ズメイ」対応。
     *   Indun List Viewer: 掃討バフお知らせにズメイを追加。新規／旧設定移行ユーザーでレイドが表示されない不具合を修正。

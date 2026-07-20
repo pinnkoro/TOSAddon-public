@@ -29,10 +29,12 @@
 -- 1.1.4 AS表示名をカスタマイズ可能に
 -- 1.1.5 CCHロード処理見直し、AS位置固定修正、TOSモンスター検索修正、CCHレベル判定修正、IP掃討ボタンの挙動修正、NCアイテム連続使用ロジック修正
 -- 1.1.6 AS%表示追加、IPフィールド表示修正、TOS表示位置修正、SGT無効処理追加
+-- 1.1.7 ズメイを全機能に対応(IP/ILV/quickslot)
+-- 1.1.8 Quick Launcher追加(`キー/メニュー)、Auto RepairアイテムID修正(Lv550)、Another Warehouse保存修正、save/load堅牢化
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.6"
+local ver = "1.1.8"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -152,23 +154,34 @@ function g.save_lua(path, tbl)
         elseif type(o) == "boolean" then
             return tostring(o)
         elseif type(o) == "table" then
-            local s = "{\n"
+            local parts = {"{\n"}
             for k, v in pairs(o) do
-                s = s .. "[" .. serialize(k) .. "]=" .. serialize(v) .. ",\n"
+                parts[#parts + 1] = "[" .. serialize(k) .. "]=" .. serialize(v) .. ",\n"
             end
-            return s .. "}"
+            parts[#parts + 1] = "}"
+            return table.concat(parts)
         else
             return "nil"
         end
     end
-    local file, err = io.open(path, "w")
+    local ok_s, content = pcall(function() return "return " .. serialize(tbl) end)
+    if not ok_s or not content then
+        if ts then ts("Save Lua Serialize Error:", tostring(content)) end
+        return
+    end
+    local tmp_path = path .. ".tmp"
+    local file, err = io.open(tmp_path, "w")
     if file then
-        file:write("return " .. serialize(tbl))
+        local ok_w, w_err = file:write(content)
         file:close()
-    else
-        if ts then
-            ts("Save Lua Error:", err)
+        if ok_w then
+            os.remove(path)
+            os.rename(tmp_path, path)
+        else
+            if ts then ts("Save Lua Write Error:", tostring(w_err)) end
         end
+    else
+        if ts then ts("Save Lua Error:", err) end
     end
 end
 
@@ -180,17 +193,49 @@ function g.load_lua(path)
             return result
         end
     end
+    local tmp_path = path .. ".tmp"
+    local tmp_chunk = loadfile(tmp_path)
+    if tmp_chunk then
+        local status, result = pcall(tmp_chunk)
+        if status then
+            os.remove(path)
+            os.rename(tmp_path, path)
+            return result
+        end
+    end
     return nil
 end
 
 function g.load_json(path)
     local file = io.open(path, "r")
     if not file then
+        local tmp_file = io.open(path .. ".tmp", "r")
+        if tmp_file then
+            local tmp_content = tmp_file:read("*all")
+            tmp_file:close()
+            if tmp_content and tmp_content ~= "" then
+                os.remove(path)
+                os.rename(path .. ".tmp", path)
+                local s, r = pcall(json.decode, tmp_content)
+                if s then return r, nil end
+            end
+        end
         return nil, "Error opening file: " .. path
     end
     local content = file:read("*all")
     file:close()
     if not content or content == "" then
+        local tmp_file = io.open(path .. ".tmp", "r")
+        if tmp_file then
+            local tmp_content = tmp_file:read("*all")
+            tmp_file:close()
+            if tmp_content and tmp_content ~= "" then
+                os.remove(path)
+                os.rename(path .. ".tmp", path)
+                local s, r = pcall(json.decode, tmp_content)
+                if s then return r, nil end
+            end
+        end
         return nil, "File content is empty or could not be read: " .. path
     end
     if string.sub(content, 1, 3) == "\239\187\191" then
@@ -587,6 +632,15 @@ g._nexus_addons = {{
         old_init_func = "PICK_ITEM_TRACKER_ON_INIT"
     }
 }, {
+    key = "quick_launcher",
+    data = {
+        use = 0,
+        name = "Quick Launcher",
+        frame_use = false,
+        config_func = "",
+        old_init_func = ""
+    }
+}, {
     key = "quickslot_operate",
     data = {
         use = 0,
@@ -936,6 +990,11 @@ g._nexus_addons_trans = {
         ja = "{ol}アーキオロジー用アドオン",
         etc = "{ol}Addon for Archaeology",
         kr = "{ol}아키올로지용 애드온"
+    },
+    ["quick_launcher"] = {
+        ja = "{ol}Ctrl+`でクイックランチャーを表示{nl}インダンパネルやギルドアジトへの移動など",
+        etc = "{ol}Show Quick Launcher with Ctrl+`{nl}Open Indun Panel, move to Guild Agit, etc.",
+        kr = "{ol}Ctrl+`로 퀵 런처 표시{nl}인던 패널 열기, 길드 아지트 이동 등"
     } --[[,
     ["ancient_monster_bookshelf"] = { -- "archeology_helper"--"ancient_monster_bookshelf"
         ja = "{ol}ebisukeさん作成{nl}アシスターカード整理アドオン",
@@ -10445,6 +10504,7 @@ function Another_warehouse_on_rbutton(frame, slot, iesid, argnum)
                 break
             end
         end
+        Another_warehouse_save_settings()
         Another_warehouse_set_items_setting(index, name_text)
         return
     end
@@ -28471,7 +28531,7 @@ end
 
 -- Auto Repaire ここから
 g.auto_repair = {
-    item_cls_id = 11202000,
+    item_cls_id = 11201388,
     repair_item = "AustejaCertificate_14",
     shop_type = "AustejaCertificate"
 }
@@ -29064,6 +29124,164 @@ function Bulk_sales_sell_execution()
     Bulk_sales_frame_close()
 end
 -- Bulk Sales　ここまで
+
+-- Quick Launcher ここから
+function quick_launcher_on_init()
+    local _nexus_addons = ui.GetFrame("_nexus_addons")
+    local ql_hotkey_timer = _nexus_addons:CreateOrGetControl("timer", "quick_launcher_hotkey_timer", 0, 0)
+    AUTO_CAST(ql_hotkey_timer)
+    ql_hotkey_timer:SetUpdateScript("Quick_launcher_hotkey_check")
+    ql_hotkey_timer:Start(0.15)
+    _G["norisan"] = _G["norisan"] or {}
+    _G["norisan"]["MENU"] = _G["norisan"]["MENU"] or {}
+    _G["norisan"]["MENU"]["quick_launcher"] = {
+        name = "Quick Launcher",
+        icon = "sysmenu_sys",
+        func = "Quick_launcher_toggle",
+        image = ""
+    }
+end
+
+g.quick_launcher_hotkey_pressed = false
+function Quick_launcher_hotkey_check()
+    local grave = keyboard.IsKeyPressed("GRAVE") == 1
+    if grave then
+        if not g.quick_launcher_hotkey_pressed then
+            g.quick_launcher_hotkey_pressed = true
+            Quick_launcher_toggle()
+        end
+    else
+        g.quick_launcher_hotkey_pressed = false
+    end
+end
+
+function Quick_launcher_toggle()
+    local ql = ui.GetFrame(addon_name_lower .. "quick_launcher")
+    if ql and ql:IsVisible() == 1 then
+        Quick_launcher_close()
+    else
+        Quick_launcher_frame_init()
+    end
+end
+
+function Quick_launcher_get_items()
+    local items = {}
+    table.insert(items, {
+        name = "Indun Panel",
+        action = "Quick_launcher_open_indun_panel"
+    })
+    table.insert(items, {
+        name = "Indun List Viewer",
+        action = "Quick_launcher_open_indun_list_viewer"
+    })
+    table.insert(items, {
+        name = "Guild Agit",
+        action = "Quick_launcher_guild_agit_move"
+    })
+    return items
+end
+
+function Quick_launcher_frame_init()
+    local items = Quick_launcher_get_items()
+    local btn_w = 200
+    local btn_h = 35
+    local btn_spc = 8
+    local padding = 15
+    local title_h = 30
+    local frame_w = btn_w + (padding * 2)
+    local frame_h = title_h + (#items * btn_h) + ((#items - 1) * btn_spc) + (padding * 2)
+
+    local ql = ui.CreateNewFrame("notice_on_pc", addon_name_lower .. "quick_launcher", 0, 0, 0, 0)
+    ql:RemoveAllChild()
+    ql:Resize(frame_w, frame_h)
+    ql:SetSkinName("None")
+    ql:SetTitleBarSkin("None")
+    ql:SetLayerLevel(100)
+    ql:EnableHittestFrame(1)
+    ql:EnableMove(1)
+
+    local sw = ui.GetClientInitialWidth()
+    local sh = ui.GetClientInitialHeight()
+    ql:SetPos((sw - frame_w) / 2, (sh - frame_h) / 2)
+
+    local title = ql:CreateOrGetControl("richtext", "ql_title", padding, 8, frame_w - padding * 2, 20)
+    AUTO_CAST(title)
+    title:SetText("{ol}{s14}{b}Quick Launcher")
+
+    local close_btn = ql:CreateOrGetControl("button", "ql_close", 0, 0, 20, 20)
+    AUTO_CAST(close_btn)
+    close_btn:SetImage("testclose_button")
+    close_btn:SetGravity(ui.RIGHT, ui.TOP)
+    close_btn:SetEventScript(ui.LBUTTONUP, "Quick_launcher_close_btn")
+
+    for i, item in ipairs(items) do
+        local x = padding
+        local y = title_h + padding + (i - 1) * (btn_h + btn_spc)
+
+        local btn = ql:CreateOrGetControl("button", "ql_btn_" .. i, x, y, btn_w, btn_h)
+        AUTO_CAST(btn)
+        btn:SetText("{ol}" .. item.name)
+        btn:SetEventScript(ui.LBUTTONUP, item.action)
+        btn:SetOverSound("button_over")
+        btn:SetClickSound("button_click_stats")
+    end
+
+    local esc_timer = ql:CreateOrGetControl("timer", "ql_esc_timer", 0, 0)
+    AUTO_CAST(esc_timer)
+    esc_timer:SetUpdateScript("Quick_launcher_esc_check")
+    esc_timer:Start(0.05)
+
+    ql:ShowWindow(1)
+end
+
+function Quick_launcher_close()
+    local ql = ui.GetFrame(addon_name_lower .. "quick_launcher")
+    if ql then
+        ql:ShowWindow(0)
+    end
+end
+
+function Quick_launcher_close_btn()
+    Quick_launcher_close()
+end
+
+function Quick_launcher_esc_check(frame)
+    local esc = keyboard.IsKeyPressed("ESCAPE") == 1
+    if esc then
+        Quick_launcher_close()
+    end
+end
+
+function Quick_launcher_open_indun_panel()
+    Quick_launcher_close()
+    local indun_panel = ui.GetFrame(addon_name_lower .. "indun_panel")
+    if not indun_panel then
+        Indun_panel_frame_init()
+        indun_panel = ui.GetFrame(addon_name_lower .. "indun_panel")
+    end
+    if indun_panel then
+        Indun_panel_frame_open(indun_panel)
+    end
+end
+
+function Quick_launcher_open_indun_list_viewer()
+    Quick_launcher_close()
+    if type(_G["Indun_list_viewer_title_frame_open"]) == "function" then
+        Indun_list_viewer_title_frame_open()
+    end
+end
+
+function Quick_launcher_guild_agit_move()
+    Quick_launcher_close()
+    local success, err = pcall(function()
+        guild.RequestGuildAgitMove()
+    end)
+    if not success then
+        ui.SysMsg("[Quick Launcher] Guild Agit move failed: " .. tostring(err))
+    end
+end
+
+-- Quick Launcher ここまで
 
 -- アドオンメニューボタン
 local norisan_menu_addons = string.format("../%s", "addons")
