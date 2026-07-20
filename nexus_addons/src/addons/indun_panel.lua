@@ -305,10 +305,12 @@ function indun_panel_on_init()
     -- (Indun_panel_frame_open → Indun_panel_sync_mine_shop)へ移した。
     if not g.indun_panel_settings then
         Indun_panel_load_settings()
-        Indun_panel_frame_init()
     end
     g.setup_hook_and_event(g.addon, "CHAT_SYSTEM", "Indun_panel_CHAT_SYSTEM", true)
     -- 機能OFF: フレームを破棄し、パネル用フック(ESCAPE/INDUN_ALREADY_PLAYING)は張らない。
+    -- use チェックはフレーム構築より前に置く。これで機能OFF時に一度フレームを組んで
+    -- 即破棄する(map パネル破棄や save_current_char_counts の副作用込みの)無駄を無くす。
+    -- フレーム構築は下の `if not indun_panel` に一本化した(初回/再init どちらもここを通る)。
     if g.settings.indun_panel.use == 0 then
         ui.DestroyFrame(addon_name_lower .. "indun_panel")
         ui.DestroyFrame(addon_name_lower .. "indun_panel_map")
@@ -326,7 +328,8 @@ end
 -- インベントリ等の排他UIを閉じるため、開いていたインベントリを記録しておき、
 -- 同期完了時(Indun_panel_earthtowershop_close)に復元する。
 -- 同期を開始できたら true、ショップフレーム未取得で空振りしたら false を返す。
--- (呼び出し側は成功時のみ synced フラグを立て、失敗時は次の展開で再試行する)
+-- (呼び出し側は開始時に syncing を立てて二重起動を防ぎ、synced は完了時=
+--  Indun_panel_earthtowershop_close で立てる。空振り時は何も立てず次の展開で再試行する)
 function Indun_panel_sync_mine_shop()
     local earthtowershop = ui.GetFrame('earthtowershop')
     if not earthtowershop then
@@ -344,6 +347,11 @@ function Indun_panel_earthtowershop_close(earthtowershop)
     if earthtowershop:IsVisible() == 1 then
         earthtowershop:Resize(580, 1920)
         ui.CloseFrame("earthtowershop")
+        -- 同期完了(ショップが実際に開いて ssn_shop を取得できた)。以後セッション中は再同期しない。
+        -- synced をここで立てることで、ショップが一度も開けなかった場合は synced が立たず
+        -- 次の展開で再試行される(開始時点で立てると空取得のまま固定される問題を防ぐ)。
+        g.indun_panel_mine_synced = true
+        g.indun_panel_mine_syncing = false
         -- 同期のためにゲームが閉じたインベントリを、元々開いていたら復元する
         if g.indun_panel_inv_restore then
             g.indun_panel_inv_restore = false
@@ -667,8 +675,15 @@ end
 function Indun_panel_frame_drag(indun_panel)
     -- ネイティブ移動(EnableMove)で動かした後の座標を保存するだけ。
     -- リビルド(frame_init)しないことで、展開表示を畳まずに位置を維持する。
-    g.indun_panel_settings.etc.x = indun_panel:GetX()
-    g.indun_panel_settings.etc.y = indun_panel:GetY()
+    -- LBUTTONUP は移動を伴わない単なるクリックでも発火するため、位置が変わっていなければ
+    -- JSON 書き込み(save_settings)を省いて無駄なディスク I/O を避ける。
+    local x = indun_panel:GetX()
+    local y = indun_panel:GetY()
+    if x == g.indun_panel_settings.etc.x and y == g.indun_panel_settings.etc.y then
+        return
+    end
+    g.indun_panel_settings.etc.x = x
+    g.indun_panel_settings.etc.y = y
     Indun_panel_save_settings()
 end
 
@@ -867,10 +882,11 @@ end
 function Indun_panel_frame_open(indun_panel)
     -- 展開表示で使う PVP_MINE 購入可能数は ssn_shop(セッションのショップ値)に入るため、
     -- セッション中まだ同期していなければ、ここで一度だけショップを開いて取得する。
-    -- (取得は非同期。完了時に Indun_panel_earthtowershop_close が展開中パネルを再描画する)
-    -- 同期が実際に開始できた時だけ synced を立てる。空振り時はフラグを残さず次回再試行。
-    if not g.indun_panel_mine_synced and Indun_panel_sync_mine_shop() then
-        g.indun_panel_mine_synced = true
+    -- (取得は非同期。完了時に Indun_panel_earthtowershop_close が展開中パネルを再描画し、
+    --  そこで synced を立てる)。syncing は開始〜完了間のガードで、二重にショップを開かない。
+    -- 空振り(ショップフレーム未取得)時は何も立てず次回展開で再試行する。
+    if not g.indun_panel_mine_synced and not g.indun_panel_mine_syncing and Indun_panel_sync_mine_shop() then
+        g.indun_panel_mine_syncing = true
     end
     indun_panel:RemoveAllChild()
     Indun_panel_setup_frame(indun_panel)
