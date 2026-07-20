@@ -47,7 +47,8 @@ jobs:
           # リリースノート: このコミットに紐づく(マージ済み)PR の本文を流用
           gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" \
             --jq '.[0].body // ""' > "${RUNNER_TEMP}/notes.md" || : > "${RUNNER_TEMP}/notes.md"
-          if [ ! -s "${RUNNER_TEMP}/notes.md" ]; then
+          # jq は空でも改行を出すため、空白のみ(= 実質空)なら既定ノートに差し替える
+          if ! grep -q '[^[:space:]]' "${RUNNER_TEMP}/notes.md"; then
             printf 'Nexus Addons %s\n' "$version" > "${RUNNER_TEMP}/notes.md"
           fi
 
