@@ -19,9 +19,17 @@ Tree of Savior アドオン .ipf の「平文(decrypted)コンテナ」を生成
 
 使い方:
     python build_addon_ipf.py <addon_source_dir> <addon_name> <out.ipf>
+                              [--require <内部パス[,内部パス...]>]
 例:
     python build_addon_ipf.py ./nexus_addons _nexus_addons ./_nexus_addons.ipf
     ( ./nexus_addons/_nexus_addons/ 配下の全ファイルを詰める )
+
+--require:
+    コンテナに必ず含まれていなければならない内部パスを指定する（複数可 / カンマ区切り可）。
+    nexus_addons の bundle .lua は .gitignore 済みの生成物なので、bundle_from_src.py を
+    先に走らせ忘れると本体を欠いた .ipf が「成功」表示で作られてしまう。それを防ぐため、
+    生成物を必須指定して不在なら失敗させる:
+        --require _nexus_addons/_nexus_addons.lua,_nexus_addons/_nexus_addons_conclude.lua
 """
 import os
 import sys
@@ -97,12 +105,42 @@ def build_ipf(files, out_path: str) -> str:
     return out_path
 
 
+def parse_args(argv):
+    """(positional, required_paths) を返す。--require は複数/カンマ区切り可。"""
+    positional, required = [], []
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == "--require":
+            i += 1
+            if i >= len(argv):
+                raise SystemExit("--require には内部パスの指定が必要")
+            required += [p for p in argv[i].split(",") if p]
+        elif a.startswith("--require="):
+            required += [p for p in a[len("--require="):].split(",") if p]
+        else:
+            positional.append(a)
+        i += 1
+    return positional, required
+
+
 def main():
-    if len(sys.argv) != 4:
+    positional, required = parse_args(sys.argv[1:])
+    if len(positional) != 3:
         print(__doc__)
         raise SystemExit(2)
-    src_dir, addon, out = sys.argv[1], sys.argv[2], sys.argv[3]
+    src_dir, addon, out = positional
     files = collect_files(src_dir, addon)
+    # bundle 未生成のまま詰めて壊れた .ipf を黙って出すのを防ぐ。
+    if not files:
+        raise SystemExit(f"アドオンフォルダが空: {os.path.join(src_dir, addon)}")
+    present = {p for p, _ in files}
+    missing = [r for r in required if r not in present]
+    if missing:
+        raise SystemExit(
+            "[ipf] 必須ファイルがコンテナに含まれない（bundle 未生成の可能性）:\n  "
+            + "\n  ".join(missing)
+            + "\n  → 先に `python docs/bundle_from_src.py` を実行すること。")
     build_ipf(files, out)
     print(f"built(plain): {out}  ({len(files)} files)")
     for p, b in files:
