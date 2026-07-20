@@ -2444,6 +2444,15 @@ local induns = {{
         icon = {"Item", 11030017}
     }
 }, {
+    zmei = {
+        h = 731,
+        s = 730,
+        a = 729,
+        ac = 80047,
+        jp = "ズメイ",
+        icon = {"Monster", 71076}
+    }
+}, {
     belliora = {
         h = 727,
         s = 726,
@@ -2614,9 +2623,9 @@ function Indun_panel_load_settings()
     g.indun_panel_path = string.format("../addons/%s/%s/indun_panel.json", addon_name_lower, g.active_id)
     g.indun_panel_old_path = string.format("../addons/%s/%s/settings.json", "indun_panel", g.active_id)
     local settings = g.load_json(g.indun_panel_path)
-    local indun_keys = {"challenge", "singularity", "belliora", "laimara", "ledania", "neringa", "golem", "merregina",
-                        "slogutis", "upinis", "roze", "falouros", "reservoir", "jellyzele", "delmore", "telharsha",
-                        "bernice", "giltine", "memory", "wailing", "ashaq", "jsr"}
+    local indun_keys = {"challenge", "singularity", "zmei", "belliora", "laimara", "ledania", "neringa", "golem",
+                        "merregina", "slogutis", "upinis", "roze", "falouros", "reservoir", "jellyzele", "delmore",
+                        "telharsha", "bernice", "giltine", "memory", "wailing", "ashaq", "jsr"}
     local json_to_indun_map = {
         veliora = "belliora",
         limara = "laimara",
@@ -2700,6 +2709,16 @@ function Indun_panel_load_settings()
                             settings.etc[k] = v
                         end
                     end
+                end
+            end
+        end
+    end
+    -- 新ダンジョン追加時のバックフィル: 既存ユーザーの保存済み設定に無いキーを既定ON(1)で補完
+    for _, set_name in ipairs({"set_a", "set_b", "set_c"}) do
+        if type(settings[set_name]) == "table" then
+            for _, name in ipairs(indun_keys) do
+                if settings[set_name][name] == nil then
+                    settings[set_name][name] = 1
                 end
             end
         end
@@ -3710,9 +3729,9 @@ function Indun_panel_frame_contents(configbtn)
                             Indun_panel_singularity_frame(indun_panel, key, sub_key, sub_value, y, x)
                         end
                     end
-                elseif key == "belliora" or key == "laimara" or key == "ledania" or key == "neringa" or key == "golem" or
-                    key == "merregina" or key == "slogutis" or key == "upinis" or key == "roze" or key == "falouros" or
-                    key == "reservoir" then -- レイド系 (onsweep)
+                elseif key == "zmei" or key == "belliora" or key == "laimara" or key == "ledania" or key == "neringa" or
+                    key == "golem" or key == "merregina" or key == "slogutis" or key == "upinis" or key == "roze" or
+                    key == "falouros" or key == "reservoir" then -- レイド系 (onsweep)
                     for sub_key, sub_value in pairs(value) do
                         if sub_key ~= "jp" and sub_key ~= "icon" then
                             Indun_panel_create_frame_onsweep(indun_panel, key, sub_key, sub_value, y, x)
@@ -4356,6 +4375,7 @@ function Indun_panel_enter_singularity(frame, ctrl, str, indun_type)
 end
 
 local raid_tbl = {
+    [729] = {11210063, 11210062, 11210061},
     [725] = {11210057, 11210056, 11210055},
     [722] = {11210053, 11210052, 11210051},
     [716] = {11210044, 10820040, 11210043, 11210042},
@@ -4367,6 +4387,7 @@ local raid_tbl = {
     [679] = {108020026, 11200222, 11200221, 11200220}
 }
 local buff_ids = {
+    [729] = 80047, -- ズメイ
     [725] = 80045, -- ベリオラ
     [722] = 80043, -- ライマラ
     [716] = 80039, -- レダニア
@@ -14488,8 +14509,16 @@ end
 -- Instant CC ここまで
 
 -- ndun_list_viewer ここから
-g.ilv_RAID_KEYS = {"V", "L", "R", "N", "G", "M", "S", "U", "RO", "F", "P", "D"}
+g.ilv_RAID_KEYS = {"Z", "V", "L", "R", "N", "G", "M", "S", "U", "RO", "F", "P", "D"}
 g.ilv_RAID_INFO = {
+    Z = {
+        name = "Zmei",
+        hard = 731,
+        solo = 730,
+        auto = 729,
+        icon = "icon_item_misc_boss_Zmei",
+        sweep_buff = 80047
+    },
     V = {
         name = "Veliora",
         hard = 727,
@@ -14587,6 +14616,14 @@ g.ilv_RAID_INFO = {
         sweep_buff = nil
     }
 }
+-- 掃討バフ(sweep_buff)一覧は ilv_RAID_INFO から生成する。
+-- 新レイド追加時に個別リストを手動更新する必要をなくし、更新漏れを防ぐ。
+g.ilv_sweep_buffs = {}
+for _, info in pairs(g.ilv_RAID_INFO) do
+    if info.sweep_buff then
+        table.insert(g.ilv_sweep_buffs, info.sweep_buff)
+    end
+end
 function Indun_list_viewer_save_settings()
     g.save_lua(g.ilv_path, g.ilv_settings)
 end
@@ -14597,7 +14634,7 @@ function Indun_list_viewer_load_settings()
     g.ilv_old_path = string.format("../addons/%s/%s/settings_2510.json", "indun_list_viewer", g.active_id)
     local settings = g.load_lua(g.ilv_path)
     local need_save = false
-    local ver = 1.1
+    local ver = 1.2 -- ズメイ追加: 既存ユーザーの display に Zmei_H/Zmei_S を補完するため繰り上げ
     if not settings then
         settings = g.load_json(json_path)
         if settings then
@@ -14611,7 +14648,7 @@ function Indun_list_viewer_load_settings()
                 options = old_settings.default_options or {},
                 display = old_settings.display_options or {},
                 chars = {},
-                ver = ver
+                ver = 0 -- 新規作成時は0にし、下のバックフィルで display の H/S キーを補完させる
             }
             for key, data in pairs(old_settings) do
                 if type(data) == "table" and key ~= "default_options" and key ~= "display_options" then
@@ -14629,7 +14666,7 @@ function Indun_list_viewer_load_settings()
                     Memo = 1
                 },
                 chars = {},
-                ver = ver
+                ver = 0 -- 新規作成時は0にし、下のバックフィルで display の H/S キーを補完させる
             }
         end
         need_save = true
@@ -14779,7 +14816,7 @@ function Indun_list_viewer_CHECK_ALERT(type)
             need_item = (list ~= nil and #list > 0)
             need_token = IS_NEED_TO_ALERT_TOKEN_EXPIRATION(near_future_sec)
         end
-        local sweep_buffs = {80045, 80043, 80039, 80035, 80037, 80032, 80031, 80030, 80015, 80017, 80016}
+        local sweep_buffs = g.ilv_sweep_buffs
         local sweep_tbl = {}
         local my_handle = session.GetMyHandle()
         local limit_time_ms = 12 * 60 * 60 * 1000
@@ -15517,7 +15554,7 @@ function Indun_list_viewer_INSTANTCC_DO_CC(parent, ctrl, cid, layer)
             need_alert = true
         end
     end
-    local sweep_buffs = {80045, 80043, 80039, 80035, 80037, 80032, 80031, 80030, 80015, 80017, 80016}
+    local sweep_buffs = g.ilv_sweep_buffs
     local sweep_tbl = {}
     local my_handle = session.GetMyHandle()
     local limit_time_ms = 12 * 60 * 60 * 1000
@@ -22030,14 +22067,14 @@ end
 -- quickslot_operate ここから
 g.quickslot_operate_raid_list = {
     Paramune = {623, 667, 666, 665, 674, 673, 675, 680, 679, 681, 707, 708, 710, 711, 709, 712, 722, 723, 724, 725, 726,
-                727},
+                727, 729, 730, 731},
     Klaida = {686, 685, 687, 716, 717, 718},
     Velnias = {689, 688, 690, 669, 635, 628, 696, 695, 697},
     Forester = {672, 671, 670},
     Widling = {677, 676, 678}
 }
 g.quickslot_operate_zone_list = {11208, 11230, 11250, 11252, 11256, 11257, 11261, 11263, 11266, 11267, 11270, 11276,
-                                 11277, 11278, 11285, 11286}
+                                 11277, 11278, 11285, 11286, 11291}
 -- 11267=ドラグーン 11257=バウバス 11290=アシャーク
 g.quickslot_guild_eventmap = {11267, 11257, 11290, 11285, 11286}
 g.quickslot_operate_atk_list = {
