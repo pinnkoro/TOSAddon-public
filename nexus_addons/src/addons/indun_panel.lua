@@ -299,21 +299,20 @@ function Indun_panel_load_settings()
 end
 
 function indun_panel_on_init()
-    if not g.indun_panel_settings then
-        local earthtowershop = ui.GetFrame('earthtowershop')
-        earthtowershop:Resize(0, 0)
-        pc.ReqExecuteTx_NumArgs("SCR_PVP_MINE_SHOP_OPEN", 0)
-        earthtowershop:RunUpdateScript("Indun_panel_earthtowershop_close", 0.1)
-        Indun_panel_load_settings()
-        Indun_panel_frame_init()
-    end
-    g.setup_hook_and_event(g.addon, "CHAT_SYSTEM", "Indun_panel_CHAT_SYSTEM", true)
-    g.addon:RegisterMsg("ESCAPE_PRESSED", "Indun_panel_frame_init")
+    -- Indun Panel が無効なら、ショップ同期もフック登録もフレーム生成も一切行わない。
+    -- (以前は use 判定より前に PVP_MINE ショップを開いていたため、機能OFFでも
+    --  ログイン時にショップが開き、ゲームの排他UI仕様でインベントリが閉じていた)
     if g.settings.indun_panel.use == 0 then
         ui.DestroyFrame(addon_name_lower .. "indun_panel")
         ui.DestroyFrame(addon_name_lower .. "indun_panel_map")
         return
     end
+    if not g.indun_panel_settings then
+        Indun_panel_load_settings()
+        Indun_panel_frame_init()
+    end
+    g.setup_hook_and_event(g.addon, "CHAT_SYSTEM", "Indun_panel_CHAT_SYSTEM", true)
+    g.addon:RegisterMsg("ESCAPE_PRESSED", "Indun_panel_frame_init")
     local indun_panel = ui.GetFrame(addon_name_lower .. "indun_panel")
     if not indun_panel then
         Indun_panel_frame_init()
@@ -321,10 +320,35 @@ function indun_panel_on_init()
     g.setup_hook_and_event(g.addon, "INDUN_ALREADY_PLAYING", "Indun_panel_INDUN_ALREADY_PLAYING", false)
 end
 
+-- PVP_MINE ショップを一瞬開いて ssn_shop を同期する。ショップを開くとゲームが
+-- インベントリ等の排他UIを閉じるため、開いていたインベントリを記録しておき、
+-- 同期完了時(Indun_panel_earthtowershop_close)に復元する。
+function Indun_panel_sync_mine_shop()
+    local earthtowershop = ui.GetFrame('earthtowershop')
+    if not earthtowershop then
+        return
+    end
+    local inventory = ui.GetFrame("inventory")
+    g.indun_panel_inv_restore = (inventory and inventory:IsVisible() == 1) and true or false
+    earthtowershop:Resize(0, 0)
+    pc.ReqExecuteTx_NumArgs("SCR_PVP_MINE_SHOP_OPEN", 0)
+    earthtowershop:RunUpdateScript("Indun_panel_earthtowershop_close", 0.1)
+end
+
 function Indun_panel_earthtowershop_close(earthtowershop)
     if earthtowershop:IsVisible() == 1 then
         earthtowershop:Resize(580, 1920)
         ui.CloseFrame("earthtowershop")
+        -- 同期のためにゲームが閉じたインベントリを、元々開いていたら復元する
+        if g.indun_panel_inv_restore then
+            g.indun_panel_inv_restore = false
+            ui.OpenFrame("inventory")
+        end
+        -- 同期完了。展開中(高さ>40)のパネルなら再描画して PVP_MINE 数を反映する
+        local indun_panel = ui.GetFrame(addon_name_lower .. "indun_panel")
+        if indun_panel and indun_panel:GetHeight() > 40 then
+            Indun_panel_frame_open(indun_panel)
+        end
         return 1
     else
         return 0
@@ -625,7 +649,9 @@ function Indun_panel_setup_frame(indun_panel)
     local enable = g.indun_panel_settings.etc.move == 0 and 1 or 0
     indun_panel:EnableMove(enable)
     indun_panel:EnableHittestFrame(enable)
-    if g.indun_panel_settings.etc.move == 1 then
+    if g.indun_panel_settings.etc.move == 0 then
+        -- 移動可モード: ドラッグして離した時に現在位置を保存する。
+        -- (固定モード(move==1)は EnableMove(0) で動かせないため保存不要)
         indun_panel:SetEventScript(ui.LBUTTONUP, "Indun_panel_frame_drag")
     else
         indun_panel:SetEventScript(ui.LBUTTONUP, "None")
@@ -633,10 +659,11 @@ function Indun_panel_setup_frame(indun_panel)
 end
 
 function Indun_panel_frame_drag(indun_panel)
+    -- ネイティブ移動(EnableMove)で動かした後の座標を保存するだけ。
+    -- リビルド(frame_init)しないことで、展開表示を畳まずに位置を維持する。
     g.indun_panel_settings.etc.x = indun_panel:GetX()
     g.indun_panel_settings.etc.y = indun_panel:GetY()
     Indun_panel_save_settings()
-    Indun_panel_frame_init()
 end
 
 function Indun_panel_create_common_buttons(indun_panel)
@@ -832,6 +859,13 @@ function Indun_panel_frame_toggle(indun_panel)
 end
 
 function Indun_panel_frame_open(indun_panel)
+    -- 展開表示で使う PVP_MINE 購入可能数は ssn_shop(セッションのショップ値)に入るため、
+    -- セッション中まだ同期していなければ、ここで一度だけショップを開いて取得する。
+    -- (取得は非同期。完了時に Indun_panel_earthtowershop_close が展開中パネルを再描画する)
+    if not g.indun_panel_mine_synced then
+        g.indun_panel_mine_synced = true
+        Indun_panel_sync_mine_shop()
+    end
     indun_panel:RemoveAllChild()
     Indun_panel_setup_frame(indun_panel)
     local btn = indun_panel:CreateOrGetControl("button", "btn", 5, 5, 80, 30)

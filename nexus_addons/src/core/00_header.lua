@@ -35,10 +35,11 @@
 -- 1.1.10 GEWワープに移動可否チェック追加(PVP/レイヤー変更/ダンジョン/レイド地域では不可)、save_jsonをtmp+renameでアトミック化
 -- 1.1.11 yoma16版修正の移植(CCHマルチセット/load堅牢化)、OCSLバラック別グループ表示
 -- 1.1.12 save/load堅牢化(rename失敗検知・load_jsonはdecode成功後に差し替え・atomic_replace共通化)、get_map_type/CCHセット/ILV設定のnilガードとデータ消失防止
+-- 1.1.13 IndunPanelのPVP_MINEショップ同期をログイン時→パネル展開時の遅延同期に変更(セッション中1回・完了後に再描画)。ログイン時にウィンドウが開いてインベントリが閉じる不具合を解消。同期でインベントリが閉じた場合は復元。IndunPanelの位置がドラッグ後に保存されず閉じると戻る不具合を修正(保存ハンドラが固定側分岐にあったのを移動可側に修正)
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.12"
+local ver = "1.1.13"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -149,10 +150,12 @@ function g.setup_hook(my_func, origin_func_name)
     g.FUNCS[origin_func_name] = _G[replace_name]
 end
 
--- tmp を path へアトミックに差し替える。成功可否を返す。
+-- tmp を path へ差し替える(remove→rename)。成功可否を返す。
+-- 厳密なアトミック差し替えではない: remove と rename の間でクラッシュすると path は
+-- 消えるが、tmp に完全な内容が残るため次回 load の .tmp リカバリで復旧できる。この
+-- tmp リカバリと対で実効的な原子性(=設定を失わない)を担保する。
 -- Windows の os.rename は移動先が存在すると失敗するため先に remove する。
--- rename が失敗した場合 path は remove 済みだが tmp に完全な内容が残るので、
--- 次回 load の .tmp リカバリで復旧できる(呼び出し側は false を検知して報告する)。
+-- rename 失敗時は path が remove 済みのまま false を返す(呼び出し側が検知して報告)。
 function g.atomic_replace(tmp_path, path)
     os.remove(path)
     local ok, err = os.rename(tmp_path, path)
@@ -222,41 +225,42 @@ function g.load_lua(path)
     return nil
 end
 
+-- path の .tmp をデコード成功時のみ path へ昇格し、(true, 値) を返す。
+-- 壊れた/空/不在の .tmp は昇格させず(リカバリ元を失わないため) false を返す。
+-- 本体ファイルが開けない/空の 2 経路で共通のリカバリ手順。
+local function load_json_recover_from_tmp(path)
+    local tmp_file = io.open(path .. ".tmp", "r")
+    if not tmp_file then
+        return false
+    end
+    local tmp_content = tmp_file:read("*all")
+    tmp_file:close()
+    if not tmp_content or tmp_content == "" then
+        return false
+    end
+    local s, r = pcall(json.decode, tmp_content)
+    if not s then
+        return false
+    end
+    g.atomic_replace(path .. ".tmp", path)
+    return true, r
+end
+
 function g.load_json(path)
     local file = io.open(path, "r")
     if not file then
-        local tmp_file = io.open(path .. ".tmp", "r")
-        if tmp_file then
-            local tmp_content = tmp_file:read("*all")
-            tmp_file:close()
-            if tmp_content and tmp_content ~= "" then
-                -- デコード成功を確認してから差し替える。壊れた .tmp を
-                -- 正規パスへ昇格させ、リカバリ元を失うのを防ぐ。
-                local s, r = pcall(json.decode, tmp_content)
-                if s then
-                    g.atomic_replace(path .. ".tmp", path)
-                    return r, nil
-                end
-            end
+        local ok, recovered = load_json_recover_from_tmp(path)
+        if ok then
+            return recovered, nil
         end
         return nil, "Error opening file: " .. path
     end
     local content = file:read("*all")
     file:close()
     if not content or content == "" then
-        local tmp_file = io.open(path .. ".tmp", "r")
-        if tmp_file then
-            local tmp_content = tmp_file:read("*all")
-            tmp_file:close()
-            if tmp_content and tmp_content ~= "" then
-                -- デコード成功を確認してから差し替える。壊れた .tmp を
-                -- 正規パスへ昇格させ、リカバリ元を失うのを防ぐ。
-                local s, r = pcall(json.decode, tmp_content)
-                if s then
-                    g.atomic_replace(path .. ".tmp", path)
-                    return r, nil
-                end
-            end
+        local ok, recovered = load_json_recover_from_tmp(path)
+        if ok then
+            return recovered, nil
         end
         return nil, "File content is empty or could not be read: " .. path
     end
