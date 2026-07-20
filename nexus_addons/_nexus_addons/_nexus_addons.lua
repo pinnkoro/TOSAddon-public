@@ -33,10 +33,12 @@
 -- 1.1.8 Auto RepairアイテムID修正(Lv550)、Another Warehouse保存修正、ILVハードモードnilガード、save/load堅牢化
 -- 1.1.9 GEWギルドイベントワープ修正(削除された_BORUTA_ZONE_MOVE_CLICKを封鎖線ランキングと同じMOVE_TO_ENTER_NPCに置換)
 -- 1.1.10 GEWワープに移動可否チェック追加(PVP/レイヤー変更/ダンジョン/レイド地域では不可)、save_jsonをtmp+renameでアトミック化
+-- 1.1.11 yoma16版修正の移植(CCHマルチセット/load堅牢化)、OCSLバラック別グループ表示
+-- 1.1.12 save/load堅牢化(rename失敗検知・load_jsonはdecode成功後に差し替え・atomic_replace共通化)、get_map_type/CCHセット/ILV設定のnilガードとデータ消失防止
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.11"
+local ver = "1.1.12"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -147,6 +149,19 @@ function g.setup_hook(my_func, origin_func_name)
     g.FUNCS[origin_func_name] = _G[replace_name]
 end
 
+-- tmp を path へアトミックに差し替える。成功可否を返す。
+-- Windows の os.rename は移動先が存在すると失敗するため先に remove する。
+-- rename が失敗した場合 path は remove 済みだが tmp に完全な内容が残るので、
+-- 次回 load の .tmp リカバリで復旧できる(呼び出し側は false を検知して報告する)。
+function g.atomic_replace(tmp_path, path)
+    os.remove(path)
+    local ok, err = os.rename(tmp_path, path)
+    if not ok then
+        return false, err
+    end
+    return true
+end
+
 function g.save_lua(path, tbl)
     local function serialize(o)
         if type(o) == "number" then
@@ -177,8 +192,8 @@ function g.save_lua(path, tbl)
         local ok_w, w_err = file:write(content)
         file:close()
         if ok_w then
-            os.remove(path)
-            os.rename(tmp_path, path)
+            local ok_r, r_err = g.atomic_replace(tmp_path, path)
+            if not ok_r and ts then ts("Save Lua Rename Error:", tostring(r_err)) end
         else
             if ts then ts("Save Lua Write Error:", tostring(w_err)) end
         end
@@ -200,8 +215,7 @@ function g.load_lua(path)
     if tmp_chunk then
         local status, result = pcall(tmp_chunk)
         if status then
-            os.remove(path)
-            os.rename(tmp_path, path)
+            g.atomic_replace(tmp_path, path)
             return result
         end
     end
@@ -216,10 +230,13 @@ function g.load_json(path)
             local tmp_content = tmp_file:read("*all")
             tmp_file:close()
             if tmp_content and tmp_content ~= "" then
-                os.remove(path)
-                os.rename(path .. ".tmp", path)
+                -- デコード成功を確認してから差し替える。壊れた .tmp を
+                -- 正規パスへ昇格させ、リカバリ元を失うのを防ぐ。
                 local s, r = pcall(json.decode, tmp_content)
-                if s then return r, nil end
+                if s then
+                    g.atomic_replace(path .. ".tmp", path)
+                    return r, nil
+                end
             end
         end
         return nil, "Error opening file: " .. path
@@ -232,10 +249,13 @@ function g.load_json(path)
             local tmp_content = tmp_file:read("*all")
             tmp_file:close()
             if tmp_content and tmp_content ~= "" then
-                os.remove(path)
-                os.rename(path .. ".tmp", path)
+                -- デコード成功を確認してから差し替える。壊れた .tmp を
+                -- 正規パスへ昇格させ、リカバリ元を失うのを防ぐ。
                 local s, r = pcall(json.decode, tmp_content)
-                if s then return r, nil end
+                if s then
+                    g.atomic_replace(path .. ".tmp", path)
+                    return r, nil
+                end
             end
         end
         return nil, "File content is empty or could not be read: " .. path
@@ -272,16 +292,23 @@ function g.save_json(path, tbl)
         print(string.format("[g.save_json] Write Error in '%s': %s", tostring(tmp_path), tostring(w_err)))
         return false
     end
-    os.remove(path)
-    os.rename(tmp_path, path)
+    local ok_r, r_err = g.atomic_replace(tmp_path, path)
+    if not ok_r then
+        print(string.format("[g.save_json] Rename Error in '%s': %s", tostring(path), tostring(r_err)))
+        return false
+    end
     return true
 end
 
 function g.get_map_type()
     local map_name = session.GetMapName()
     local map_cls = GetClass("Map", map_name)
-    local map_type = map_cls.MapType
-    return map_type
+    -- 未知/インスタンスマップでは GetClass が nil を返しうるので nil ガード。
+    -- 呼び出し側はいずれも文字列比較(== "Dungeon" 等)なので nil で問題ない。
+    if not map_cls then
+        return nil
+    end
+    return map_cls.MapType
 end
 
 function g.debug_print_table(tbl, indent)
@@ -5136,10 +5163,13 @@ function Cc_helper_load_settings()
     for _, k in ipairs(legacy_keys) do
         local newk = tostring(k) .. "_set1"
         if not copys[newk] then
+            -- 移行先が未使用のときだけ再キーして旧キーを削除する。
+            -- 既に "<cid>_set1" が存在する場合は旧エントリを消すと衝突で
+            -- データを失うため、そのまま残す。
             copys[newk] = copys[k]
+            copys[k] = nil
+            need_save = true
         end
-        copys[k] = nil
-        need_save = true
     end
     g.cc_helper_settings = settings
     if need_save then
@@ -5177,6 +5207,7 @@ function Cc_helper_switch_set(n)
     if not cd then
         return
     end
+    Cc_helper_ensure_sets(cd) -- sets/current/items alias が無いキャラでも安全に
     if n < 1 or n > g.cc_helper_set_count then
         n = 1
     end
@@ -5189,7 +5220,12 @@ end
 function Cc_helper_take_item_context(frame, ctrl)
     local title = g.lang == "Japanese" and "{ol}セット選択" or "{ol}Select Set"
     local context = ui.CreateContextMenu("cc_helper_set_context", title, 0, 0, 0, 0)
-    local cur = g.cc_helper_settings[g.cid].current or 1
+    local cd = g.cc_helper_settings and g.cc_helper_settings[g.cid]
+    if not cd then
+        return
+    end
+    Cc_helper_ensure_sets(cd) -- current/sets が未構築でも nil index を避ける
+    local cur = cd.current or 1
     for n = 1, g.cc_helper_set_count do
         local mark = (n == cur) and " {#00FF00}<<" or ""
         local text = string.format("{ol}Set %d%s", n, mark)
@@ -15396,13 +15432,12 @@ function Indun_list_viewer_config(parent)
     AUTO_CAST(text)
     text:SetText(g.lang == "Japanese" and "チェックすると表示" or "{ol}Check to show")
     local x = text:GetX() + text:GetWidth() + 5
-    local text_x = 0
+    -- x はハード枠内でのみ増加するので、初期値 x がそのまま「ハード列の先頭位置」。
+    -- ハードモードのレイドが 1 つも無くても hard_text が x=-40 に飛ばない。
+    local text_x = x
     for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
         local raid_info = g.ilv_RAID_INFO[raid_key]
         if raid_info.hard then
-            if text_x == 0 then
-                text_x = x
-            end
             local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x + 5, 5, 30, 30)
             AUTO_CAST(pic)
             pic:SetImage(raid_info.icon)
