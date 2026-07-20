@@ -4,3 +4,8 @@
 CLAUDE.md
 _client/kr/
 ipf_unpack.exe
+
+# nexus_addons: 生成物（source of truth は nexus_addons/src/**。
+# docs/bundle_from_src.py で再生成する）。手書きの .xml と配布 .ipf は追跡継続。
+/nexus_addons/_nexus_addons/_nexus_addons.lua
+/nexus_addons/_nexus_addons/_nexus_addons_conclude.lua
