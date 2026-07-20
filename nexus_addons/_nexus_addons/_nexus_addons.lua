@@ -36,7 +36,7 @@
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.10"
+local ver = "1.1.11"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -4959,27 +4959,56 @@ function Cc_helper_save_settings()
     g.save_lua(g.cc_helper_path, g.cc_helper_settings)
 end
 
-function Cc_helper_missing_char_data(char_data)
-    if not char_data.items then
-        char_data.items = {}
+g.cc_helper_set_count = 3
+
+-- Ensure the multi-set structure exists and keep char_data.items as a live
+-- alias to the currently selected set's items (minimizes changes elsewhere).
+function Cc_helper_ensure_sets(char_data)
+    if not char_data.sets then
+        char_data.sets = {}
+        -- migrate legacy single-set data into set 1
+        if char_data.items and next(char_data.items) then
+            char_data.sets[1] = {
+                items = char_data.items
+            }
+        end
     end
+    for s = 1, g.cc_helper_set_count do
+        if not char_data.sets[s] then
+            char_data.sets[s] = {
+                items = {}
+            }
+        end
+        if not char_data.sets[s].items then
+            char_data.sets[s].items = {}
+        end
+        for _, key in ipairs(g.cc_helper_item_keys) do
+            if not char_data.sets[s].items[key] then
+                char_data.sets[s].items[key] = {
+                    iesid = "",
+                    clsid = 0,
+                    option = "",
+                    rank = "",
+                    image = ""
+                }
+            end
+        end
+    end
+    if not char_data.current or char_data.current < 1 or char_data.current > g.cc_helper_set_count then
+        char_data.current = 1
+    end
+    -- live alias so existing `[cid].items` reads/writes target the current set
+    char_data.items = char_data.sets[char_data.current].items
+end
+
+function Cc_helper_missing_char_data(char_data)
     char_data.agm = char_data.agm or 0
     char_data.agm_check = char_data.agm_check or 0
     char_data.mcc = char_data.mcc or 0
     if not char_data.name then
         char_data.name = "Unknown"
     end
-    for _, key in ipairs(g.cc_helper_item_keys) do
-        if not char_data.items[key] then
-            char_data.items[key] = {
-                iesid = "",
-                clsid = 0,
-                option = "",
-                rank = "",
-                image = ""
-            }
-        end
-    end
+    Cc_helper_ensure_sets(char_data)
 end
 
 function Cc_helper_load_settings()
@@ -4987,7 +5016,7 @@ function Cc_helper_load_settings()
     local json_path = string.format("../addons/%s/%s/cc_helper.json", addon_name_lower, g.active_id)
     local settings = g.load_lua(g.cc_helper_path)
     local need_save = false
-    local ver = 1.2
+    local ver = 1.3
     if not settings then
         settings = g.load_json(json_path)
         if settings then
@@ -5073,10 +5102,44 @@ function Cc_helper_load_settings()
             Cc_helper_missing_char_data(val)
         end
     end
-    for _, val in pairs(settings.etc.copys) do
+    -- normalize copy sources to single-set entries keyed as "<cid>_set<N>".
+    -- legacy entries (plain cid key, no setnum, possibly whole-char with .sets)
+    -- are collapsed to one item set and re-keyed under "<cid>_set1".
+    local copys = settings.etc.copys
+    local legacy_keys = {}
+    for k, val in pairs(copys) do
         if type(val) == "table" then
-            Cc_helper_missing_char_data(val)
+            if not val.setnum then
+                -- legacy: derive a single item set, drop multi-set structure
+                if not val.items or not next(val.items) then
+                    if val.sets then
+                        local sc = val.current or 1
+                        local sset = val.sets[sc] or val.sets[1]
+                        val.items = (sset and sset.items) or {}
+                    end
+                end
+                val.items = val.items or {}
+                val.sets = nil
+                val.current = nil
+                val.setnum = 1
+                if not string.find(tostring(k), "_set") then
+                    legacy_keys[#legacy_keys + 1] = k
+                end
+            else
+                -- new-format entry: keep it single-set (drop any stale .sets)
+                val.sets = nil
+                val.current = nil
+                val.items = val.items or {}
+            end
         end
+    end
+    for _, k in ipairs(legacy_keys) do
+        local newk = tostring(k) .. "_set1"
+        if not copys[newk] then
+            copys[newk] = copys[k]
+        end
+        copys[k] = nil
+        need_save = true
     end
     g.cc_helper_settings = settings
     if need_save then
@@ -5105,6 +5168,82 @@ function Cc_helper_ensure_settings_loaded()
     end
     if not g.cc_helper_settings[g.cid] then
         Cc_helper_char_load_settings()
+    end
+end
+
+-- Switch the active equipment set (re-points the items alias) and persist.
+function Cc_helper_switch_set(n)
+    local cd = g.cc_helper_settings and g.cc_helper_settings[g.cid]
+    if not cd then
+        return
+    end
+    if n < 1 or n > g.cc_helper_set_count then
+        n = 1
+    end
+    cd.current = n
+    cd.items = cd.sets[n].items
+    Cc_helper_save_settings()
+end
+
+-- Right-click on the "take out (equip)" button: choose which set to equip.
+function Cc_helper_take_item_context(frame, ctrl)
+    local title = g.lang == "Japanese" and "{ol}セット選択" or "{ol}Select Set"
+    local context = ui.CreateContextMenu("cc_helper_set_context", title, 0, 0, 0, 0)
+    local cur = g.cc_helper_settings[g.cid].current or 1
+    for n = 1, g.cc_helper_set_count do
+        local mark = (n == cur) and " {#00FF00}<<" or ""
+        local text = string.format("{ol}Set %d%s", n, mark)
+        ui.AddContextMenuItem(context, text, string.format("Cc_helper_take_item_set(%d)", n))
+    end
+    ui.OpenContextMenu(context)
+end
+
+-- Switch to set n, then run the normal equip (take from warehouse) flow.
+function Cc_helper_take_item_set(n)
+    Cc_helper_switch_set(n)
+    local cch_setting = ui.GetFrame(addon_name_lower .. "cch_setting")
+    if cch_setting and cch_setting:IsVisible() == 1 then
+        Cc_helper_setting_frame_init()
+    end
+    local out_btn = GET_CHILD(ui.GetFrame("accountwarehouse"), "cch_out_btn")
+    if not out_btn or out_btn:IsVisible() == 0 then
+        out_btn = GET_CHILD(ui.GetFrame("inventory"), "cch_out_btn")
+    end
+    if out_btn then
+        Cc_helper_take_item(nil, out_btn, nil, 0)
+    end
+end
+
+-- Set tab in the config frame: switch active set and refresh the slots.
+function Cc_helper_setting_switch_set(frame, ctrl, argstr, n)
+    Cc_helper_switch_set(n)
+    Cc_helper_setting_frame_init()
+end
+
+-- Config-frame "Store" button: unequip current set and deposit to warehouse.
+-- Reuses the warehouse in_btn control so the async operation survives.
+function Cc_helper_setting_deposit()
+    local accountwarehouse = ui.GetFrame("accountwarehouse")
+    if not accountwarehouse or accountwarehouse:IsVisible() == 0 then
+        ui.SysMsg(g.lang == "Japanese" and "倉庫を開いてください" or "Open the warehouse first")
+        return
+    end
+    local in_btn = GET_CHILD(accountwarehouse, "cch_in_btn")
+    if in_btn then
+        Cc_helper_putitem(nil, in_btn, nil, 0)
+    end
+end
+
+-- Config-frame "Equip" button: equip the currently shown set from the warehouse.
+function Cc_helper_setting_equip()
+    local accountwarehouse = ui.GetFrame("accountwarehouse")
+    if not accountwarehouse or accountwarehouse:IsVisible() == 0 then
+        ui.SysMsg(g.lang == "Japanese" and "倉庫を開いてください" or "Open the warehouse first")
+        return
+    end
+    local out_btn = GET_CHILD(accountwarehouse, "cch_out_btn")
+    if out_btn then
+        Cc_helper_take_item(nil, out_btn, nil, 0)
     end
 end
 
@@ -5193,9 +5332,11 @@ function Cc_helper_accountwarehouse_btn_init()
     AUTO_CAST(out_btn)
     out_btn:SetText("{@st66b}{img chul_arrow 20 20}")
     out_btn:SetEventScript(ui.LBUTTONUP, "Cc_helper_take_item")
+    out_btn:SetEventScript(ui.RBUTTONUP, "Cc_helper_take_item_context")
     out_btn:SetSkinName("test_pvp_btn")
-    out_btn:SetTextTooltip(g.lang == "Japanese" and "{ol}[CCH]{nl}倉庫から搬出して装備します" or
-                               "{ol}[CCH]{nl}It is carried out from the warehouse and equipped")
+    out_btn:SetTextTooltip(g.lang == "Japanese" and
+                               "{ol}[CCH]{nl}倉庫から搬出して装備します{nl}左クリック: 現在のセット / 右クリック: セット選択" or
+                               "{ol}[CCH]{nl}It is carried out from the warehouse and equipped{nl}Left: current set / Right: choose set")
     out_btn:ShowWindow(1)
     local auto_close = accountwarehouse:CreateOrGetControl("checkbox", "cch_auto_close", 540, 120, 30, 30)
     AUTO_CAST(auto_close)
@@ -5252,10 +5393,25 @@ function Cc_helper_inventory_btn_init()
         AUTO_CAST(out_btn)
         out_btn:SetText("{@st66b}{img chul_arrow 20 20}")
         out_btn:SetEventScript(ui.LBUTTONUP, "Cc_helper_take_item")
+        out_btn:SetEventScript(ui.RBUTTONUP, "Cc_helper_take_item_context")
         out_btn:SetSkinName("test_pvp_btn")
-        out_btn:SetTextTooltip(g.lang == "Japanese" and "{ol}[CCH]{nl}倉庫から搬出して装備します" or
-                                   "{ol}[CCH]{nl}It is carried out from the warehouse and equipped")
+        out_btn:SetTextTooltip(g.lang == "Japanese" and
+                                   "{ol}[CCH]{nl}倉庫から搬出して装備します{nl}左クリック: 現在のセット / 右クリック: セット選択" or
+                                   "{ol}[CCH]{nl}It is carried out from the warehouse and equipped{nl}Left: current set / Right: choose set")
         out_btn:ShowWindow(1)
+    end
+end
+
+function Cc_helper_setting_tab_create(cch_setting)
+    local cur = g.cc_helper_settings[g.cid].current or 1
+    for n = 1, g.cc_helper_set_count do
+        local tab = cch_setting:CreateOrGetControl("button", "cch_set_tab_" .. n, 110 + (n - 1) * 48, 13, 46, 26)
+        AUTO_CAST(tab)
+        tab:SetText(string.format("{ol}Set%d", n))
+        tab:SetSkinName(n == cur and "test_pvp_btn" or "test_gray_button")
+        tab:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_switch_set")
+        tab:SetEventScriptArgNumber(ui.LBUTTONUP, n)
+        tab:SetTextTooltip(g.lang == "Japanese" and "{ol}編集するセットを選択" or "{ol}Select set to edit")
     end
 end
 
@@ -5281,7 +5437,8 @@ function Cc_helper_setting_frame_init(frame)
     cch_setting:EnableHittestFrame(1)
     local title_text = cch_setting:CreateOrGetControl("richtext", "title_text", 20, 15, 50, 30)
     AUTO_CAST(title_text)
-    title_text:SetText("{ol}CC Helper Config")
+    title_text:SetText("{ol}CCH config")
+    Cc_helper_setting_tab_create(cch_setting)
     local close = cch_setting:CreateOrGetControl("button", "close", 0, 0, 30, 30)
     AUTO_CAST(close)
     close:SetImage("testclose_button")
@@ -5290,24 +5447,38 @@ function Cc_helper_setting_frame_init(frame)
     local gbox = cch_setting:CreateOrGetControl("groupbox", "gbox", 10, 40, 0, 0)
     AUTO_CAST(gbox)
     gbox:SetSkinName("test_frame_midle_light")
-    local copy = gbox:CreateOrGetControl("button", "copy", 200, 10, 70, 30)
-    AUTO_CAST(copy)
-    copy:SetText("{ol}copy")
-    copy:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_copy")
-    copy:SetTextTooltip(g.lang == "Japanese" and "{ol}コピー用の設定を適用します" or
-                            "{ol}Applies the settings for copying")
-    local save = gbox:CreateOrGetControl("button", "save", 130, 10, 70, 30)
-    AUTO_CAST(save)
-    save:SetText("{ol}save")
-    save:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_save")
-    save:SetTextTooltip(g.lang == "Japanese" and "{ol}このキャラの設定をコピー用に保存します" or
-                            "{ol}Save this character settings for copying")
-    local save_delete = gbox:CreateOrGetControl("button", "save_delete", 60, 10, 70, 30)
+    local deposit = gbox:CreateOrGetControl("button", "cch_set_deposit", 4, 10, 54, 30)
+    AUTO_CAST(deposit)
+    deposit:SetText(g.lang == "Japanese" and "{ol}収納" or "{ol}Store")
+    deposit:SetSkinName("test_pvp_btn")
+    deposit:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_deposit")
+    deposit:SetTextTooltip(g.lang == "Japanese" and "{ol}装備を外して倉庫へ搬入します" or
+                               "{ol}Unequip and store into the warehouse")
+    local save_delete = gbox:CreateOrGetControl("button", "save_delete", 61, 10, 54, 30)
     AUTO_CAST(save_delete)
     save_delete:SetText("{ol}delete")
     save_delete:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_delete")
     save_delete:SetTextTooltip(g.lang == "Japanese" and "{ol}コピー用の設定を削除します" or
                                    "{ol}Delete settings for copying")
+    local save = gbox:CreateOrGetControl("button", "save", 118, 10, 54, 30)
+    AUTO_CAST(save)
+    save:SetText("{ol}save")
+    save:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_save")
+    save:SetTextTooltip(g.lang == "Japanese" and "{ol}このキャラの設定をコピー用に保存します" or
+                            "{ol}Save this character settings for copying")
+    local copy = gbox:CreateOrGetControl("button", "copy", 175, 10, 54, 30)
+    AUTO_CAST(copy)
+    copy:SetText("{ol}copy")
+    copy:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_copy")
+    copy:SetTextTooltip(g.lang == "Japanese" and "{ol}コピー用の設定を適用します" or
+                            "{ol}Applies the settings for copying")
+    local equip = gbox:CreateOrGetControl("button", "cch_set_equip", 232, 10, 54, 30)
+    AUTO_CAST(equip)
+    equip:SetText(g.lang == "Japanese" and "{ol}装着" or "{ol}Equip")
+    equip:SetSkinName("test_pvp_btn")
+    equip:SetEventScript(ui.LBUTTONUP, "Cc_helper_setting_equip")
+    equip:SetTextTooltip(g.lang == "Japanese" and "{ol}表示中のセットを装着します" or
+                             "{ol}Equip the currently shown set")
     if g.settings.monster_card_changer.use == 1 then
         local mccuse = gbox:CreateOrGetControl("checkbox", "mccuse", 10, 375, 25, 25)
         AUTO_CAST(mccuse)
@@ -5525,32 +5696,31 @@ function Cc_helper_slot_create(gbox, name, x, y, width, height, skin, text, clsi
         end
     end
     if string.find(name, "gem") then
-        if g.cc_helper_settings[g.cid].agm == 0 then
-            slot:ShowWindow(0)
-        elseif g.cc_helper_settings[g.cid].agm == 1 then
-            local gem_name = item_cls.ClassName
-            local icon = slot:GetIcon()
-            if not icon then
-                icon = CreateIcon(slot)
-            end
-            SET_SLOT_ITEM_CLS(slot, item_cls)
-            local lv_text = slot:CreateOrGetControl("richtext", "lv_text", 0, 30, 25, 25)
-            AUTO_CAST(lv_text)
-            if string.find(gem_name, "480") then
-                lv_text:SetText("{ol}{s14}LV480")
-                slot:SetSkinName("invenslot_rare")
-            elseif string.find(gem_name, "500") then
-                lv_text:SetText("{ol}{s14}LV500")
-                slot:SetSkinName("invenslot_unique")
-            elseif string.find(gem_name, "520") then
-                lv_text:SetText("{ol}{s14}LV520")
-                slot:SetSkinName("invenslot_legend")
-            elseif string.find(gem_name, "540") then
-                lv_text:SetText("{ol}{s14}LV540")
-                slot:SetSkinName("invenslot_pic_goddess")
-            else
-                lv_text:SetText("{ol}{s14}LV460")
-            end
+        -- gem slots always show as placeholders (equip/unequip behavior is still
+        -- gated by the Aether Gem checkbox in putitem/take_item, not visibility)
+        slot:ShowWindow(1)
+        local gem_name = item_cls.ClassName
+        local icon = slot:GetIcon()
+        if not icon then
+            icon = CreateIcon(slot)
+        end
+        SET_SLOT_ITEM_CLS(slot, item_cls)
+        local lv_text = slot:CreateOrGetControl("richtext", "lv_text", 0, 30, 25, 25)
+        AUTO_CAST(lv_text)
+        if string.find(gem_name, "480") then
+            lv_text:SetText("{ol}{s14}LV480")
+            slot:SetSkinName("invenslot_rare")
+        elseif string.find(gem_name, "500") then
+            lv_text:SetText("{ol}{s14}LV500")
+            slot:SetSkinName("invenslot_unique")
+        elseif string.find(gem_name, "520") then
+            lv_text:SetText("{ol}{s14}LV520")
+            slot:SetSkinName("invenslot_legend")
+        elseif string.find(gem_name, "540") then
+            lv_text:SetText("{ol}{s14}LV540")
+            slot:SetSkinName("invenslot_pic_goddess")
+        else
+            lv_text:SetText("{ol}{s14}LV460")
         end
     end
 end
@@ -5615,27 +5785,42 @@ function Cc_helper_setting_copy()
         local job_cls = GetClassByType("Job", char_data.jobid)
         local job_name = GET_JOB_NAME(job_cls, char_data.gender)
         local name = char_data.name
-        local text = name .. " (" .. job_name .. ")"
+        local setnum = char_data.setnum or 1 -- legacy entries without a set show as Set 1
+        local text = name .. " (" .. job_name .. ") Set " .. setnum
         local scp = ui.AddContextMenuItem(context, text, string.format("Cc_helper_load_copy('%s')", cid))
     end
     ui.OpenContextMenu(context)
 end
 
 function Cc_helper_load_copy(cid)
-    for key, value in pairs(g.cc_helper_settings.etc.copys[cid]) do
-        if type(value) == "table" then
-            g.cc_helper_settings[g.cid].items = value
-        elseif key == "mcc" or key == "agm" or key == "agm_check" then
-            if key == "mcc" then
-                g.cc_helper_settings[g.cid].mcc = value
-            elseif key == "agm" then
-                g.cc_helper_settings[g.cid].agm = value
-            elseif key == "agm_check" then
-                g.cc_helper_settings[g.cid].agm_check = value
-            end
-        end
+    local src = g.cc_helper_settings.etc.copys[cid]
+    local cd = g.cc_helper_settings[g.cid]
+    Cc_helper_ensure_sets(cd) -- make sure sets/current/items alias are valid
+    -- source items: new per-set source has .items; legacy whole-char source
+    -- (has .sets) -> take its current set
+    local src_items
+    if src.items then
+        src_items = src.items
+    elseif src.sets then
+        local scur = src.current or 1
+        local sset = src.sets[scur] or src.sets[1]
+        src_items = sset and sset.items
     end
-    g.cc_helper_settings[g.cid].name = g.login_name
+    if src_items then
+        -- copy into the currently shown set only; leave other sets intact
+        cd.sets[cd.current].items = json.decode(json.encode(src_items))
+        Cc_helper_ensure_sets(cd) -- fill any missing item keys, re-point items alias
+    end
+    if src.mcc ~= nil then
+        cd.mcc = src.mcc
+    end
+    if src.agm ~= nil then
+        cd.agm = src.agm
+    end
+    if src.agm_check ~= nil then
+        cd.agm_check = src.agm_check
+    end
+    cd.name = g.login_name
     Cc_helper_save_settings()
     ui.SysMsg(g.lang == "Japanese" and "設定をコピーしました" or "Settings copied")
     Cc_helper_setting_frame_init()
@@ -5649,7 +5834,8 @@ function Cc_helper_setting_delete(frame, ctrl)
         local job_cls = GetClassByType("Job", char_data.jobid)
         local job_name = GET_JOB_NAME(job_cls, char_data.gender)
         local name = char_data.name
-        local text = "{ol}{#FF0000}" .. name .. " (" .. job_name .. ")"
+        local setnum = char_data.setnum or 1 -- legacy entries without a set show as Set 1
+        local text = "{ol}{#FF0000}" .. name .. " (" .. job_name .. ") Set " .. setnum
         local scp = ui.AddContextMenuItem(context, text, string.format("Cc_helper_setting_delete_('%s')", cid))
     end
     ui.OpenContextMenu(context)
@@ -5662,15 +5848,26 @@ function Cc_helper_setting_delete_(cid)
 end
 
 function Cc_helper_setting_save(frame, ctrl)
-    local current_char_data_str = json.encode(g.cc_helper_settings[g.cid])
-    local new_copy_data = json.decode(current_char_data_str)
-    g.cc_helper_settings.etc.copys[g.cid] = new_copy_data
+    local cd = g.cc_helper_settings[g.cid]
+    Cc_helper_ensure_sets(cd)
+    -- save only the currently shown set as the copy source, keyed per (char, set)
+    -- so each set is a distinct entry (does not overwrite other sets)
+    local key = tostring(g.cid) .. "_set" .. cd.current
+    local new_copy_data = {
+        items = json.decode(json.encode(cd.sets[cd.current].items)),
+        setnum = cd.current,
+        agm = cd.agm,
+        agm_check = cd.agm_check,
+        mcc = cd.mcc,
+        name = cd.name or g.login_name
+    }
     local pc_info = session.barrack.GetMyAccount():GetByStrCID(g.cid)
     local pc_apc = pc_info:GetApc()
     local jobid = pc_info:GetRepID() or pc_apc:GetJob()
     local gender = pc_apc:GetGender()
-    g.cc_helper_settings.etc.copys[g.cid].jobid = jobid
-    g.cc_helper_settings.etc.copys[g.cid].gender = gender
+    new_copy_data.jobid = jobid
+    new_copy_data.gender = gender
+    g.cc_helper_settings.etc.copys[key] = new_copy_data
     ui.SysMsg(g.lang == "Japanese" and "設定を保存しました" or "Settings saved")
     Cc_helper_save_settings()
 end
@@ -13534,47 +13731,62 @@ function Other_character_skill_list_load_settings()
     end
 end
 
-local function GetValidCIDs()
-    local valid_cids = {}
-    local aid = session.loginInfo.GetAID()
-    local sys_opt_path = string.format("../release/addon_setting/system_option/%s/settings.json", aid)
-    local sys_opt_file = io.open(sys_opt_path, "r")
-    if sys_opt_file then
-        local content = sys_opt_file:read("*a")
-        sys_opt_file:close()
-        if content and content ~= "" then
-            local status, data = pcall(json.decode, content)
-            if status and data and data.pc_id then
-                for k, _ in pairs(data.pc_id) do
-                    valid_cids[tostring(k)] = true
+function Other_character_skill_list_char_load_settings()
+    local acc_info = session.barrack.GetMyAccount()
+    if acc_info then
+        -- 現在選択中のバラックレイヤーのキャラを登録/更新する。GetPCByIndexで
+        -- 列挙できるのは現レイヤーのみ。
+        local layer_pc_count = acc_info:GetPCCount()
+        for order = 0, layer_pc_count - 1 do
+            local pc_info = acc_info:GetPCByIndex(order)
+            if pc_info then
+                local pc_apc = pc_info:GetApc()
+                if pc_apc then
+                    local pc_name = pc_apc:GetName()
+                    local char_data = g.ocsl_settings.chars[pc_name] or {}
+                    char_data.name = pc_name
+                    char_data.cid = char_data.cid or pc_info:GetCID()
+                    char_data.layer = g.ocsl_layer or char_data.layer or 9
+                    char_data.order = order
+                    char_data.hide = char_data.hide or 0
+                    char_data.equips = char_data.equips or {}
+                    char_data.gear_score = char_data.gear_score or 0
+                    g.ocsl_settings.chars[pc_name] = char_data
                 end
             end
         end
-    end
-    return valid_cids
-end
-
-function Other_character_skill_list_char_load_settings()
-    local valid_cids = GetValidCIDs()
-    if next(valid_cids) then
-        local chars_to_delete = {}
-        for char_name, char_data in pairs(g.ocsl_settings.chars) do
-            local cid_str = tostring(char_data.cid)
-            if not valid_cids[cid_str] then
-                table.insert(chars_to_delete, char_name)
+        -- 実際にアカウントから消えたキャラのみを除去する。バラック名簿
+        -- (GetBarrackPCByIndex)は全キャラの正となる一覧だが、ゲーム起動直後は
+        -- 空なので count > 0 でガードし、名簿ロード前にリストを消さない。
+        -- InstantCC(Instant_cc_save_char_data)と同じ安全パターン。
+        local barrack_all = acc_info:GetBarrackPCCount()
+        if barrack_all > 0 then
+            local barrack_chars = {}
+            for i = 0, barrack_all - 1 do
+                local pc_info = acc_info:GetBarrackPCByIndex(i)
+                if pc_info then
+                    barrack_chars[pc_info:GetName()] = true
+                end
+            end
+            local chars_to_delete = {}
+            for char_name, _ in pairs(g.ocsl_settings.chars) do
+                if not barrack_chars[char_name] then
+                    table.insert(chars_to_delete, char_name)
+                end
+            end
+            for _, char_name in ipairs(chars_to_delete) do
+                g.ocsl_settings.chars[char_name] = nil
             end
         end
-        for _, char_name in ipairs(chars_to_delete) do
-            g.ocsl_settings.chars[char_name] = nil
-        end
     end
+    -- バラックデータがまだ無くても、ログイン中キャラは必ず存在させる(prune後に
+    -- 残るよう最後に追加。名簿未反映の新規作成キャラ対策)。
     local my_handle = session.GetMyHandle()
     if my_handle then
         local my_name = info.GetName(my_handle)
-        local my_cid = info.GetCID(my_handle)
         local char_data = g.ocsl_settings.chars[my_name] or {}
         char_data.name = my_name
-        char_data.cid = my_cid
+        char_data.cid = char_data.cid or info.GetCID(my_handle)
         char_data.layer = char_data.layer or g.ocsl_layer or 1
         char_data.order = char_data.order or 0
         char_data.hide = char_data.hide or 0
@@ -13584,51 +13796,6 @@ function Other_character_skill_list_char_load_settings()
     end
     Other_character_skill_list_save_settings()
 end
-
---[[function Other_character_skill_list_char_load_settings()
-    local acc_info = session.barrack.GetMyAccount()
-    local layer_pc_count = acc_info:GetPCCount()
-    for order = 0, layer_pc_count - 1 do
-        local pc_info = acc_info:GetPCByIndex(order)
-        if pc_info then
-            local pc_apc = pc_info:GetApc()
-            local pc_name = pc_apc:GetName()
-            local pc_cid = pc_info:GetCID()
-            local existing_data = g.ocsl_settings.chars[pc_name] or {}
-            g.ocsl_settings.chars[pc_name] = {
-                layer = g.ocsl_layer or existing_data.layer or 9,
-                order = order,
-                cid = existing_data.cid or pc_cid,
-                name = pc_name,
-                gear_score = existing_data.gear_score or 0,
-                hide = existing_data.hide or 0,
-                equips = existing_data.equips or {}
-            }
-        end
-    end
-    local barrack_all = acc_info:GetBarrackPCCount()
-    if barrack_all > 0 then
-        local barrack_chars = {}
-        for i = 0, barrack_all - 1 do
-            local pc_info = acc_info:GetBarrackPCByIndex(i)
-            if pc_info then
-                barrack_chars[pc_info:GetName()] = true
-            end
-        end
-        local chars_to_delete = {}
-        for char_name, _ in pairs(g.ocsl_settings.chars) do
-            if not barrack_chars[char_name] then
-                table.insert(chars_to_delete, char_name)
-            end
-        end
-        if #chars_to_delete > 0 then
-            for _, char_name in ipairs(chars_to_delete) do
-                g.ocsl_settings.chars[char_name] = nil
-            end
-        end
-    end
-    Other_character_skill_list_save_settings()
-end]]
 
 function other_character_skill_list_on_init()
     local old_func = g.settings.other_character_skill_list.old_init_func
@@ -13806,6 +13973,7 @@ function Other_character_skill_list_save_enchant()
 end
 
 function Other_character_skill_list_sort()
+    -- バラック(layer:1/2/3)でグループ化し、その中は各バラック内の順番(order)で並べる
     local function sort_layer_order(a, b)
         if a.layer ~= b.layer then
             return a.layer < b.layer
@@ -13833,10 +14001,39 @@ function Other_character_skill_list_split_earring_options(earring_data_string)
 end
 
 function Other_character_skill_list_frame_open()
-    Other_character_skill_list_save_enchant()
     if g.settings.other_character_skill_list.use == 0 then
         return
     end
+    -- Lazy-load: the settings frame can be opened from anywhere (e.g. Nexus
+    -- Addons management list), but char data is normally only loaded/sorted on
+    -- city entry. Ensure data exists before use so the frame does not silently
+    -- fail with a nil error.
+    if not g.ocsl_settings then
+        Other_character_skill_list_load_settings()
+    end
+    if not g.ocsl_sorted_chars or #g.ocsl_sorted_chars == 0 then
+        Other_character_skill_list_char_load_settings()
+        Other_character_skill_list_sort()
+    end
+    -- save_enchant indexes inventory equip slots and can raise if the inventory
+    -- UI is not built yet; it is only a refresh, so never let it block the frame.
+    pcall(Other_character_skill_list_save_enchant)
+    if not g.ocsl_sorted_chars or #g.ocsl_sorted_chars == 0 then
+        local msg = g.lang == "Japanese" and
+            "[Nexus Addons] 表示できるキャラクター情報がありません。都市でキャラクターを切り替えると記録されます" or
+            "[Nexus Addons] No character data to display. Info is recorded when you switch characters in a city."
+        imcAddOn.BroadMsg("NOTICE_Dm_!", msg, 5.0)
+        return
+    end
+    local ok, err = pcall(Other_character_skill_list_render_frame)
+    if not ok then
+        local m = "[Nexus Addons] OCSL open error: " .. tostring(err)
+        imcAddOn.BroadMsg("NOTICE_Dm_!", m, 10.0)
+        pcall(g.log_to_file, m)
+    end
+end
+
+function Other_character_skill_list_render_frame()
     local ocsl = ui.CreateNewFrame("notice_on_pc", addon_name_lower .. "ocsl", 0, 0, 70, 30)
     AUTO_CAST(ocsl)
     ocsl:SetSkinName("test_frame_midle_light")
@@ -13856,15 +14053,16 @@ function Other_character_skill_list_frame_open()
         if char_settings.hide ~= 1 or g.ocsl_settings.hide == 0 then
             local job_list, level, last_job_id = GetJobListFromAdventureBookCharData(char_info.name)
             if type(_G["INDUN_LIST_VIEWER_ON_INIT"]) == "function" then
-                local ilv_settings = _G["ADDONS"]["norisan"]["indun_list_viewer"].settings
-                if ilv_settings[char_info.name] then
+                local ilv = _G["ADDONS"]["norisan"]["indun_list_viewer"]
+                local ilv_settings = ilv and ilv.settings
+                if ilv_settings and ilv_settings[char_info.name] then
                     if ilv_settings[char_info.name].president_jobid ~= "" then
                         last_job_id = ilv_settings[char_info.name].president_jobid
                     end
                 end
             elseif type(_G["indun_list_viewer_on_init"]) == "function" then
                 local ilv_settings = _G["ADDONS"]["norisan"]["_NEXUS_ADDONS"].ilv_settings
-                if ilv_settings.chars[char_info.name] then
+                if ilv_settings and ilv_settings.chars and ilv_settings.chars[char_info.name] then
                     if ilv_settings.chars[char_info.name].president_jobid ~= "" then
                         last_job_id = ilv_settings.chars[char_info.name].president_jobid
                     end
@@ -13955,10 +14153,10 @@ function Other_character_skill_create_title_bar(ocsl)
                                   "{ol}Hide Checked Characters")
     hide_check:SetCheck(g.ocsl_settings.hide)
     help_btn:SetTextTooltip(g.lang == "Japanese" and
-                                "{ol}順番に並ばない場合は一度バラックに戻ってバラック1､2､3毎にログインしてください。{nl}" ..
+                                "{ol}バラック1/2/3の順にグループ表示します。順番に並ばない場合は、各バラック(1,2,3)に一度ずつログインして順番を記録してください。{nl}" ..
                                 "{ol}名前部分を押すと、ログインキャラと同一バラックの各キャラの装備詳細が見れます。" or
-                                "{ol}If you do not line up in order,{nl}" ..
-                                "please return to the barracks once and log in for each barracks 1,2,3.{nl}" ..
+                                "{ol}Characters are grouped by barrack (1/2/3).{nl}" ..
+                                "If they do not sort in order, log in once from each barrack (1,2,3) to record the order.{nl}" ..
                                 "{ol}Press the name section to see the equipment details of each character{nl}in the same barrack as the login character.")
     local weapon_lbl = title_box:CreateOrGetControl("richtext", "weapon", 160, 10, 100, 20)
     weapon_lbl:SetText(g.lang == "Japanese" and "{ol}" .. "武器" or "{ol}" .. "weapons")
@@ -27482,6 +27680,10 @@ function Aethergem_manager_load_settings()
             }
             changed = true
         end
+    end
+    if not settings.set then
+        settings.set = {}
+        changed = true
     end
     for i = 1, 6 do
         local i_str = tostring(i)
