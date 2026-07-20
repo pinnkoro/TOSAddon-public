@@ -14742,7 +14742,7 @@ function Indun_list_viewer_load_settings()
             if info.name then
                 local h_key = info.name .. "_H"
                 local s_key = info.name .. "_S"
-                if settings.display[h_key] == nil then
+                if info.hard and settings.display[h_key] == nil then
                     settings.display[h_key] = 1
                 end
                 if settings.display[s_key] == nil then
@@ -14991,7 +14991,7 @@ function Indun_list_viewer_save_current_char_counts()
     end
     local raid_data = {}
     for key, raid in pairs(g.ilv_RAID_INFO) do
-        local count = get_safe_entrance_count(raid.hard)
+        local count = raid.hard and get_safe_entrance_count(raid.hard)
         raid_data[key .. "_H"] = count or "?"
         count = get_safe_entrance_count(raid.auto)
         raid_data[key .. "_A"] = count or "?"
@@ -15205,20 +15205,22 @@ function Indun_list_viewer_config(parent)
     local text_x = 0
     for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
         local raid_info = g.ilv_RAID_INFO[raid_key]
-        if text_x == 0 then
-            text_x = x
+        if raid_info.hard then
+            if text_x == 0 then
+                text_x = x
+            end
+            local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x + 5, 5, 30, 30)
+            AUTO_CAST(pic)
+            pic:SetImage(raid_info.icon)
+            pic:SetEnableStretch(1)
+            pic:EnableHitTest(1)
+            local check = config_gb:CreateOrGetControl("checkbox", "check_" .. raid_key .. "_H", x, 5, 30, 30)
+            AUTO_CAST(check)
+            check:SetCheck(g.ilv_settings.display[raid_info.name .. "_H"])
+            check:SetEventScript(ui.LBUTTONDOWN, "Indun_list_viewer_display_check")
+            check:SetEventScriptArgString(ui.LBUTTONDOWN, raid_info.name .. "_H")
+            x = x + 30
         end
-        local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x + 5, 5, 30, 30)
-        AUTO_CAST(pic)
-        pic:SetImage(raid_info.icon)
-        pic:SetEnableStretch(1)
-        pic:EnableHitTest(1)
-        local check = config_gb:CreateOrGetControl("checkbox", "check_" .. raid_key .. "_H", x, 5, 30, 30)
-        AUTO_CAST(check)
-        check:SetCheck(g.ilv_settings.display[raid_info.name .. "_H"])
-        check:SetEventScript(ui.LBUTTONDOWN, "Indun_list_viewer_display_check")
-        check:SetEventScriptArgString(ui.LBUTTONDOWN, raid_info.name .. "_H")
-        x = x + 30
     end
     local hard_text = title_gb:CreateOrGetControl("richtext", "hard_text", text_x - 40, 10)
     AUTO_CAST(hard_text)
@@ -15303,7 +15305,7 @@ function Indun_list_viewer_title_frame_open()
     for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
         local raid_info = g.ilv_RAID_INFO[raid_key]
         if raid_info and raid_info.name then -- ここで安全確認
-            if g.ilv_settings.display[raid_info.name .. "_H"] == 1 then
+            if raid_info.hard and g.ilv_settings.display[raid_info.name .. "_H"] == 1 then
                 local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x, 5, 30, 30)
                 AUTO_CAST(pic)
                 pic:SetImage(raid_info.icon)
@@ -15435,7 +15437,7 @@ function Indun_list_viewer_frame_open(indun_list_viewer)
             local auto_clear_data = data.auto_clear_count or {}
             for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
                 local raid_info = g.ilv_RAID_INFO[raid_key]
-                if raid_info and raid_info.name then
+                if raid_info and raid_info.name and raid_info.hard then
                     if g.ilv_settings.display[raid_info.name .. "_H"] == 1 then
                         local count = raid_count_data[raid_key .. "_H"] or "?"
                         local text_ctrl = gb:CreateOrGetControl("richtext", raid_key .. "_H_" .. pc_name, current_x, y)
