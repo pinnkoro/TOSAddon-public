@@ -1,0 +1,157 @@
+# アドオン .ipf のビルド方法
+
+このリポジトリのアドオン(`nexus_addons` など)を配布用 `.ipf` にする手順をまとめる。
+GUI(IPFSuite)を使う方法と、スクリプトで自動生成する方法の 2 通りを載せる。
+
+---
+
+## 1. 前提: 配布 .ipf の中身
+
+配布用 `.ipf` は **2 層構造**:
+
+1. **平文コンテナ** … アドオンフォルダ配下のファイル(`.lua` / `.xml` / `_conclude.lua`)を
+   それぞれ raw deflate 圧縮して 1 つにまとめたもの
+2. **PKware 暗号化** … 上をさらに暗号化したもの(これが配布形式)
+
+`nexus_addons` の場合、コンテナには次の 3 ファイルが入る:
+
+```
+_nexus_addons/_nexus_addons.lua
+_nexus_addons/_nexus_addons.xml
+_nexus_addons/_nexus_addons_conclude.lua
+```
+
+---
+
+## 2. 必要なツール
+
+| ツール | 場所 | 用途 |
+| --- | --- | --- |
+| `ipf_unpack.exe` | `C:\Users\pinnk\Documents\TOSAddon_Tools\workspace\` | encrypt / decrypt / extract(**パック機能は無い**) |
+| `IPFSuite.exe` | 同上 | GUI でコンテナを作る(方式 A) |
+| `encrypt.bat` | 同上 | `ipf_unpack.exe %1 encrypt` のラッパー |
+| `build_addon_ipf.py` | 本フォルダ `docs/` | 平文コンテナを自動生成(方式 B) |
+| `tos_extract.py` | `...\TosSukillSimulator\tools\` | 検証時に中身を展開して確認(任意) |
+
+Python は python.org 版(`Python312`)を使う(uv 同梱ビルドは避ける。詳細は個人メモ参照)。
+
+---
+
+## 3. ビルド手順
+
+どちらの方式でも **「平文コンテナを作る → 暗号化する」** の 2 ステップ。
+暗号化は自作せず、実績のある `ipf_unpack.exe encrypt` を使うこと。
+
+### 方式 B: スクリプトで自動生成(推奨・CI 化可能)
+
+```bash
+# 1) 平文コンテナを生成
+python docs/build_addon_ipf.py ./nexus_addons _nexus_addons ./_nexus_addons-plain.ipf
+
+# 2) PKware 暗号化(配布形式に変換)
+"C:/Users/pinnk/Documents/TOSAddon_Tools/workspace/ipf_unpack.exe" ./_nexus_addons-plain.ipf encrypt
+
+# 3) 正式名にリネームして配置(⛄ = U+26C4)
+mv ./_nexus_addons-plain.ipf "nexus_addons/_nexus_addons-⛄-vX.Y.Z.ipf"
+```
+
+`build_addon_ipf.py` は zlib **level 6**(= IPFSuite と同一バイト)で圧縮し、
+テーブル・footer を実物と同じ書式で生成する。IPFSuite で作ったものと
+バイト単位で一致することを確認済み(§5)。
+
+### 方式 A: IPFSuite(GUI)
+
+1. `IPFSuite.exe` を起動し、新規アーカイブを作成
+2. アドオンフォルダ(`_nexus_addons/`)を、内部パス `_nexus_addons/...` を保った状態で追加
+   - 内部の pack 名フィールドは `addon_d.ipf`(全アドオン共通の固定値)
+3. `_nexus_addons-⛄-vX.Y.Z.ipf` の名前で保存(この時点では平文)
+4. `encrypt.bat _nexus_addons-⛄-vX.Y.Z.ipf`(= `ipf_unpack.exe ... encrypt`)で暗号化
+
+---
+
+## 4. 検証(ビルド後に必ず実施)
+
+`.ipf` はバイナリなので `git diff` では中身が見えない。**復号 → 展開してソースと比較**する。
+
+```bash
+# 生成した .ipf を作業コピー(元ファイルは書き換えないこと。decrypt/extract は破壊的)
+cp "nexus_addons/_nexus_addons-⛄-vX.Y.Z.ipf" /tmp/verify.ipf
+
+# decrypt → extract。extract は「カレントディレクトリ/extract/<packname>/<内部パス>」に出す
+cd "C:/Users/pinnk/Documents/TOSAddon_Tools/workspace"
+./ipf_unpack.exe /tmp/verify.ipf decrypt
+./ipf_unpack.exe /tmp/verify.ipf extract lua xml
+# → 出力先: ./extract/addon_d.ipf/_nexus_addons/_nexus_addons.lua など
+
+# 元ソースと一致するか比較
+cmp ./extract/addon_d.ipf/_nexus_addons/_nexus_addons.lua \
+    <repo>/nexus_addons/_nexus_addons/_nexus_addons.lua
+```
+
+3 ファイルとも元ソースと一致すれば OK。`tos_extract.py`(IPF/IES リーダー)で
+Python から往復検証してもよい。
+
+---
+
+## 5. なぜ level 6 なのか(バイト一致の根拠)
+
+- IPFSuite が使う deflate は **stock zlib の既定 level 6**。
+- `build_addon_ipf.py` を level 6 にすると、既存の `_nexus_addons-⛄-v1.1.6.ipf` を
+  同じソースから再生成したとき **MD5 完全一致**する(検証済み)。
+- level 9 でも「有効な .ipf」ではあるが(ゲームは問題なく解凍する)、
+  圧縮結果が変わるためバイト一致はしない。オリジナルのツールチェーンと
+  完全一致させたいので level 6 を採用している。
+
+---
+
+## 6. コンテナ書式(リファレンス)
+
+`_nexus_addons-⛄-v1.1.6.ipf` を解析して確定した仕様:
+
+```
+[ファイルデータ領域]   各ファイル: raw deflate(level 6) を順に連結
+[ファイルテーブル]     エントリを連結:
+    path_len       u16
+    checksum       u32   ← 平文(解凍後データ)の CRC32
+    comp           u32   ← 圧縮後サイズ
+    uncomp         u32   ← 元サイズ
+    data_off       u32   ← ファイルデータ領域内のオフセット
+    packname_len   u16
+    packname       bytes ← 常に "addon_d.ipf"
+    path           bytes ← 例 "_nexus_addons/_nexus_addons.lua"(区切りは "/")
+[footer 24 バイト]
+    file_count             u16
+    table_off              u32   ← ファイルテーブル先頭オフセット
+    0                      u16
+    最終ファイルの data_off u32
+    "PK\x05\x06"           4 バイト(シグネチャ)
+    0                      u32
+    0                      u32
+```
+
+暗号化は PKware(ZIP 伝統暗号)を **偶数インデックスのバイトのみ**に適用する変種。
+footer 末尾 2 つの u32 が 0 のため、リーダー側は「暗号化あり」と判定して復号する。
+
+---
+
+## 7. リリース手順(まとめ)
+
+1. ソース(`nexus_addons/_nexus_addons/_nexus_addons.lua` など)を編集
+2. 方式 B(または A)で `.ipf` を生成 → §4 で検証
+3. 旧版 `.ipf` を `nexus_addons/etc/` へ移動(最新版だけをアドオン直下に置く慣習)
+4. 新版を `nexus_addons/_nexus_addons-⛄-vX.Y.Z.ipf` に配置
+5. `addons.json` の該当アドオンの `fileVersion` を更新
+6. コミット & プッシュ
+
+---
+
+## 8. ゲーム内での反映・テスト
+
+1. 生成した `.ipf` を
+   `C:\Program Files (x86)\Steam\steamapps\common\Tree of Savior (Japanese Ver.)\data\`
+   にコピー
+2. `data\` に古い `_nexus_addons-⛄-*.ipf` があれば削除(バージョン競合防止)
+3. クライアントを**再起動**(`.ipf` は起動時にマウントされるため、差し替え反映には再起動が必要)
+
+> Lua の静的構文チェックはクライアント同梱の LuaJIT が実行ファイルに静的リンクされて
+> いるため単体では行えない。必要なら WSL に `luajit` を入れてチェックする。
