@@ -233,8 +233,15 @@ function GUILDEVENTWARP_frame_init()
 end
 
 function GUILDEVENTWARP_move_to_guild_event(_, _, event_id)
+    -- 旧クライアントの _BORUTA_ZONE_MOVE_CLICK は削除されたため、
+    -- guild_activity_ui の封鎖線ランキング「移動」ボタンと同じ処理に置き換え。
+    -- (event_id 500/501/502 = 封鎖線タブ 0/1/2 のイベントタイプ)
+    local type = tonumber(event_id)
+    if type == nil then
+        return
+    end
     g.channel_change = true
-    _BORUTA_ZONE_MOVE_CLICK(event_id)
+    control.CustomCommand("MOVE_TO_ENTER_NPC", type, 1, 0)
 end
 
 function GUILDEVENTWARP_ch_change()

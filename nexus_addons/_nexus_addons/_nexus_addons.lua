@@ -31,10 +31,11 @@
 -- 1.1.6 AS%表示追加、IPフィールド表示修正、TOS表示位置修正、SGT無効処理追加
 -- 1.1.7 ズメイを全機能に対応(IP/ILV/quickslot)
 -- 1.1.8 Auto RepairアイテムID修正(Lv550)、Another Warehouse保存修正、ILVハードモードnilガード、save/load堅牢化
+-- 1.1.9 GEWギルドイベントワープ修正(削除された_BORUTA_ZONE_MOVE_CLICKを封鎖線ランキングと同じMOVE_TO_ENTER_NPCに置換)
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.8"
+local ver = "1.1.9"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -28266,8 +28267,15 @@ function Guild_event_warp_toggle_frame(frame, ctrl, str, num)
 end
 
 function Guild_event_warp_move_to_guild_event(_, _, event_id)
+    -- 旧クライアントの _BORUTA_ZONE_MOVE_CLICK は削除されたため、
+    -- guild_activity_ui の封鎖線ランキング「移動」ボタンと同じ処理に置き換え。
+    -- (event_id 500/501/502 = 封鎖線タブ 0/1/2 のイベントタイプ)
+    local type = tonumber(event_id)
+    if type == nil then
+        return
+    end
     g.guild_event_warp_channnel_change = true
-    _BORUTA_ZONE_MOVE_CLICK(event_id)
+    control.CustomCommand("MOVE_TO_ENTER_NPC", type, 1, 0)
 end
 
 function Guild_event_warp_channel_change()
