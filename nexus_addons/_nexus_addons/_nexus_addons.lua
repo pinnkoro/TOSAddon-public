@@ -14616,6 +14616,14 @@ g.ilv_RAID_INFO = {
         sweep_buff = nil
     }
 }
+-- 掃討バフ(sweep_buff)一覧は ilv_RAID_INFO から生成する。
+-- 新レイド追加時に個別リストを手動更新する必要をなくし、更新漏れを防ぐ。
+g.ilv_sweep_buffs = {}
+for _, info in pairs(g.ilv_RAID_INFO) do
+    if info.sweep_buff then
+        table.insert(g.ilv_sweep_buffs, info.sweep_buff)
+    end
+end
 function Indun_list_viewer_save_settings()
     g.save_lua(g.ilv_path, g.ilv_settings)
 end
@@ -14640,7 +14648,7 @@ function Indun_list_viewer_load_settings()
                 options = old_settings.default_options or {},
                 display = old_settings.display_options or {},
                 chars = {},
-                ver = ver
+                ver = 0 -- 新規作成時は0にし、下のバックフィルで display の H/S キーを補完させる
             }
             for key, data in pairs(old_settings) do
                 if type(data) == "table" and key ~= "default_options" and key ~= "display_options" then
@@ -14658,7 +14666,7 @@ function Indun_list_viewer_load_settings()
                     Memo = 1
                 },
                 chars = {},
-                ver = ver
+                ver = 0 -- 新規作成時は0にし、下のバックフィルで display の H/S キーを補完させる
             }
         end
         need_save = true
@@ -14808,7 +14816,7 @@ function Indun_list_viewer_CHECK_ALERT(type)
             need_item = (list ~= nil and #list > 0)
             need_token = IS_NEED_TO_ALERT_TOKEN_EXPIRATION(near_future_sec)
         end
-        local sweep_buffs = {80045, 80043, 80039, 80035, 80037, 80032, 80031, 80030, 80015, 80017, 80016}
+        local sweep_buffs = g.ilv_sweep_buffs
         local sweep_tbl = {}
         local my_handle = session.GetMyHandle()
         local limit_time_ms = 12 * 60 * 60 * 1000
@@ -15546,7 +15554,7 @@ function Indun_list_viewer_INSTANTCC_DO_CC(parent, ctrl, cid, layer)
             need_alert = true
         end
     end
-    local sweep_buffs = {80045, 80043, 80039, 80035, 80037, 80032, 80031, 80030, 80015, 80017, 80016}
+    local sweep_buffs = g.ilv_sweep_buffs
     local sweep_tbl = {}
     local my_handle = session.GetMyHandle()
     local limit_time_ms = 12 * 60 * 60 * 1000
