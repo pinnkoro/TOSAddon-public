@@ -240,6 +240,30 @@ function GUILDEVENTWARP_move_to_guild_event(_, _, event_id)
     if type == nil then
         return
     end
+    -- guild_activity_ui の移動ボタンと同じ移動可否チェック。
+    -- マッチングダンジョン/PVP/レイヤー変更中/ダンジョン/レイド地域では移動不可。
+    local pc = GetMyPCObject()
+    if session.world.IsIntegrateServer() == true or IsPVPField(pc) == 1 or IsPVPServer(pc) == 1 then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return
+    end
+    if world.GetLayer() ~= 0 then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return
+    end
+    local cur_map = GetClass("Map", session.GetMapName())
+    if cur_map then
+        if TryGetProp(cur_map, "MapType") == "Dungeon" then
+            ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+            return
+        end
+        local zone_keyword = TryGetProp(cur_map, "Keyword", "None")
+        local keyword_table = StringSplit(zone_keyword, "")
+        if table.find(keyword_table, "IsRaidField") > 0 or table.find(keyword_table, "WeeklyBossMap") > 0 then
+            ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+            return
+        end
+    end
     g.channel_change = true
     control.CustomCommand("MOVE_TO_ENTER_NPC", type, 1, 0)
 end

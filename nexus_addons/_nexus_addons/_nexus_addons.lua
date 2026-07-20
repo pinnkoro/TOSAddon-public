@@ -32,10 +32,11 @@
 -- 1.1.7 ズメイを全機能に対応(IP/ILV/quickslot)
 -- 1.1.8 Auto RepairアイテムID修正(Lv550)、Another Warehouse保存修正、ILVハードモードnilガード、save/load堅牢化
 -- 1.1.9 GEWギルドイベントワープ修正(削除された_BORUTA_ZONE_MOVE_CLICKを封鎖線ランキングと同じMOVE_TO_ENTER_NPCに置換)
+-- 1.1.10 GEWワープに移動可否チェック追加(PVP/レイヤー変更/ダンジョン/レイド地域では不可)、save_jsonをtmp+renameでアトミック化
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.9"
+local ver = "1.1.10"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -251,21 +252,29 @@ function g.load_json(path)
 end
 
 function g.save_json(path, tbl)
-    local file, err = io.open(path, "w")
-    if not file then
-        print(string.format("[g.save_json] Error opening file for write: %s (Error: %s)", tostring(path), tostring(err)))
-        return false
-    end
+    -- 先にエンコードしてから書き込む。エンコード失敗時に本体ファイルを
+    -- 空に潰さないよう、まず tmp に書いてから rename でアトミックに差し替える。
+    -- (load_json の .tmp リカバリと対になる)
     local success, str = pcall(json.encode, tbl)
-    if success then
-        file:write(str)
-        file:close()
-        return true
-    else
-        file:close()
+    if not success then
         print(string.format("[g.save_json] JSON Encode Error in '%s': %s", tostring(path), tostring(str)))
         return false
     end
+    local tmp_path = path .. ".tmp"
+    local file, err = io.open(tmp_path, "w")
+    if not file then
+        print(string.format("[g.save_json] Error opening file for write: %s (Error: %s)", tostring(tmp_path), tostring(err)))
+        return false
+    end
+    local ok_w, w_err = file:write(str)
+    file:close()
+    if not ok_w then
+        print(string.format("[g.save_json] Write Error in '%s': %s", tostring(tmp_path), tostring(w_err)))
+        return false
+    end
+    os.remove(path)
+    os.rename(tmp_path, path)
+    return true
 end
 
 function g.get_map_type()
@@ -28266,12 +28275,45 @@ function Guild_event_warp_toggle_frame(frame, ctrl, str, num)
     Guild_event_warp_save_settings()
 end
 
+-- guild_activity_ui の EXEC_GUILD_ACTIVITY_DETAIL_BLOCKADE_RANK_MOVE と同じ
+-- 移動可否チェック。マッチングダンジョン/PVP/レイヤー変更中/ダンジョン/レイド地域
+-- では移動不可(不可なら ThisLocalUseNot を表示して false を返す)。
+function g.guild_event_warp_can_move()
+    local pc = GetMyPCObject()
+    if session.world.IsIntegrateServer() == true or IsPVPField(pc) == 1 or IsPVPServer(pc) == 1 then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return false
+    end
+    if world.GetLayer() ~= 0 then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return false
+    end
+    if g.get_map_type() == "Dungeon" then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return false
+    end
+    local cur_map = GetClass("Map", session.GetMapName())
+    if cur_map then
+        local zone_keyword = TryGetProp(cur_map, "Keyword", "None")
+        local keyword_table = StringSplit(zone_keyword, "")
+        if table.find(keyword_table, "IsRaidField") > 0 or table.find(keyword_table, "WeeklyBossMap") > 0 then
+            ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+            return false
+        end
+    end
+    return true
+end
+
 function Guild_event_warp_move_to_guild_event(_, _, event_id)
     -- 旧クライアントの _BORUTA_ZONE_MOVE_CLICK は削除されたため、
     -- guild_activity_ui の封鎖線ランキング「移動」ボタンと同じ処理に置き換え。
     -- (event_id 500/501/502 = 封鎖線タブ 0/1/2 のイベントタイプ)
     local type = tonumber(event_id)
     if type == nil then
+        return
+    end
+    -- guild_activity_ui の移動ボタンと同じ移動可否チェックを行う
+    if not g.guild_event_warp_can_move() then
         return
     end
     g.guild_event_warp_channnel_change = true
