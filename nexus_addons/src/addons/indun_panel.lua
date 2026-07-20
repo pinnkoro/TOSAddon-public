@@ -655,13 +655,13 @@ function Indun_panel_setup_frame(indun_panel)
     local enable = g.indun_panel_settings.etc.move == 0 and 1 or 0
     indun_panel:EnableMove(enable)
     indun_panel:EnableHittestFrame(enable)
-    if g.indun_panel_settings.etc.move == 0 then
-        -- 移動可モード: ドラッグして離した時に現在位置を保存する。
-        -- (固定モード(move==1)は EnableMove(0) で動かせないため保存不要)
-        indun_panel:SetEventScript(ui.LBUTTONUP, "Indun_panel_frame_drag")
-    else
-        indun_panel:SetEventScript(ui.LBUTTONUP, "None")
-    end
+    -- フレーム固定チェックの状態に関わらず、ドラッグ保存ハンドラは常にバインドしておく。
+    -- 固定モード(move==1)は EnableHittestFrame(0) で LBUTTONUP 自体が発火しないため無害。
+    -- これにより、設定で固定を外して即ドラッグした場合(リビルド前)も、既にハンドラが
+    -- 付いているので位置が保存される。
+    -- (以前は固定モードで "None" にしており、チェックを外した直後に動かすと
+    --  Indun_panel_ischecked が EnableMove を戻すだけでハンドラ未バインドのまま→保存されなかった)
+    indun_panel:SetEventScript(ui.LBUTTONUP, "Indun_panel_frame_drag")
 end
 
 function Indun_panel_frame_drag(indun_panel)

@@ -60,7 +60,7 @@
     ]
   },
   "sha256": {
-    "_nexus_addons.lua": "cca62b7788a91560fdc177d4304845782f164a3868826161ac747090eb1b1822",
+    "_nexus_addons.lua": "cb82f9afc384e072aa1f41641296b5f2add65adf69db66c3ce15dbbaffa0591b",
     "_nexus_addons_conclude.lua": "67c38fb9d55afb152160d5592d949559426ef4815ea218825567e98b2b999520"
   }
 }
