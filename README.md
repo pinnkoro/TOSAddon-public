@@ -32,6 +32,9 @@ Tree of Savior 用のアドオンを作成・改変しています。
 <details>
 <summary>紹介画像 & 更新履歴 (Nexus Addons)</summary>
 
+*   **v1.1.7**
+    *   Indun Panel / Indun List Viewer / Quickslot Operate: 新レイド「ズメイ」対応。
+    *   Indun List Viewer: 掃討バフお知らせにズメイを追加。新規／旧設定移行ユーザーでレイドが表示されない不具合を修正。
 *   **v1.1.6**
     *   AlwaysStatus: %表示追加
     *   Indun Panel: フィールドモード修正。
