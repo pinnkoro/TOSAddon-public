@@ -299,19 +299,21 @@ function Indun_panel_load_settings()
 end
 
 function indun_panel_on_init()
-    -- Indun Panel が無効なら、ショップ同期もフック登録もフレーム生成も一切行わない。
-    -- (以前は use 判定より前に PVP_MINE ショップを開いていたため、機能OFFでも
-    --  ログイン時にショップが開き、ゲームの排他UI仕様でインベントリが閉じていた)
-    if g.settings.indun_panel.use == 0 then
-        ui.DestroyFrame(addon_name_lower .. "indun_panel")
-        ui.DestroyFrame(addon_name_lower .. "indun_panel_map")
-        return
-    end
+    -- 設定ロードと CHAT_SYSTEM(デイリー額取得)フックは機能ON/OFFに関わらず従来通り行う。
+    -- 旧来ここで開いていた PVP_MINE ショップだけは、機能OFFでもログイン時にショップが開き
+    -- インベントリが閉じる不具合の原因だったため撤去し、パネル展開時の遅延同期
+    -- (Indun_panel_frame_open → Indun_panel_sync_mine_shop)へ移した。
     if not g.indun_panel_settings then
         Indun_panel_load_settings()
         Indun_panel_frame_init()
     end
     g.setup_hook_and_event(g.addon, "CHAT_SYSTEM", "Indun_panel_CHAT_SYSTEM", true)
+    -- 機能OFF: フレームを破棄し、パネル用フック(ESCAPE/INDUN_ALREADY_PLAYING)は張らない。
+    if g.settings.indun_panel.use == 0 then
+        ui.DestroyFrame(addon_name_lower .. "indun_panel")
+        ui.DestroyFrame(addon_name_lower .. "indun_panel_map")
+        return
+    end
     g.addon:RegisterMsg("ESCAPE_PRESSED", "Indun_panel_frame_init")
     local indun_panel = ui.GetFrame(addon_name_lower .. "indun_panel")
     if not indun_panel then
@@ -323,16 +325,19 @@ end
 -- PVP_MINE ショップを一瞬開いて ssn_shop を同期する。ショップを開くとゲームが
 -- インベントリ等の排他UIを閉じるため、開いていたインベントリを記録しておき、
 -- 同期完了時(Indun_panel_earthtowershop_close)に復元する。
+-- 同期を開始できたら true、ショップフレーム未取得で空振りしたら false を返す。
+-- (呼び出し側は成功時のみ synced フラグを立て、失敗時は次の展開で再試行する)
 function Indun_panel_sync_mine_shop()
     local earthtowershop = ui.GetFrame('earthtowershop')
     if not earthtowershop then
-        return
+        return false
     end
     local inventory = ui.GetFrame("inventory")
     g.indun_panel_inv_restore = (inventory and inventory:IsVisible() == 1) and true or false
     earthtowershop:Resize(0, 0)
     pc.ReqExecuteTx_NumArgs("SCR_PVP_MINE_SHOP_OPEN", 0)
     earthtowershop:RunUpdateScript("Indun_panel_earthtowershop_close", 0.1)
+    return true
 end
 
 function Indun_panel_earthtowershop_close(earthtowershop)
@@ -344,9 +349,10 @@ function Indun_panel_earthtowershop_close(earthtowershop)
             g.indun_panel_inv_restore = false
             ui.OpenFrame("inventory")
         end
-        -- 同期完了。展開中(高さ>40)のパネルなら再描画して PVP_MINE 数を反映する
+        -- 同期完了。表示中かつ展開中(高さ>40)のパネルだけ再描画して PVP_MINE 数を反映する。
+        -- (同期中の0.1秒間にユーザーが畳んだ/閉じた場合は再描画しない=無駄な再構築を避ける)
         local indun_panel = ui.GetFrame(addon_name_lower .. "indun_panel")
-        if indun_panel and indun_panel:GetHeight() > 40 then
+        if indun_panel and indun_panel:IsVisible() == 1 and indun_panel:GetHeight() > 40 then
             Indun_panel_frame_open(indun_panel)
         end
         return 1
@@ -862,9 +868,9 @@ function Indun_panel_frame_open(indun_panel)
     -- 展開表示で使う PVP_MINE 購入可能数は ssn_shop(セッションのショップ値)に入るため、
     -- セッション中まだ同期していなければ、ここで一度だけショップを開いて取得する。
     -- (取得は非同期。完了時に Indun_panel_earthtowershop_close が展開中パネルを再描画する)
-    if not g.indun_panel_mine_synced then
+    -- 同期が実際に開始できた時だけ synced を立てる。空振り時はフラグを残さず次回再試行。
+    if not g.indun_panel_mine_synced and Indun_panel_sync_mine_shop() then
         g.indun_panel_mine_synced = true
-        Indun_panel_sync_mine_shop()
     end
     indun_panel:RemoveAllChild()
     Indun_panel_setup_frame(indun_panel)
