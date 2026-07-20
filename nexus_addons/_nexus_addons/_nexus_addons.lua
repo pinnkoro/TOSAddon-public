@@ -14509,8 +14509,16 @@ end
 -- Instant CC ここまで
 
 -- ndun_list_viewer ここから
-g.ilv_RAID_KEYS = {"V", "L", "R", "N", "G", "M", "S", "U", "RO", "F", "P", "D"}
+g.ilv_RAID_KEYS = {"Z", "V", "L", "R", "N", "G", "M", "S", "U", "RO", "F", "P", "D"}
 g.ilv_RAID_INFO = {
+    Z = {
+        name = "Zmei",
+        hard = 731,
+        solo = 730,
+        auto = 729,
+        icon = "icon_item_misc_boss_Zmei",
+        sweep_buff = 80047
+    },
     V = {
         name = "Veliora",
         hard = 727,
@@ -14618,7 +14626,7 @@ function Indun_list_viewer_load_settings()
     g.ilv_old_path = string.format("../addons/%s/%s/settings_2510.json", "indun_list_viewer", g.active_id)
     local settings = g.load_lua(g.ilv_path)
     local need_save = false
-    local ver = 1.1
+    local ver = 1.2 -- ズメイ追加: 既存ユーザーの display に Zmei_H/Zmei_S を補完するため繰り上げ
     if not settings then
         settings = g.load_json(json_path)
         if settings then
@@ -22051,14 +22059,14 @@ end
 -- quickslot_operate ここから
 g.quickslot_operate_raid_list = {
     Paramune = {623, 667, 666, 665, 674, 673, 675, 680, 679, 681, 707, 708, 710, 711, 709, 712, 722, 723, 724, 725, 726,
-                727},
+                727, 729, 730, 731},
     Klaida = {686, 685, 687, 716, 717, 718},
     Velnias = {689, 688, 690, 669, 635, 628, 696, 695, 697},
     Forester = {672, 671, 670},
     Widling = {677, 676, 678}
 }
 g.quickslot_operate_zone_list = {11208, 11230, 11250, 11252, 11256, 11257, 11261, 11263, 11266, 11267, 11270, 11276,
-                                 11277, 11278, 11285, 11286}
+                                 11277, 11278, 11285, 11286, 11291}
 -- 11267=ドラグーン 11257=バウバス 11290=アシャーク
 g.quickslot_guild_eventmap = {11267, 11257, 11290, 11285, 11286}
 g.quickslot_operate_atk_list = {
