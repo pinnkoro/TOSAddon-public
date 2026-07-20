@@ -11,9 +11,11 @@
 
 境界アンカー（現 v1.1.12 bundle 基準）:
     main:  header 1-337 / registry 338-1027 / lifecycle 1028-1488
-           addons 各 `ここから`〜次 `ここから` の直前 / tail(norisan_menu) 29403-EOF
+           addons 各 `ここから`〜次 `ここから` の直前 /
+           tail(norisan_menu) は共有メニュー先頭アンカー〜EOF
     conclude: header 1-27 / ancient_monster_bookshelf 28-EOF
 """
+import hashlib
 import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +43,9 @@ ADDON_ORDER = [
     "auto_pet_summon", "auto_map_change", "bulk_sales",
 ]
 MARKER = "ここから".encode("utf-8")
-NORISAN_TAIL = 29403  # `-- アドオンメニューボタン`（共有メニュー先頭）
+# norisan_menu（共有メニュー）先頭のアンカー。行番号ではなくこの一意な行内容から
+# 境界を導出する（bundle が伸縮しても追従し、他バージョンでの誤爆を防ぐ）。
+NORISAN_ANCHOR = "-- アドオンメニューボタン".encode("utf-8")
 
 
 def line_offsets(data):
@@ -71,13 +75,30 @@ def sub(data, offs, a, b):
     return data[offs[a]:end]
 
 
+def anchor_line(data, needle):
+    """needle を含む行の 1-indexed 行番号を返す。一意でなければ SystemExit。"""
+    hits, line, start = [], 1, 0
+    for i, b in enumerate(data):
+        if b == 0x0A:
+            if needle in data[start:i]:
+                hits.append(line)
+            line, start = line + 1, i + 1
+    if start < len(data) and needle in data[start:]:
+        hits.append(line)
+    if len(hits) != 1:
+        raise SystemExit(
+            f"[split] アンカー {needle!r} が一意でない: {hits}")
+    return hits[0]
+
+
 def build_plan():
-    """(manifest, {relpath: bytes}) を返す。ファイルを書かずに構築のみ。"""
+    """(manifest, {relpath: bytes}, originals) を返す。ファイルを書かずに構築のみ。"""
     main_b = open(MAIN, "rb").read()
     conc_b = open(CONCLUDE, "rb").read()
     m_off, marks = line_offsets(main_b), marker_lines(main_b)
     if len(marks) != 48:
         raise SystemExit(f"[split] main の ここから が48でない: {len(marks)}")
+    norisan_tail = anchor_line(main_b, NORISAN_ANCHOR)  # 共有メニュー先頭行
 
     chunks = [
         ("core/00_header.lua", 1, 338),
@@ -85,9 +106,9 @@ def build_plan():
         ("core/20_lifecycle.lua", 1028, marks[0]),
     ]
     for i, key in enumerate(ADDON_ORDER):
-        end = marks[i + 1] if i + 1 < len(marks) else NORISAN_TAIL
+        end = marks[i + 1] if i + 1 < len(marks) else norisan_tail
         chunks.append((f"addons/{key}.lua", marks[i], end))
-    chunks.append(("core/90_norisan_menu.lua", NORISAN_TAIL, len(m_off)))
+    chunks.append(("core/90_norisan_menu.lua", norisan_tail, len(m_off)))
 
     prev = 1
     for rel, a, b in chunks:
@@ -97,10 +118,12 @@ def build_plan():
             raise SystemExit(f"[split] 空チャンク {rel}")
         prev = b
 
-    files, manifest = {}, {"_nexus_addons.lua": [], "_nexus_addons_conclude.lua": []}
+    files = {}
+    manifest = {"targets": {"_nexus_addons.lua": [],
+                            "_nexus_addons_conclude.lua": []}, "sha256": {}}
     for rel, a, b in chunks:
         files[rel] = sub(main_b, m_off, a, b)
-        manifest["_nexus_addons.lua"].append(rel)
+        manifest["targets"]["_nexus_addons.lua"].append(rel)
 
     c_off, cmarks = line_offsets(conc_b), marker_lines(conc_b)
     if cmarks != [28]:
@@ -108,16 +131,18 @@ def build_plan():
     for rel, a, b in [("conclude_header.lua", 1, 28),
                       ("addons/ancient_monster_bookshelf.lua", 28, len(c_off))]:
         files[rel] = sub(conc_b, c_off, a, b)
-        manifest["_nexus_addons_conclude.lua"].append(rel)
+        manifest["targets"]["_nexus_addons_conclude.lua"].append(rel)
 
-    return manifest, files, {"_nexus_addons.lua": main_b,
-                             "_nexus_addons_conclude.lua": conc_b}
+    originals = {"_nexus_addons.lua": main_b, "_nexus_addons_conclude.lua": conc_b}
+    for target, orig in originals.items():
+        manifest["sha256"][target] = hashlib.sha256(orig).hexdigest()
+    return manifest, files, originals
 
 
 def verify(manifest, files, originals):
     ok = True
     for target, orig in originals.items():
-        rebuilt = b"".join(files[rel] for rel in manifest[target])
+        rebuilt = b"".join(files[rel] for rel in manifest["targets"][target])
         same = rebuilt == orig
         ok = ok and same
         print(f"  {target}: {len(rebuilt)}B vs {len(orig)}B -> "
@@ -137,7 +162,8 @@ def main():
     os.makedirs(os.path.join(SRC, "addons"), exist_ok=True)
     for rel, data in files.items():
         open(os.path.join(SRC, rel), "wb").write(data)
-    with open(MANIFEST, "w", encoding="utf-8") as f:
+    # newline="\n": Windows でも LF 固定（CRLF になると git が毎回差分検出する）。
+    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
         f.write("\n")
     print(f"[split] {len(files)} files + manifest -> {SRC}")

@@ -96,20 +96,28 @@ nexus_addons/
 
 ```jsonc
 {
-  "_nexus_addons.lua": [
-    "core/00_header.lua",
-    "core/10_registry.lua",
-    "core/20_lifecycle.lua",
-    "addons/always_status.lua",
-    "addons/indun_panel.lua",
-    "…(現在の出現順で 48 個)…",
-    "addons/bulk_sales.lua",
-    "core/90_norisan_menu.lua"
-  ],
-  "_nexus_addons_conclude.lua": [
-    "conclude_header.lua",
-    "addons/ancient_monster_bookshelf.lua"
-  ]
+  "targets": {
+    "_nexus_addons.lua": [
+      "core/00_header.lua",
+      "core/10_registry.lua",
+      "core/20_lifecycle.lua",
+      "addons/always_status.lua",
+      "addons/indun_panel.lua",
+      "…(現在の出現順で 48 個)…",
+      "addons/bulk_sales.lua",
+      "core/90_norisan_menu.lua"
+    ],
+    "_nexus_addons_conclude.lua": [
+      "conclude_header.lua",
+      "addons/ancient_monster_bookshelf.lua"
+    ]
+  },
+  // 各ターゲットの golden ハッシュ。連結結果がこれと一致しなければ生成/検証を失敗
+  // させる（CRLF 混入・src 誤編集の検知）。意図した変更時は --bless で更新する。
+  "sha256": {
+    "_nexus_addons.lua": "…",
+    "_nexus_addons_conclude.lua": "…"
+  }
 }
 ```
 
@@ -133,7 +141,7 @@ nexus_addons/
 - 規則：
   - 先頭〜最初の `ここから`（1489 直前）→ `core/00_header` + `10_registry` + `20_lifecycle` に規定行で分割（境界 337 / 1027 / 1488 は固定値）。
   - `-- <name> ここから` 〜 対応する `-- <name> ここまで`（マーカー行を含む）→ `addons/<name>.lua`。ファイル名は登録リストの `key` に正規化（マーカー表記ゆれ `Instant CC` / `ndun_list_viewer` 等は key 対応表で吸収）。
-  - 最後の `ここまで`（29401）以降 → `core/90_norisan_menu.lua`。
+  - 共有メニュー先頭アンカー行（`-- アドオンメニューボタン`、bundle 内で一意）以降 → `core/90_norisan_menu.lua`。行番号ではなくこの行内容から境界を導出する（bundle が伸縮しても追従。旧版では 29403 行目）。
   - conclude：1–27 → `conclude_header.lua`、28–998 → `addons/ancient_monster_bookshelf.lua`。
 - 逆変換（§3 の連結）で **cmp 一致するまで境界を調整**。一致した時点で分割ロジックの正しさが機械的に証明される。
 
@@ -143,8 +151,10 @@ nexus_addons/
 
 ## 6. 検証（受け入れ条件）
 
-1. **byte-identical rebuild（必須）**：`src → 連結` で生成した `_nexus_addons.lua` / `_conclude.lua` が、リファクタ前の bundle と `cmp` で完全一致すること。
+1. **byte-identical rebuild（必須・初回）**：`src → 連結` で生成した `_nexus_addons.lua` / `_conclude.lua` が、リファクタ前の bundle と `cmp` で完全一致すること。
    - 一致 ⇒ 分割は無損失（境界ミス・行の欠落／重複・改行差は即検出）。これが本リファクタ唯一かつ十分な正しさ証明。
+   - **以降の恒常ガード**：この一致時のハッシュを `build_manifest.json` の `sha256` に固定し、`bundle_from_src.py` が生成/`--check` のたびに照合する。旧 bundle は `.gitignore`（＝リポジトリに golden が残らない）ため、`--check` は既存 bundle ではなくこの sha を正とする。CRLF 混入・src 誤編集で sha がズレたら失敗。**改行は `.gitattributes` の `*.lua text eol=lf` で LF 固定**。意図した変更のときだけ `python docs/bundle_from_src.py --bless` で sha を更新する。
+   - **脱落ガード**：`src/**` の実 `.lua` 集合と manifest の parts 集合が一致しなければ失敗（新規追加を manifest に書き忘れると黙ってビルドから消えるのを防ぐ）。
 2. `.ipf` 化後、既存の往復検証（復号 → extract → `cmp`、[BUILD_IPF.md](BUILD_IPF.md) §4）を通す。
 3. Lua 構文は処理系が無いため実機テスト（現状と同じ）。ただし §6-1 が通れば「生成物は現行とバイト同一」なので、リファクタ自体による退行はロジック上あり得ない。
 
@@ -163,7 +173,7 @@ nexus_addons/
 ## 8. リスク・留意点
 
 - **`.ipf` の byte 一致（level 6）は維持**：連結結果が現 bundle と同一 ⇒ `build_addon_ipf.py` の入力も同一 ⇒ 出力 `.ipf` も同一。
-- **新規アドオン追加時**：`src/addons/<key>.lua` を追加 + `core/10_registry.lua` に登録 + `build_manifest.json` に追記。以降は新版なので初回のバイト一致制約から解放される（一致検証は「分割が現行と等価」の初回証明専用）。
+- **新規アドオン追加時**：`src/addons/<key>.lua` を追加 + `core/10_registry.lua` に登録 + `build_manifest.json` の `targets` に追記（脱落ガードにより追記漏れは即エラー）。挙動が変わるので初回のバイト一致制約からは解放されるが、恒常ガードの sha はズレるため `python docs/bundle_from_src.py --bless` で golden を更新すること。
 - **conclude を使う理由の温存**：`ancient_monster_bookshelf` を conclude 側に残すか main に取り込むかは、現状の load 順依存があるため**現状維持**（conclude のまま）を推奨。動かす場合は別途実機検証が要る。
 - **xml は分割しない**。
 - **CI 化余地**：`分割検証 → 連結 → ipf 化 → 往復検証` をワンショット化できる。
