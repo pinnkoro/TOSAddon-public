@@ -233,8 +233,39 @@ function GUILDEVENTWARP_frame_init()
 end
 
 function GUILDEVENTWARP_move_to_guild_event(_, _, event_id)
+    -- 旧クライアントの _BORUTA_ZONE_MOVE_CLICK は削除されたため、
+    -- guild_activity_ui の封鎖線ランキング「移動」ボタンと同じ処理に置き換え。
+    -- (event_id 500/501/502 = 封鎖線タブ 0/1/2 のイベントタイプ)
+    local type = tonumber(event_id)
+    if type == nil then
+        return
+    end
+    -- guild_activity_ui の移動ボタンと同じ移動可否チェック。
+    -- マッチングダンジョン/PVP/レイヤー変更中/ダンジョン/レイド地域では移動不可。
+    local pc = GetMyPCObject()
+    if session.world.IsIntegrateServer() == true or IsPVPField(pc) == 1 or IsPVPServer(pc) == 1 then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return
+    end
+    if world.GetLayer() ~= 0 then
+        ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+        return
+    end
+    local cur_map = GetClass("Map", session.GetMapName())
+    if cur_map then
+        if TryGetProp(cur_map, "MapType") == "Dungeon" then
+            ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+            return
+        end
+        local zone_keyword = TryGetProp(cur_map, "Keyword", "None")
+        local keyword_table = StringSplit(zone_keyword, "")
+        if table.find(keyword_table, "IsRaidField") > 0 or table.find(keyword_table, "WeeklyBossMap") > 0 then
+            ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
+            return
+        end
+    end
     g.channel_change = true
-    _BORUTA_ZONE_MOVE_CLICK(event_id)
+    control.CustomCommand("MOVE_TO_ENTER_NPC", type, 1, 0)
 end
 
 function GUILDEVENTWARP_ch_change()
