@@ -29,10 +29,12 @@
 -- 1.1.4 AS表示名をカスタマイズ可能に
 -- 1.1.5 CCHロード処理見直し、AS位置固定修正、TOSモンスター検索修正、CCHレベル判定修正、IP掃討ボタンの挙動修正、NCアイテム連続使用ロジック修正
 -- 1.1.6 AS%表示追加、IPフィールド表示修正、TOS表示位置修正、SGT無効処理追加
+-- 1.1.7 ズメイを全機能に対応(IP/ILV/quickslot)
+-- 1.1.8 Auto RepairアイテムID修正(Lv550)、Another Warehouse保存修正、ILVハードモードnilガード、save/load堅牢化
 local addon_name = "_NEXUS_ADDONS"
 local addon_name_lower = string.lower(addon_name)
 local author = "norisan"
-local ver = "1.1.6"
+local ver = "1.1.8"
 
 _G["ADDONS"] = _G["ADDONS"] or {}
 _G["ADDONS"][author] = _G["ADDONS"][author] or {}
@@ -152,23 +154,34 @@ function g.save_lua(path, tbl)
         elseif type(o) == "boolean" then
             return tostring(o)
         elseif type(o) == "table" then
-            local s = "{\n"
+            local parts = {"{\n"}
             for k, v in pairs(o) do
-                s = s .. "[" .. serialize(k) .. "]=" .. serialize(v) .. ",\n"
+                parts[#parts + 1] = "[" .. serialize(k) .. "]=" .. serialize(v) .. ",\n"
             end
-            return s .. "}"
+            parts[#parts + 1] = "}"
+            return table.concat(parts)
         else
             return "nil"
         end
     end
-    local file, err = io.open(path, "w")
+    local ok_s, content = pcall(function() return "return " .. serialize(tbl) end)
+    if not ok_s or not content then
+        if ts then ts("Save Lua Serialize Error:", tostring(content)) end
+        return
+    end
+    local tmp_path = path .. ".tmp"
+    local file, err = io.open(tmp_path, "w")
     if file then
-        file:write("return " .. serialize(tbl))
+        local ok_w, w_err = file:write(content)
         file:close()
-    else
-        if ts then
-            ts("Save Lua Error:", err)
+        if ok_w then
+            os.remove(path)
+            os.rename(tmp_path, path)
+        else
+            if ts then ts("Save Lua Write Error:", tostring(w_err)) end
         end
+    else
+        if ts then ts("Save Lua Error:", err) end
     end
 end
 
@@ -180,17 +193,49 @@ function g.load_lua(path)
             return result
         end
     end
+    local tmp_path = path .. ".tmp"
+    local tmp_chunk = loadfile(tmp_path)
+    if tmp_chunk then
+        local status, result = pcall(tmp_chunk)
+        if status then
+            os.remove(path)
+            os.rename(tmp_path, path)
+            return result
+        end
+    end
     return nil
 end
 
 function g.load_json(path)
     local file = io.open(path, "r")
     if not file then
+        local tmp_file = io.open(path .. ".tmp", "r")
+        if tmp_file then
+            local tmp_content = tmp_file:read("*all")
+            tmp_file:close()
+            if tmp_content and tmp_content ~= "" then
+                os.remove(path)
+                os.rename(path .. ".tmp", path)
+                local s, r = pcall(json.decode, tmp_content)
+                if s then return r, nil end
+            end
+        end
         return nil, "Error opening file: " .. path
     end
     local content = file:read("*all")
     file:close()
     if not content or content == "" then
+        local tmp_file = io.open(path .. ".tmp", "r")
+        if tmp_file then
+            local tmp_content = tmp_file:read("*all")
+            tmp_file:close()
+            if tmp_content and tmp_content ~= "" then
+                os.remove(path)
+                os.rename(path .. ".tmp", path)
+                local s, r = pcall(json.decode, tmp_content)
+                if s then return r, nil end
+            end
+        end
         return nil, "File content is empty or could not be read: " .. path
     end
     if string.sub(content, 1, 3) == "\239\187\191" then
@@ -10445,6 +10490,7 @@ function Another_warehouse_on_rbutton(frame, slot, iesid, argnum)
                 break
             end
         end
+        Another_warehouse_save_settings()
         Another_warehouse_set_items_setting(index, name_text)
         return
     end
@@ -14682,7 +14728,7 @@ function Indun_list_viewer_load_settings()
             if info.name then
                 local h_key = info.name .. "_H"
                 local s_key = info.name .. "_S"
-                if settings.display[h_key] == nil then
+                if info.hard and settings.display[h_key] == nil then
                     settings.display[h_key] = 1
                 end
                 if settings.display[s_key] == nil then
@@ -14931,7 +14977,7 @@ function Indun_list_viewer_save_current_char_counts()
     end
     local raid_data = {}
     for key, raid in pairs(g.ilv_RAID_INFO) do
-        local count = get_safe_entrance_count(raid.hard)
+        local count = raid.hard and get_safe_entrance_count(raid.hard)
         raid_data[key .. "_H"] = count or "?"
         count = get_safe_entrance_count(raid.auto)
         raid_data[key .. "_A"] = count or "?"
@@ -15145,20 +15191,22 @@ function Indun_list_viewer_config(parent)
     local text_x = 0
     for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
         local raid_info = g.ilv_RAID_INFO[raid_key]
-        if text_x == 0 then
-            text_x = x
+        if raid_info.hard then
+            if text_x == 0 then
+                text_x = x
+            end
+            local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x + 5, 5, 30, 30)
+            AUTO_CAST(pic)
+            pic:SetImage(raid_info.icon)
+            pic:SetEnableStretch(1)
+            pic:EnableHitTest(1)
+            local check = config_gb:CreateOrGetControl("checkbox", "check_" .. raid_key .. "_H", x, 5, 30, 30)
+            AUTO_CAST(check)
+            check:SetCheck(g.ilv_settings.display[raid_info.name .. "_H"])
+            check:SetEventScript(ui.LBUTTONDOWN, "Indun_list_viewer_display_check")
+            check:SetEventScriptArgString(ui.LBUTTONDOWN, raid_info.name .. "_H")
+            x = x + 30
         end
-        local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x + 5, 5, 30, 30)
-        AUTO_CAST(pic)
-        pic:SetImage(raid_info.icon)
-        pic:SetEnableStretch(1)
-        pic:EnableHitTest(1)
-        local check = config_gb:CreateOrGetControl("checkbox", "check_" .. raid_key .. "_H", x, 5, 30, 30)
-        AUTO_CAST(check)
-        check:SetCheck(g.ilv_settings.display[raid_info.name .. "_H"])
-        check:SetEventScript(ui.LBUTTONDOWN, "Indun_list_viewer_display_check")
-        check:SetEventScriptArgString(ui.LBUTTONDOWN, raid_info.name .. "_H")
-        x = x + 30
     end
     local hard_text = title_gb:CreateOrGetControl("richtext", "hard_text", text_x - 40, 10)
     AUTO_CAST(hard_text)
@@ -15243,7 +15291,7 @@ function Indun_list_viewer_title_frame_open()
     for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
         local raid_info = g.ilv_RAID_INFO[raid_key]
         if raid_info and raid_info.name then -- ここで安全確認
-            if g.ilv_settings.display[raid_info.name .. "_H"] == 1 then
+            if raid_info.hard and g.ilv_settings.display[raid_info.name .. "_H"] == 1 then
                 local pic = title_gb:CreateOrGetControl("picture", "title_pic_" .. raid_key .. "_H", x, 5, 30, 30)
                 AUTO_CAST(pic)
                 pic:SetImage(raid_info.icon)
@@ -15375,7 +15423,7 @@ function Indun_list_viewer_frame_open(indun_list_viewer)
             local auto_clear_data = data.auto_clear_count or {}
             for _, raid_key in ipairs(g.ilv_RAID_KEYS) do
                 local raid_info = g.ilv_RAID_INFO[raid_key]
-                if raid_info and raid_info.name then
+                if raid_info and raid_info.name and raid_info.hard then
                     if g.ilv_settings.display[raid_info.name .. "_H"] == 1 then
                         local count = raid_count_data[raid_key .. "_H"] or "?"
                         local text_ctrl = gb:CreateOrGetControl("richtext", raid_key .. "_H_" .. pc_name, current_x, y)
@@ -28471,7 +28519,7 @@ end
 
 -- Auto Repaire ここから
 g.auto_repair = {
-    item_cls_id = 11202000,
+    item_cls_id = 11201388,
     repair_item = "AustejaCertificate_14",
     shop_type = "AustejaCertificate"
 }
