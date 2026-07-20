@@ -2444,6 +2444,15 @@ local induns = {{
         icon = {"Item", 11030017}
     }
 }, {
+    zmei = {
+        h = 731,
+        s = 730,
+        a = 729,
+        ac = 80047,
+        jp = "ズメイ",
+        icon = {"Monster", 71076}
+    }
+}, {
     belliora = {
         h = 727,
         s = 726,
@@ -2614,9 +2623,9 @@ function Indun_panel_load_settings()
     g.indun_panel_path = string.format("../addons/%s/%s/indun_panel.json", addon_name_lower, g.active_id)
     g.indun_panel_old_path = string.format("../addons/%s/%s/settings.json", "indun_panel", g.active_id)
     local settings = g.load_json(g.indun_panel_path)
-    local indun_keys = {"challenge", "singularity", "belliora", "laimara", "ledania", "neringa", "golem", "merregina",
-                        "slogutis", "upinis", "roze", "falouros", "reservoir", "jellyzele", "delmore", "telharsha",
-                        "bernice", "giltine", "memory", "wailing", "ashaq", "jsr"}
+    local indun_keys = {"challenge", "singularity", "zmei", "belliora", "laimara", "ledania", "neringa", "golem",
+                        "merregina", "slogutis", "upinis", "roze", "falouros", "reservoir", "jellyzele", "delmore",
+                        "telharsha", "bernice", "giltine", "memory", "wailing", "ashaq", "jsr"}
     local json_to_indun_map = {
         veliora = "belliora",
         limara = "laimara",
@@ -2700,6 +2709,16 @@ function Indun_panel_load_settings()
                             settings.etc[k] = v
                         end
                     end
+                end
+            end
+        end
+    end
+    -- 新ダンジョン追加時のバックフィル: 既存ユーザーの保存済み設定に無いキーを既定ON(1)で補完
+    for _, set_name in ipairs({"set_a", "set_b", "set_c"}) do
+        if type(settings[set_name]) == "table" then
+            for _, name in ipairs(indun_keys) do
+                if settings[set_name][name] == nil then
+                    settings[set_name][name] = 1
                 end
             end
         end
@@ -3710,9 +3729,9 @@ function Indun_panel_frame_contents(configbtn)
                             Indun_panel_singularity_frame(indun_panel, key, sub_key, sub_value, y, x)
                         end
                     end
-                elseif key == "belliora" or key == "laimara" or key == "ledania" or key == "neringa" or key == "golem" or
-                    key == "merregina" or key == "slogutis" or key == "upinis" or key == "roze" or key == "falouros" or
-                    key == "reservoir" then -- レイド系 (onsweep)
+                elseif key == "zmei" or key == "belliora" or key == "laimara" or key == "ledania" or key == "neringa" or
+                    key == "golem" or key == "merregina" or key == "slogutis" or key == "upinis" or key == "roze" or
+                    key == "falouros" or key == "reservoir" then -- レイド系 (onsweep)
                     for sub_key, sub_value in pairs(value) do
                         if sub_key ~= "jp" and sub_key ~= "icon" then
                             Indun_panel_create_frame_onsweep(indun_panel, key, sub_key, sub_value, y, x)
@@ -4356,6 +4375,7 @@ function Indun_panel_enter_singularity(frame, ctrl, str, indun_type)
 end
 
 local raid_tbl = {
+    [729] = {11210063, 11210062, 11210061},
     [725] = {11210057, 11210056, 11210055},
     [722] = {11210053, 11210052, 11210051},
     [716] = {11210044, 10820040, 11210043, 11210042},
@@ -4367,6 +4387,7 @@ local raid_tbl = {
     [679] = {108020026, 11200222, 11200221, 11200220}
 }
 local buff_ids = {
+    [729] = 80047, -- ズメイ
     [725] = 80045, -- ベリオラ
     [722] = 80043, -- ライマラ
     [716] = 80039, -- レダニア
