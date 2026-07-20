@@ -63,7 +63,14 @@ def build(manifest):
             if not os.path.isfile(path):
                 raise SystemExit(f"[bundle] src が無い: {rel}")
             with open(path, "rb") as f:
-                parts.append(f.read())
+                data = f.read()
+            # part 間には必ず改行境界を入れる。末尾改行を欠く src があっても、直前ファイルの
+            # 最終トークンと次ファイル先頭トークンが結合(例: end + function → endfunction)して
+            # 壊れた bundle が黙って生成されるのを防ぐ。既に改行で終わる part には足さないので、
+            # 全 src が末尾 LF の現状では連結結果は不変(golden sha も変わらない)。
+            if parts and not parts[-1].endswith(b"\n"):
+                parts.append(b"\n")
+            parts.append(data)
         out[target] = b"".join(parts)
 
     # manifest に未登録の src .lua があれば黙って脱落するので失敗させる。

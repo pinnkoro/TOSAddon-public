@@ -133,8 +133,9 @@ end
 -- 移動可否チェック。マッチングダンジョン/PVP/レイヤー変更中/ダンジョン/レイド地域
 -- では移動不可(不可なら ThisLocalUseNot を表示して false を返す)。
 function g.guild_event_warp_can_move()
-    local pc = GetMyPCObject()
-    if session.world.IsIntegrateServer() == true or IsPVPField(pc) == 1 or IsPVPServer(pc) == 1 then
+    -- グローバル pc(pc.ReqExecuteTx… 等)を隠さないよう別名で受ける。
+    local my_pc = GetMyPCObject()
+    if session.world.IsIntegrateServer() == true or IsPVPField(my_pc) == 1 or IsPVPServer(my_pc) == 1 then
         ui.SysMsg(ScpArgMsg("ThisLocalUseNot"))
         return false
     end
@@ -162,8 +163,8 @@ function Guild_event_warp_move_to_guild_event(_, _, event_id)
     -- 旧クライアントの _BORUTA_ZONE_MOVE_CLICK は削除されたため、
     -- guild_activity_ui の封鎖線ランキング「移動」ボタンと同じ処理に置き換え。
     -- (event_id 500/501/502 = 封鎖線タブ 0/1/2 のイベントタイプ)
-    local type = tonumber(event_id)
-    if type == nil then
+    local event_type = tonumber(event_id)
+    if event_type == nil then
         return
     end
     -- guild_activity_ui の移動ボタンと同じ移動可否チェックを行う
@@ -171,7 +172,7 @@ function Guild_event_warp_move_to_guild_event(_, _, event_id)
         return
     end
     g.guild_event_warp_channnel_change = true
-    control.CustomCommand("MOVE_TO_ENTER_NPC", type, 1, 0)
+    control.CustomCommand("MOVE_TO_ENTER_NPC", event_type, 1, 0)
 end
 
 function Guild_event_warp_channel_change()
